@@ -1168,7 +1168,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #d5ffff;
+  background: #88f9e9;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -2353,16 +2353,25 @@ ul.breadcrumb li + li:last-child {
   border-bottom-color: #fc6423;
 }
 .sidebar {
-  background: var(--body-bg-color);
-  box-shadow: none;
-  margin-top: 100%;
-  position: static;
+  background: url("/images/background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  bottom: 0;
+  box-shadow: inset 0 2px 6px #000;
+  position: fixed;
+  top: 0;
+  transition: all $transition-ease-out;
   width: 240px;
+  z-index: 1200;
 }
-@media (max-width: 991px) {
-  .sidebar {
-    display: none;
-  }
+.sidebar a {
+  border-bottom-color: #fff;
+  color: #fff;
+}
+.sidebar a:hover {
+  border-bottom-color: $FFFFFF;
+  color: #fff;
 }
 .sidebar-toggle {
   display: none;
