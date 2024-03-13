@@ -22,12 +22,12 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="包含临时文件php文件上传特性 php中上传文件，会创建临时文件，随机生成临时文件名（临时文件名为php+6位[a-zA-Z0-9]，比如phpkx32ma），将上传的内容写入临时文件后，关闭临时文件。在linux下保存在&#x2F;tmp目录，而在windows下保存在c:\winsdows\temp目录。然后开始执行文件内程序，执行完后删除。因此，可以上传包含payload的恶意文件，在文件被删除前（作">
+  <meta name="description" content="包含临时文件php文件上传特性">
 <meta property="og:type" content="article">
 <meta property="og:title" content="包含临时文件学习记录">
 <meta property="og:url" content="http://example.com/2024/03/09/%E5%8C%85%E5%90%AB%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6/index.html">
 <meta property="og:site_name" content="Ed3n&#39;s Blog">
-<meta property="og:description" content="包含临时文件php文件上传特性 php中上传文件，会创建临时文件，随机生成临时文件名（临时文件名为php+6位[a-zA-Z0-9]，比如phpkx32ma），将上传的内容写入临时文件后，关闭临时文件。在linux下保存在&#x2F;tmp目录，而在windows下保存在c:\winsdows\temp目录。然后开始执行文件内程序，执行完后删除。因此，可以上传包含payload的恶意文件，在文件被删除前（作">
+<meta property="og:description" content="包含临时文件php文件上传特性">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://s2.loli.net/2023/11/18/5AgRPFiqI4KeX3a.png">
 <meta property="og:image" content="https://s2.loli.net/2023/11/18/YWsGoH6aLJiC2Uc.png">
@@ -45,7 +45,7 @@
 <meta property="og:image" content="https://s2.loli.net/2023/11/18/8hvtMaESITi7Jd4.png">
 <meta property="og:image" content="https://s2.loli.net/2023/11/18/nUJworM2IdKe4Eu.png">
 <meta property="article:published_time" content="2024-03-08T16:00:00.000Z">
-<meta property="article:modified_time" content="2024-03-09T08:11:12.088Z">
+<meta property="article:modified_time" content="2024-03-13T10:21:15.942Z">
 <meta property="article:author" content="Ed3n">
 <meta property="article:tag" content="文件包含">
 <meta name="twitter:card" content="summary">
@@ -201,10 +201,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-03-09 00:00:00 / 修改时间：16:11:12" itemprop="dateCreated datePublished" datetime="2024-03-09T00:00:00+08:00">2024-03-09</time>
+              <time title="创建时间：2024-03-09 00:00:00" itemprop="dateCreated datePublished" datetime="2024-03-09T00:00:00+08:00">2024-03-09</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-03-13 18:21:15" itemprop="dateModified" datetime="2024-03-13T18:21:15+08:00">2024-03-13</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -241,6 +247,8 @@
 
       
         <h1 id="包含临时文件"><a href="#包含临时文件" class="headerlink" title="包含临时文件"></a>包含临时文件</h1><h2 id="php文件上传特性"><a href="#php文件上传特性" class="headerlink" title="php文件上传特性"></a>php文件上传特性</h2><p><img src="https://s2.loli.net/2023/11/18/5AgRPFiqI4KeX3a.png" alt="img"></p>
+<span id="more"></span>
+
 <p>php中上传文件，会创建临时文件，随机生成临时文件名（临时文件名为<code>php+6位[a-zA-Z0-9]</code>，比如<code>phpkx32ma</code>），将上传的内容写入临时文件后，关闭临时文件。在<code>linux</code>下保存在<code>/tmp</code>目录，而在<code>windows</code>下保存在<code>c:\winsdows\temp</code>目录。然后开始执行文件内程序，执行完后删除。因此，可以上传包含payload的恶意文件，在文件被删除前（作为临时文件）包含该文件，可以实现利用。</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$temp_file</span> = <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;tmp_name&#x27;</span>];</span><br><span class="line"><span class="variable">$img_path</span> = UPLOAD_PATH . <span class="string">&#x27;/&#x27;</span> . <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;name&#x27;</span>] </span><br><span class="line"><span class="keyword">if</span> (<span class="title function_ invoke__">move_uploaded_file</span>(<span class="variable">$temp_file</span>, <span class="variable">$img_path</span>)) &#123;</span><br><span class="line">    <span class="variable">$is_upload</span> = <span class="literal">true</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable">$msg</span> = <span class="string">&#x27;上传出错！&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -362,8 +370,8 @@
       <i class="fa fa-chevron-left"></i> 无参数RCE学习记录
     </a></div>
       <div class="post-nav-item">
-    <a href="/2024/03/09/Jinja2%20SSTI/" rel="next" title="Flask Jinja2 SSTI学习记录">
-      Flask Jinja2 SSTI学习记录 <i class="fa fa-chevron-right"></i>
+    <a href="/2024/03/09/%E5%8C%85%E5%90%ABsession%E6%96%87%E4%BB%B6/" rel="next" title="包含session文件学习记录">
+      包含session文件学习记录 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
