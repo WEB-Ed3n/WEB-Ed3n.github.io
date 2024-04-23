@@ -1,0 +1,1144 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>MySQL 语法学习记录 | Ed3n's Blog</title><meta name="author" content="Ed3n"><meta name="copyright" content="Ed3n"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="[TOC] 前置准备： phpstudy 可以正常启动：    用 Navicat 连接至数据库：  密码默认为 root  新建查询即可    基础语法注：MySQL 数据库大小写不敏感 通配符 %：表示零个或多个字符。 _：表示单个字符。 [ ]：用于指定一个字符集合，匹配其中任意一个字符。 [^]：用于指定一个字符集合，匹配其中任意一个字符之外的字符。 |：用于指定多个条件中的一个。 *：表">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 语法学习记录">
+<meta property="og:url" content="http://example.com/2024/04/23/Mysql%20%E8%AF%AD%E6%B3%95/index.html">
+<meta property="og:site_name" content="Ed3n&#39;s Blog">
+<meta property="og:description" content="[TOC] 前置准备： phpstudy 可以正常启动：    用 Navicat 连接至数据库：  密码默认为 root  新建查询即可    基础语法注：MySQL 数据库大小写不敏感 通配符 %：表示零个或多个字符。 _：表示单个字符。 [ ]：用于指定一个字符集合，匹配其中任意一个字符。 [^]：用于指定一个字符集合，匹配其中任意一个字符之外的字符。 |：用于指定多个条件中的一个。 *：表">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/avatar.jpg">
+<meta property="article:published_time" content="2024-04-22T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-04-23T12:28:01.822Z">
+<meta property="article:author" content="Ed3n">
+<meta property="article:tag" content="MySQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/avatar.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2024/04/23/Mysql%20%E8%AF%AD%E6%B3%95/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":-1,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":false,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'MySQL 语法学习记录',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-04-23 20:28:01'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.1.1"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+  window.addEventListener('load',() => { preloader.endLoading() })
+
+  if (false) {
+    document.addEventListener('pjax:send', () => { preloader.initLoading() })
+    document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+  }
+})()</script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">17</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">18</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">10</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://s2.loli.net/2024/03/16/lDdKRUXWtLcZJP8.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="Ed3n's Blog"><span class="site-name">Ed3n's Blog</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">MySQL 语法学习记录</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-04-22T16:00:00.000Z" title="发表于 2024-04-23 00:00:00">2024-04-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-04-23T12:28:01.822Z" title="更新于 2024-04-23 20:28:01">2024-04-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/MySQL/">MySQL</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">10.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>39分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="MySQL 语法学习记录"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>[TOC]</p>
+<h2 id="前置准备："><a href="#前置准备：" class="headerlink" title="前置准备："></a>前置准备：</h2><ol>
+<li>phpstudy 可以正常启动：</li>
+</ol>
+<p><img src="C:/Users/ASUS/AppData/Roaming/Typora/typora-user-images/image-20240417150925056.png" alt="image-20240417150925056"></p>
+<ol start="2">
+<li><p>用 Navicat 连接至数据库：</p>
+<p><img src="C:/Users/ASUS/AppData/Roaming/Typora/typora-user-images/image-20240417151319130.png" alt="image-20240417151319130"></p>
+<p>密码默认为 root</p>
+</li>
+<li><p>新建查询即可</p>
+<p><img src="C:/Users/ASUS/AppData/Roaming/Typora/typora-user-images/image-20240417151733346.png" alt="image-20240417151733346"></p>
+</li>
+</ol>
+<h1 id="基础语法"><a href="#基础语法" class="headerlink" title="基础语法"></a>基础语法</h1><p>注：MySQL 数据库大小写不敏感</p>
+<h2 id="通配符"><a href="#通配符" class="headerlink" title="通配符"></a>通配符</h2><ol>
+<li><code>%</code>：表示零个或多个字符。</li>
+<li><code>_</code>：表示单个字符。</li>
+<li><code>[ ]</code>：用于指定一个字符集合，匹配其中任意一个字符。</li>
+<li><code>[^]</code>：用于指定一个字符集合，匹配其中任意一个字符之外的字符。</li>
+<li><code>|</code>：用于指定多个条件中的一个。</li>
+<li><code>*</code>：表示“所有列”或“所有字段”，通常用在 SELECT 语句中</li>
+</ol>
+<h2 id="SELECT-语句"><a href="#SELECT-语句" class="headerlink" title="SELECT 语句"></a>SELECT 语句</h2><p>SELECT 语句用于从数据库中选取数据。</p>
+<p>结果被存储在一个结果表中，称为结果集。</p>
+<h3 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column1, column2, ...</span><br><span class="line">FROM table_name;</span><br></pre></td></tr></table></figure>
+
+<p>或</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM table_name;</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li>column1, column2, …：要选择的字段名称，可以为多个字段。如果不指定字段名称，则会选择所有字段。</li>
+<li>table_name：要查询的表名称。</li>
+</ul>
+<h2 id="SELECT-DISTINCT-语句"><a href="#SELECT-DISTINCT-语句" class="headerlink" title="SELECT DISTINCT 语句"></a>SELECT DISTINCT 语句</h2><p>在表中，一个列可能会包含多个重复值，有时也许希望仅仅列出不同的值。</p>
+<p>DISTINCT 关键词用于返回唯一不同的值。此时会去除重复的值。</p>
+<h3 id="语法-1"><a href="#语法-1" class="headerlink" title="语法"></a>语法</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT DISTINCT column1, column2, ...</span><br><span class="line">FROM table_name;</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li>column1, column2, …：要选择的字段名称，可以为多个字段。如果不指定字段名称，则会选择所有字段。</li>
+<li>table_name：要查询的表名称。</li>
+</ul>
+<h2 id="WHERE-子句"><a href="#WHERE-子句" class="headerlink" title="WHERE 子句"></a>WHERE 子句</h2><p>我们知道从数据表中使用 SELECT 语句来读取数据。</p>
+<p>如需有条件地从表中选取数据，可将 WHERE 子句添加到 SELECT 语句中。</p>
+<p>WHERE 子句用于在 sql 中过滤查询结果，只返回满足特定条件的行。</p>
+<h3 id="语法-2"><a href="#语法-2" class="headerlink" title="语法"></a>语法</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column1, column2, ...</span><br><span class="line">FROM table_name</span><br><span class="line">WHERE condition;</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li>column1, column2, …：是你要选择的列的名称，如果使用 <code>*</code> 表示选择所有列。</li>
+<li>table_name： 是你要从中查询数据的表的名称。</li>
+<li>WHERE condition：是用于指定过滤条件的子句。</li>
+</ul>
+<p><strong>更多说明：</strong></p>
+<ul>
+<li>查询语句中你可以使用一个或者多个表，表之间使用逗号 ‘,’  分割，并使用WHERE语句来设定查询条件。</li>
+<li>你可以在 WHERE 子句中指定任何条件。</li>
+<li>你可以使用 AND 或者 OR 指定一个或多个条件。</li>
+<li>WHERE 子句也可以运用于 SQL 的 DELETE 或者 UPDATE 命令。</li>
+<li>WHERE 子句类似于程序语言中的 if 条件，根据数据表中的字段值来读取指定的数据。</li>
+</ul>
+<p>以下为操作符列表，可用于 WHERE 子句中。</p>
+<p>下表中实例假定 A 为 10, B 为 20</p>
+<table>
+<thead>
+<tr>
+<th align="center">操作符</th>
+<th align="center">描述</th>
+<th align="center">实例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">&#x3D;</td>
+<td align="center">等号，检测两个值是否相等，如果相等返回 true</td>
+<td align="center">(A &#x3D; B) 返回 false。</td>
+</tr>
+<tr>
+<td align="center">&lt;&gt;, !&#x3D;</td>
+<td align="center">不等于，检测两个值是否相等，如果不相等返回 true</td>
+<td align="center">(A !&#x3D; B) 返回 true。</td>
+</tr>
+<tr>
+<td align="center">&gt;</td>
+<td align="center">大于号，检测左边的值是否大于右边的值, 如果左边的值大于右边的值返回 true</td>
+<td align="center">(A &gt; B) 返回 false。</td>
+</tr>
+<tr>
+<td align="center">&lt;</td>
+<td align="center">小于号，检测左边的值是否小于右边的值, 如果左边的值小于右边的值返回 true</td>
+<td align="center">(A &lt; B) 返回 true。</td>
+</tr>
+<tr>
+<td align="center">&gt;&#x3D;</td>
+<td align="center">大于等于号，检测左边的值是否大于或等于右边的值, 如果左边的值大于或等于右边的值返回 true</td>
+<td align="center">(A &gt;&#x3D; B) 返回 false。</td>
+</tr>
+<tr>
+<td align="center">&lt;&#x3D;</td>
+<td align="center">小于等于号，检测左边的值是否小于或等于右边的值, 如果左边的值小于或等于右边的值返回 true</td>
+<td align="center">(A &lt;&#x3D; B) 返回 true。</td>
+</tr>
+</tbody></table>
+<h3 id="简单实例"><a href="#简单实例" class="headerlink" title="简单实例"></a>简单实例</h3><h4 id="等于条件："><a href="#等于条件：" class="headerlink" title="等于条件："></a>等于条件：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM users WHERE username = &#x27;test&#x27;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="不等于条件："><a href="#不等于条件：" class="headerlink" title="不等于条件："></a>不等于条件：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM users WHERE username != &#x27;runoob&#x27;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="大于条件"><a href="#大于条件" class="headerlink" title="大于条件:"></a>大于条件:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM products WHERE price &gt; 50.00;</span><br></pre></td></tr></table></figure>
+
+<h4 id="小于条件"><a href="#小于条件" class="headerlink" title="小于条件:"></a>小于条件:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM orders WHERE order_date &lt; &#x27;2023-01-01&#x27;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="大于等于条件"><a href="#大于等于条件" class="headerlink" title="大于等于条件:"></a>大于等于条件:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM employees WHERE salary &gt;= 50000;</span><br></pre></td></tr></table></figure>
+
+<h4 id="小于等于条件"><a href="#小于等于条件" class="headerlink" title="小于等于条件:"></a>小于等于条件:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM students WHERE age &lt;= 21;</span><br></pre></td></tr></table></figure>
+
+<h4 id="组合条件（AND、OR）"><a href="#组合条件（AND、OR）" class="headerlink" title="组合条件（AND、OR）:"></a>组合条件（AND、OR）:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM products WHERE category = &#x27;Electronics&#x27; AND price &gt; 100.00;</span><br><span class="line">SELECT * FROM orders WHERE order_date &gt;= &#x27;2023-01-01&#x27; OR total_amount &gt; 1000.00;</span><br></pre></td></tr></table></figure>
+
+<h4 id="模糊匹配条件（LIKE）"><a href="#模糊匹配条件（LIKE）" class="headerlink" title="模糊匹配条件（LIKE）:"></a>模糊匹配条件（LIKE）:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM customers WHERE first_name LIKE &#x27;J%&#x27;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="IN-条件"><a href="#IN-条件" class="headerlink" title="IN 条件:"></a>IN 条件:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM countries WHERE country_code IN (&#x27;US&#x27;, &#x27;CA&#x27;, &#x27;MX&#x27;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="NOT-条件"><a href="#NOT-条件" class="headerlink" title="NOT 条件:"></a>NOT 条件:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM products WHERE NOT category = &#x27;Clothing&#x27;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="BETWEEN-条件"><a href="#BETWEEN-条件" class="headerlink" title="BETWEEN 条件:"></a>BETWEEN 条件:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM orders WHERE order_date BETWEEN &#x27;2023-01-01&#x27; AND &#x27;2023-12-31&#x27;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="IS-NULL-条件"><a href="#IS-NULL-条件" class="headerlink" title="IS NULL 条件"></a>IS NULL 条件</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM employees WHERE department IS NULL;</span><br></pre></td></tr></table></figure>
+
+<h4 id="IS-NOT-NULL-条件"><a href="#IS-NOT-NULL-条件" class="headerlink" title="IS NOT NULL 条件:"></a>IS NOT NULL 条件:</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM customers WHERE email IS NOT NULL;</span><br></pre></td></tr></table></figure>
+
+<p>如果我们想在数据表中读取指定的数据，WHERE 子句是非常有用的。</p>
+<p>使用主键来作为 WHERE 子句的条件查询是非常快速的。</p>
+<p>如果给定的条件在表中没有任何匹配的记录，那么查询不会返回任何数据。</p>
+<h2 id="LIKE-子句"><a href="#LIKE-子句" class="headerlink" title="LIKE 子句"></a>LIKE 子句</h2><p>我们知道使用 SELECT 命令来读取数据， 同时我们可以在 SELECT 语句中使用 WHERE 子句来获取指定的记录。</p>
+<p>WHERE 子句中可以使用等号 <strong>&#x3D;</strong> 来设定获取数据的条件。</p>
+<p><strong>LIKE</strong> 子句用于在 WHERE 子句中进行模糊匹配的关键字。它通常与通配符一起使用，用于搜索符合某种模式的字符串。</p>
+<h3 id="语法-3"><a href="#语法-3" class="headerlink" title="语法"></a>语法</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column1, column2, ...</span><br><span class="line">FROM table_name</span><br><span class="line">WHERE column LIKE pattern;</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li>column1, column2, …：是你要选择的列的名称，如果使用 <code>*</code> 表示选择所有列。</li>
+<li>table_name：是你要从中查询数据的表的名称。</li>
+<li>column：是你要应用 <code>LIKE</code> 子句的列的名称。</li>
+<li>pattern：是用于匹配的模式，可以包含通配符。</li>
+</ul>
+<p><strong>更多说明：</strong></p>
+<ul>
+<li>你可以在 WHERE 子句中指定任何条件。</li>
+<li>你可以在 WHERE 子句中使用LIKE子句。</li>
+<li>你可以使用 LIKE 子句代替等号 &#x3D;。</li>
+<li>LIKE 通常与 % 一同使用，类似于一个元字符的搜索。</li>
+<li>你可以使用 AND 或者 OR 指定一个或多个条件。</li>
+<li>你可以在 DELETE 或 UPDATE 命令中使用 WHERE…LIKE 子句来指定条件。</li>
+</ul>
+<h3 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h3><p>以下是一些 LIKE 子句的使用实例。</p>
+<h4 id="百分号通配符-："><a href="#百分号通配符-：" class="headerlink" title="百分号通配符 % ："></a>百分号通配符 % ：</h4><p>% 通配符表示零个或多个字符。例如：’a%’ 匹配以字母 ‘a’ 开头的任何字符串。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM customers WHERE last_name LIKE &#x27;S%&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将选择所有姓氏以 ‘S’ 开头的客户。</p>
+<h4 id="下划线通配符-："><a href="#下划线通配符-：" class="headerlink" title="下划线通配符 _ ："></a>下划线通配符 _ ：</h4><p><strong>_</strong> 通配符表示一个字符。例如，’_r%’ 匹配第二个字母为 ‘r’ 的任何字符串。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM products WHERE product_name LIKE &#x27;_a%&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将选择产品名称的第二个字符为 ‘a’ 的所有产品。</p>
+<h4 id="组合使用-和-："><a href="#组合使用-和-：" class="headerlink" title="组合使用 % 和 _ ："></a>组合使用 % 和 _ ：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM users WHERE username LIKE &#x27;a%o_&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将匹配以字母 ‘a’ 开头，然后是零个或多个字符，接着是 ‘o’，最后是一个任意字符的字符串，如 ‘aaron’、’apol’。</p>
+<h4 id="不区分大小写的匹配："><a href="#不区分大小写的匹配：" class="headerlink" title="不区分大小写的匹配："></a>不区分大小写的匹配：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM employees WHERE last_name LIKE &#x27;smi%&#x27; COLLATE utf8mb4_general_ci;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将选择姓氏以 ‘smi’ 开头的所有员工，不区分大小写。</p>
+<p>LIKE 子句提供了强大的模糊搜索能力，可以根据不同的模式和需求进行定制。在使用时，请确保理解通配符的含义，并根据实际情况进行匹配。</p>
+<h2 id="ORDER-BY-语句"><a href="#ORDER-BY-语句" class="headerlink" title="ORDER BY 语句"></a>ORDER BY 语句</h2><p>我们知道从数据表中使用 <strong>SELECT</strong> 语句来读取数据。</p>
+<p>如果我们需要对读取的数据进行排序，我们就可以使用 <strong>ORDER BY</strong> 子句来设定你想按哪个字段哪种方式来进行排序，再返回搜索结果。</p>
+<p>ORDER BY 语句可以按照一个或多个列的值进行升序（<strong>ASC</strong>）或降序（<strong>DESC</strong>）排序。</p>
+<h3 id="语法-4"><a href="#语法-4" class="headerlink" title="语法"></a>语法</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column1, column2, ...</span><br><span class="line">FROM table_name</span><br><span class="line">ORDER BY column1 [ASC | DESC], column2 [ASC | DESC], ...;</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li>column1, column2, …：是你要选择的列的名称，如果使用 <code>*</code> 表示选择所有列。</li>
+<li>table_name： 是你要从中查询数据的表的名称。</li>
+<li>ORDER BY column1 [ASC|DESC], column2 [ASC|DESC], …：是用于指定排序顺序的子句。</li>
+<li><code>ASC</code> 表示升序（默认），<code>DESC</code> 表示降序。</li>
+</ul>
+<p><strong>更多说明：</strong></p>
+<ul>
+<li>你可以使用任何字段来作为排序的条件，从而返回排序后的查询结果。</li>
+<li>你可以设定多个字段来排序。</li>
+<li>你可以使用 ASC 或 DESC 关键字来设置查询结果是按升序或降序排列。 默认情况下，它是按升序排列。</li>
+<li>你可以添加 WHERE…LIKE 子句来设置条件。</li>
+</ul>
+<h3 id="实例-1"><a href="#实例-1" class="headerlink" title="实例"></a>实例</h3><p>以下是一些 ORDER BY 子句的使用实例。</p>
+<h4 id="单列排序："><a href="#单列排序：" class="headerlink" title="单列排序："></a>单列排序：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM products</span><br><span class="line">ORDER BY product_name ASC;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将选择产品表 products 中的所有产品，并按产品名称升序 ASC 排序。</p>
+<h4 id="多列排序："><a href="#多列排序：" class="headerlink" title="多列排序："></a>多列排序：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM employees</span><br><span class="line">ORDER BY department_id ASC, hire_date DESC;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将选择员工表 employees 中的所有员工，并先按部门 ID 升序 ASC 排序，然后在相同部门中按雇佣日期降序 DESC 排序。</p>
+<h4 id="使用数字表示列的位置："><a href="#使用数字表示列的位置：" class="headerlink" title="使用数字表示列的位置："></a>使用数字表示列的位置：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT first_name, last_name, salary</span><br><span class="line">FROM employees</span><br><span class="line">ORDER BY 3 DESC, 1 ASC;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将选择员工表 employees 中的名字和工资列，并按第三列（salary）降序 DESC 排序，然后按第一列（first_name）升序 ASC 排序。</p>
+<h4 id="使用表达式排序："><a href="#使用表达式排序：" class="headerlink" title="使用表达式排序："></a>使用表达式排序：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT product_name, price * discount_rate AS discounted_price</span><br><span class="line">FROM products</span><br><span class="line">ORDER BY discounted_price DESC;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将选择产品表 products 中的产品名称和根据折扣率计算的折扣后价格，并按折扣后价格降序 DESC 排序。</p>
+<h4 id="使用-NULLS-FIRST-或-NULLS-LAST-处理-NULL-值："><a href="#使用-NULLS-FIRST-或-NULLS-LAST-处理-NULL-值：" class="headerlink" title="使用 NULLS FIRST 或 NULLS LAST 处理 NULL 值："></a>使用 NULLS FIRST 或 NULLS LAST 处理 NULL 值：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT product_name, price</span><br><span class="line">FROM products</span><br><span class="line">ORDER BY price DESC NULLS LAST;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将选择产品表 products 中的产品名称和价格，并按价格降序 DESC 排序，将 NULL 值排在最后。</p>
+<blockquote>
+<p>ORDER BY 子句是一个强大的工具，可以根据不同的业务需求对查询结果进行排序。在实际应用中，注意选择适当的列和排序顺序，以获得符合期望的排序效果。</p>
+</blockquote>
+<h2 id="UPDATE-语句"><a href="#UPDATE-语句" class="headerlink" title="UPDATE 语句"></a>UPDATE 语句</h2><p>UPDATE 语句用于更新表中的记录。</p>
+<h3 id="语法-5"><a href="#语法-5" class="headerlink" title="语法"></a>语法</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">UPDATE table_name</span><br><span class="line">SET column1 = value1, column2 = value2, ...</span><br><span class="line">WHERE condition;</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li>table_name：是你要更新数据的表的名称。</li>
+<li>column1, column2, …：是你要更新的列的名称。</li>
+<li>value1, value2, …：是新的值，用于替换旧的值。</li>
+<li>WHERE condition：是一个可选的子句，用于指定更新的行。如果省略 WHERE 子句，将更新表中的所有行。</li>
+</ul>
+<p><strong>更多说明：</strong></p>
+<ul>
+<li>你可以同时更新一个或多个字段。</li>
+<li>你可以在 WHERE 子句中指定任何条件。</li>
+<li>你可以在一个单独表中同时更新数据。</li>
+</ul>
+<p>当你需要更新数据表中指定行的数据时 WHERE 子句是非常有用的。</p>
+<h3 id="实例-2"><a href="#实例-2" class="headerlink" title="实例"></a>实例</h3><p>以下实例演示了如何使用 UPDATE 语句。</p>
+<h4 id="更新单个列的值："><a href="#更新单个列的值：" class="headerlink" title="更新单个列的值："></a>更新单个列的值：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">UPDATE employees</span><br><span class="line">SET salary = 60000</span><br><span class="line">WHERE employee_id = 101;</span><br></pre></td></tr></table></figure>
+
+<h4 id="更新多个列的值："><a href="#更新多个列的值：" class="headerlink" title="更新多个列的值："></a>更新多个列的值：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">UPDATE orders</span><br><span class="line">SET status = &#x27;Shipped&#x27;, ship_date = &#x27;2023-03-01&#x27;</span><br><span class="line">WHERE order_id = 1001;</span><br></pre></td></tr></table></figure>
+
+<h4 id="使用表达式更新值："><a href="#使用表达式更新值：" class="headerlink" title="使用表达式更新值："></a>使用表达式更新值：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">UPDATE products</span><br><span class="line">SET price = price * 1.1</span><br><span class="line">WHERE category = &#x27;Electronics&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将每个属于 Electronics 类别的产品的价格都增加了 10%。</p>
+<h4 id="更新符合条件的所有行："><a href="#更新符合条件的所有行：" class="headerlink" title="更新符合条件的所有行："></a>更新符合条件的所有行：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">UPDATE students</span><br><span class="line">SET status = &#x27;Graduated&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将所有学生的状态更新为 Graduated。</p>
+<h4 id="更新使用子查询的值："><a href="#更新使用子查询的值：" class="headerlink" title="更新使用子查询的值："></a>更新使用子查询的值：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">UPDATE customers</span><br><span class="line">SET total_purchases = (</span><br><span class="line">    SELECT SUM(amount)</span><br><span class="line">    FROM orders</span><br><span class="line">    WHERE orders.customer_id = customers.customer_id</span><br><span class="line">)</span><br><span class="line">WHERE customer_type = &#x27;Premium&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句通过子查询计算每个 Premium 类型客户的总购买金额，并将该值更新到 total_purchases 列中。</p>
+<blockquote>
+<p><strong>注意：</strong> 在使用 UPDATE 语句时，请确保你提供了足够的条件来确保只有你想要更新的行被修改。如果不提供 WHERE 子句，将更新表中的所有行，可能导致不可预测的结果。</p>
+</blockquote>
+<h2 id="DELETE-语句"><a href="#DELETE-语句" class="headerlink" title="DELETE 语句"></a>DELETE 语句</h2><p>你可以使用 <strong>DELETE FROM</strong> 命令来删除数据表中的记录。</p>
+<h3 id="语法-6"><a href="#语法-6" class="headerlink" title="语法"></a>语法</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DELETE FROM table_name</span><br><span class="line">WHERE condition;</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li>table_name：是你要删除数据的表的名称。</li>
+<li>WHERE condition：是一个可选的子句，用于指定删除的行。如果省略 WHERE 子句，将删除表中的所有行。</li>
+</ul>
+<p><strong>更多说明：</strong></p>
+<ul>
+<li>如果没有指定 WHERE 子句，数据表中的所有记录将被删除。</li>
+<li>你可以在 WHERE 子句中指定任何条件</li>
+<li>您可以在单个表中一次性删除记录。</li>
+</ul>
+<p>当你想删除数据表中指定的记录时 WHERE 子句是非常有用的。</p>
+<h3 id="实例-3"><a href="#实例-3" class="headerlink" title="实例"></a>实例</h3><p>以下实例演示了如何使用 DELETE 语句。</p>
+<h4 id="删除符合条件的行："><a href="#删除符合条件的行：" class="headerlink" title="删除符合条件的行："></a>删除符合条件的行：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DELETE FROM students</span><br><span class="line">WHERE graduation_year = 2021;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句删除了 students 表中所有 graduation_year 为 2021 的学生的记录。</p>
+<h4 id="删除所有行："><a href="#删除所有行：" class="headerlink" title="删除所有行："></a>删除所有行：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DELETE FROM orders;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句删除了 orders 表中的所有记录，但表结构保持不变。</p>
+<h4 id="使用子查询删除符合条件的行："><a href="#使用子查询删除符合条件的行：" class="headerlink" title="使用子查询删除符合条件的行："></a>使用子查询删除符合条件的行：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DELETE FROM customers</span><br><span class="line">WHERE customer_id IN (</span><br><span class="line">    SELECT customer_id</span><br><span class="line">    FROM orders</span><br><span class="line">    WHERE order_date &lt; &#x27;2023-01-01&#x27;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句通过子查询删除了 orders 表中在 2023-01-01 之前下的订单对应的客户。</p>
+<blockquote>
+<p><strong>注意：</strong> 在使用 DELETE 语句时，请确保你提供了足够的条件来确保只有你想要删除的行被删除。如果不提供 WHERE 子句，将删除表中的所有行，可能导致不可预测的结果。</p>
+</blockquote>
+<h2 id="UNION-操作符"><a href="#UNION-操作符" class="headerlink" title="UNION 操作符"></a>UNION 操作符</h2><p>本教程为大家介绍 MySQL <strong>UNION</strong> 操作符的语法和实例。</p>
+<h3 id="描述"><a href="#描述" class="headerlink" title="描述"></a>描述</h3><p>UNION 操作符用于连接两个以上的 SELECT 语句的结果组合到一个结果集合，并去除重复的行。</p>
+<p>UNION 内部的每个 SELECT 语句必须拥有相同数量的列。列也必须拥有相似的数据类型。同时，每个 SELECT 语句中的列的顺序必须相同。</p>
+<h3 id="语法-7"><a href="#语法-7" class="headerlink" title="语法"></a>语法</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column1, column2, ...</span><br><span class="line">FROM table1</span><br><span class="line">WHERE condition1</span><br><span class="line">UNION</span><br><span class="line">SELECT column1, column2, ...</span><br><span class="line">FROM table2</span><br><span class="line">WHERE condition2</span><br><span class="line">[ORDER BY column1, column2, ...];</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数说明：</strong></p>
+<ul>
+<li>column1, column2, … ：是你要选择的列的名称，如果使用 <code>*</code> 表示选择所有列。</li>
+<li>table1, table2, … ：是你要从中查询数据的表的名称。</li>
+<li>condition1, condition2, … ：是每个 <code>SELECT</code> 语句的过滤条件，是可选的。</li>
+<li>ORDER BY 子句是一个可选的子句，用于指定合并后的结果集的排序顺序。</li>
+</ul>
+<h3 id="实例-4"><a href="#实例-4" class="headerlink" title="实例"></a>实例</h3><h4 id="基本的-UNION-操作："><a href="#基本的-UNION-操作：" class="headerlink" title="基本的 UNION 操作："></a>基本的 UNION 操作：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT city FROM customers</span><br><span class="line">UNION</span><br><span class="line">SELECT city FROM suppliers</span><br><span class="line">ORDER BY city;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将选择客户表和供应商表中所有城市的唯一值，并按城市名称升序排序。</p>
+<h4 id="使用过滤条件的-UNION："><a href="#使用过滤条件的-UNION：" class="headerlink" title="使用过滤条件的 UNION："></a>使用过滤条件的 UNION：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT product_name FROM products WHERE category = &#x27;Electronics&#x27;</span><br><span class="line">UNION</span><br><span class="line">SELECT product_name FROM products WHERE category = &#x27;Clothing&#x27;</span><br><span class="line">ORDER BY product_name;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句将选择电子产品和服装类别的产品名称，并按产品名称升序排序。</p>
+<h4 id="UNION-操作中的列数和数据类型必须相同："><a href="#UNION-操作中的列数和数据类型必须相同：" class="headerlink" title="UNION 操作中的列数和数据类型必须相同："></a>UNION 操作中的列数和数据类型必须相同：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT first_name, last_name FROM employees</span><br><span class="line">UNION</span><br><span class="line">SELECT department_name, NULL FROM departments</span><br><span class="line">ORDER BY first_name;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句中，departments 表中的 department_name 列被映射到了 employees 表中的 last_name 列，但是列数和数据类型必须相同。</p>
+<h4 id="使用-UNION-ALL-不去除重复行："><a href="#使用-UNION-ALL-不去除重复行：" class="headerlink" title="使用 UNION ALL 不去除重复行："></a>使用 UNION ALL 不去除重复行：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT city FROM customers</span><br><span class="line">UNION ALL</span><br><span class="line">SELECT city FROM suppliers</span><br><span class="line">ORDER BY city;</span><br></pre></td></tr></table></figure>
+
+<p>以上 SQL 语句使用 UNION ALL 将客户表和供应商表中的所有城市合并在一起，不去除重复行。</p>
+<blockquote>
+<p>UNION 操作符在合并结果集时会去除重复行，而 UNION ALL 不会去除重复行，因此 UNION ALL 的性能可能更好，但如果你确实希望去除重复行，可以使用 UNION。</p>
+</blockquote>
+<h2 id="ALTER-TABLE-命令"><a href="#ALTER-TABLE-命令" class="headerlink" title="ALTER TABLE 命令"></a>ALTER TABLE 命令</h2><p>当我们需要修改数据表名或者修改数据表字段时，就需要使用到 ALTER TABLE 命令。</p>
+<p>ALTER TABLE 命令用于修改数据库、表和索引等对象的结构。</p>
+<p>ALTER TABLE 命令允许你添加、修改或删除数据库对象，并且可以用于更改表的列定义、添加约束、创建和删除索引等操作。</p>
+<p>ALTER TABLE 命令非常强大，可以在数据库结构发生变化时进行灵活的修改和调整。</p>
+<h3 id="语法-8"><a href="#语法-8" class="headerlink" title="语法"></a>语法</h3><h4 id="添加列"><a href="#添加列" class="headerlink" title="添加列"></a>添加列</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE table_name</span><br><span class="line">ADD COLUMN new_column_name datatype;</span><br></pre></td></tr></table></figure>
+
+<p>以下 SQL 语句在 employees 表中添加了一个名为 birth_date 的日期列：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE employees</span><br><span class="line">ADD COLUMN birth_date DATE;</span><br></pre></td></tr></table></figure>
+
+<h4 id="修改列的数据类型"><a href="#修改列的数据类型" class="headerlink" title="修改列的数据类型"></a>修改列的数据类型</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE TABLE_NAME</span><br><span class="line">MODIFY COLUMN column_name new_datatype;</span><br></pre></td></tr></table></figure>
+
+<p>以下 SQL 语句将 employees 表中的 salary 列的数据类型修改为 DECIMAL(10,2)：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE employees</span><br><span class="line">MODIFY COLUMN salary DECIMAL(10,2);</span><br></pre></td></tr></table></figure>
+
+<h4 id="修改列名"><a href="#修改列名" class="headerlink" title="修改列名"></a>修改列名</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE table_name</span><br><span class="line">CHANGE COLUMN old_column_name new_column_name datatype;</span><br></pre></td></tr></table></figure>
+
+<p>以下 SQL 语句将 employees 表中的某个列的名字由 old_column_name 修改为 new_column_name，并且可以同时修改数据类型：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE employees</span><br><span class="line">CHANGE COLUMN old_column_name new_column_name VARCHAR(255);</span><br></pre></td></tr></table></figure>
+
+<h4 id="删除列"><a href="#删除列" class="headerlink" title="删除列"></a>删除列</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE table_name</span><br><span class="line">DROP COLUMN column_name;</span><br></pre></td></tr></table></figure>
+
+<p>以下 SQL 语句将 employees 表中的 birth_date 列删除：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">**ALTER** **TABLE** employees</span><br><span class="line">**DROP** **COLUMN** birth_date;</span><br></pre></td></tr></table></figure>
+
+<h4 id="添加-PRIMARY-KEY"><a href="#添加-PRIMARY-KEY" class="headerlink" title="添加 PRIMARY KEY"></a>添加 PRIMARY KEY</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE table_name</span><br><span class="line">ADD PRIMARY KEY (column_name);</span><br></pre></td></tr></table></figure>
+
+<p>以下 SQL 语句在 employees 表中添加了一个主键：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE employees</span><br><span class="line">ADD PRIMARY KEY (employee_id);</span><br></pre></td></tr></table></figure>
+
+<h4 id="添加-FOREIGN-KEY"><a href="#添加-FOREIGN-KEY" class="headerlink" title="添加 FOREIGN KEY"></a>添加 FOREIGN KEY</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE child_table</span><br><span class="line">ADD CONSTRAINT fk_name</span><br><span class="line">FOREIGN KEY (column_name)</span><br><span class="line">REFERENCES parent_table (column_name);</span><br></pre></td></tr></table></figure>
+
+<p>以下 SQL 语句在 orders 表中添加了一个外键，关联到 customers 表的 customer_id 列：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE orders</span><br><span class="line">ADD CONSTRAINT fk_customer</span><br><span class="line">FOREIGN KEY (customer_id)</span><br><span class="line">REFERENCES customers (customer_id);</span><br></pre></td></tr></table></figure>
+
+<h4 id="修改表名"><a href="#修改表名" class="headerlink" title="修改表名"></a>修改表名</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE old_table_name</span><br><span class="line">RENAME TO new_table_name;</span><br></pre></td></tr></table></figure>
+
+<p>以下 SQL 语句将表名由 employees 修改为 staff：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE employees</span><br><span class="line">RENAME TO staff;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意：</strong>但在使用 <strong>ALTER</strong> 命令时要格外小心，因为一些操作可能需要重建表或索引，这可能会影响数据库的性能和运行时间。在进行重要的结构修改时，建议先备份数据，并在生产环境中谨慎操作。</p>
+</blockquote>
+<h2 id="别名"><a href="#别名" class="headerlink" title="别名"></a>别名</h2><p>通过使用 SQL，可以为表名称或列名称指定别名。</p>
+<hr>
+<h2 id="SQL-别名"><a href="#SQL-别名" class="headerlink" title="SQL 别名"></a>SQL 别名</h2><p>通过使用 SQL，可以为表名称或列名称指定别名。</p>
+<p>基本上，创建别名是为了让列名称的可读性更强。</p>
+<h3 id="列的-SQL-别名语法"><a href="#列的-SQL-别名语法" class="headerlink" title="列的 SQL 别名语法"></a>列的 SQL 别名语法</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column_name AS alias_name</span><br><span class="line">FROM table_name;</span><br></pre></td></tr></table></figure>
+
+<h3 id="表的-SQL-别名语法"><a href="#表的-SQL-别名语法" class="headerlink" title="表的 SQL 别名语法"></a>表的 SQL 别名语法</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column_name(s)</span><br><span class="line">FROM table_name AS alias_name;</span><br></pre></td></tr></table></figure>
+
+<h2 id="约束"><a href="#约束" class="headerlink" title="约束"></a>约束</h2><p>MySQL 中的约束是用来限制表中数据的规则，防止无效的数据进入到表中，确保数据的完整性和一致性。</p>
+<p>约束可以应用在列级别或表级别。</p>
+<h3 id="列级约束"><a href="#列级约束" class="headerlink" title="列级约束"></a>列级约束</h3><h4 id="NOT-NULL-非空约束"><a href="#NOT-NULL-非空约束" class="headerlink" title="NOT NULL 非空约束"></a>NOT NULL 非空约束</h4><p>NOT NULL 约束强制列不接受 NULL 值。</p>
+<p>NOT NULL 约束强制字段始终包含值。这意味着，如果不向字段添加值，就无法插入新记录或者更新记录。</p>
+<h5 id="CREATE-TABLE-时添加-NOT-NULL-约束"><a href="#CREATE-TABLE-时添加-NOT-NULL-约束" class="headerlink" title="CREATE TABLE 时添加 NOT NULL 约束"></a>CREATE TABLE 时添加 NOT NULL 约束</h5><p>下面的 SQL 在 student 表创建时在 NAME 列上创建 NOT NULL 约束：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE student(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT,</span><br><span class="line">NAME VARCHAR(30) NOT NULL,</span><br><span class="line">age INT UNIQUE</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h5 id="ALTER-TABLE-时添加-NOT-NULL-约束"><a href="#ALTER-TABLE-时添加-NOT-NULL-约束" class="headerlink" title="ALTER TABLE 时添加 NOT NULL 约束"></a>ALTER TABLE 时添加 NOT NULL 约束</h5><p>在一个已创建的表的 Age 字段中添加 NOT NULL 约束如下所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE student MODIFY Age int NOT NULL;</span><br></pre></td></tr></table></figure>
+
+<p><strong>check</strong></p>
+<p>查询学生表的详细信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DESC student;</span><br></pre></td></tr></table></figure>
+
+<p>添加 NULL 数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO student VALUES (NULL,&#x27;张三&#x27;,23);</span><br></pre></td></tr></table></figure>
+
+<h5 id="撤销-NOT-NULL-约束"><a href="#撤销-NOT-NULL-约束" class="headerlink" title="撤销 NOT NULL 约束"></a>撤销 NOT NULL 约束</h5><p>在一个已创建的表的 “Age” 字段中删除 NOT NULL 约束如下所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE student MODIFY Age int NULL;</span><br></pre></td></tr></table></figure>
+
+<p><strong>check</strong></p>
+<p>添加 NULL 数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO student VALUES (NULL,NULL,25);</span><br></pre></td></tr></table></figure>
+
+<h4 id="DEFAULT-默认值约束"><a href="#DEFAULT-默认值约束" class="headerlink" title="DEFAULT 默认值约束"></a>DEFAULT 默认值约束</h4><p>用于约束该字段有默认值，约束当数据表中某个字段不输入值时，自动为其添加一个已经设置好的值。比如性别。</p>
+<h4 id="UNIQUE-唯一约束"><a href="#UNIQUE-唯一约束" class="headerlink" title="UNIQUE 唯一约束"></a>UNIQUE 唯一约束</h4><p>UNIQUE 约束唯一标识数据库表中的每条记录。</p>
+<p>UNIQUE 和 PRIMARY KEY 约束均为列或列集合提供了唯一性的保证。</p>
+<p>PRIMARY KEY 约束拥有自动定义的 UNIQUE 约束。</p>
+<p>请注意，每个表可以有多个 UNIQUE 约束，但是每个表只能有一个 PRIMARY KEY 约束。</p>
+<h5 id="CREATE-TABLE-时的-UNIQUE-约束"><a href="#CREATE-TABLE-时的-UNIQUE-约束" class="headerlink" title="CREATE TABLE 时的 UNIQUE 约束"></a>CREATE TABLE 时的 UNIQUE 约束</h5><p>下面的 SQL 在 student 表创建时在 age 和 NAME 列上创建 UNIQUE 约束：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE student(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT,</span><br><span class="line">NAME VARCHAR(30),</span><br><span class="line">UNIQUE (NAME),</span><br><span class="line">age INT UNIQUE</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>命名 UNIQUE 约束，并定义多个列的 UNIQUE 约束：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE student(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT,</span><br><span class="line">NAME VARCHAR(30),</span><br><span class="line">age INT,</span><br><span class="line">CONSTRAINT people UNIQUE (NAME,age)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h5 id="ALTER-TABLE-时的-UNIQUE-约束"><a href="#ALTER-TABLE-时的-UNIQUE-约束" class="headerlink" title="ALTER TABLE 时的 UNIQUE 约束"></a>ALTER TABLE 时的 UNIQUE 约束</h5><p>在一个已创建的表的 age 字段中添加 UNIQUE 约束如下所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE student MODIFY age INT UNIQUE;</span><br><span class="line">ALTER TABLE student ADD UNIQUE (age);</span><br></pre></td></tr></table></figure>
+
+<p>命名 UNIQUE 约束，并定义多个列的 UNIQUE 约束：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE student ADD CONSTRAINT Person UNIQUE (NAME,age);</span><br></pre></td></tr></table></figure>
+
+<p><strong>check</strong></p>
+<p>查询学生表的详细信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DESC student;</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO student VALUES (NULL,&#x27;张三&#x27;,23);</span><br><span class="line">INSERT INTO student VALUES (NULL,&#x27;李四&#x27;,23);</span><br><span class="line">INSERT INTO student VALUES (NULL,&#x27;李四&#x27;,24);</span><br></pre></td></tr></table></figure>
+
+<h5 id="删除-UNIQUE-约束"><a href="#删除-UNIQUE-约束" class="headerlink" title="删除 UNIQUE 约束"></a>删除 UNIQUE 约束</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE student DROP INDEX age;</span><br></pre></td></tr></table></figure>
+
+<p><strong>check</strong></p>
+<p>查询学生表的详细信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DESC student;</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO student VALUES (NULL,&#x27;李四&#x27;,23);</span><br></pre></td></tr></table></figure>
+
+<h4 id="PRIMARY-KEY-主键约束"><a href="#PRIMARY-KEY-主键约束" class="headerlink" title="PRIMARY KEY 主键约束"></a>PRIMARY KEY 主键约束</h4><p>PRIMARY KEY 约束唯一标识数据库表中的每条记录。</p>
+<p>主键必须包含唯一的值。</p>
+<p>主键列不能包含 NULL 值。</p>
+<p>每个表都应该有一个主键，并且每个表只能有一个主键。</p>
+<p>主键约束可以应用在一个或多个列上，通常用来标识表中的主要记录。</p>
+<h5 id="CREATE-TABLE-时的-PRIMARY-KEY-约束"><a href="#CREATE-TABLE-时的-PRIMARY-KEY-约束" class="headerlink" title="CREATE TABLE 时的 PRIMARY KEY 约束"></a>CREATE TABLE 时的 PRIMARY KEY 约束</h5><p>下面的 SQL 在 student 表创建时在 id 和 NAME 列上创建 PRIMARY KEY 约束</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE student(</span><br><span class="line">id INT PRIMARY KEY,</span><br><span class="line">NAME VARCHAR(30) NOT NULL,</span><br><span class="line">PRIMARY KEY (NAME),</span><br><span class="line">age INT</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>命名 PRIMARY KEY 约束，并定义多个列的 PRIMARY KEY 约束</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE student(</span><br><span class="line">id INT NOT NULL,</span><br><span class="line">NAME VARCHAR(30) NOT NULL,</span><br><span class="line">age INT,</span><br><span class="line">CONSTRAINT person PRIMARY KEY (id,NAME)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>注：在上面的实例中，只有一个主键 PRIMARY KEY（person）。然而，person 的值是由两个列（id 和 NAME）组成的。</p>
+<h5 id="ALTER-TABLE-时的-PRIMARY-KEY-约束"><a href="#ALTER-TABLE-时的-PRIMARY-KEY-约束" class="headerlink" title="ALTER TABLE 时的 PRIMARY KEY 约束"></a>ALTER TABLE 时的 PRIMARY KEY 约束</h5><p>当表已被创建时，在 id 列创建 PRIMARY KEY 约束</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE student ADD PRIMARY KEY (id)</span><br></pre></td></tr></table></figure>
+
+<p>命名 PRIMARY KEY 约束，并定义多个列的 PRIMARY KEY 约束</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE student ADD CONSTRAINT person PRIMARY KEY (id,NAME)</span><br></pre></td></tr></table></figure>
+
+<p>注：使用 ALTER TABLE 语句添加主键，必须把主键列声明为不包含 NULL 值（在表首次创建时）。</p>
+<p><strong>check</strong></p>
+<p>查询学生表的详细信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DESC student;</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO student VALUES (1,&#x27;张三&#x27;,23);</span><br><span class="line">INSERT INTO student VALUES (2,&#x27;李四&#x27;,24);</span><br></pre></td></tr></table></figure>
+
+<h5 id="删除-PRIMARY-KEY-约束"><a href="#删除-PRIMARY-KEY-约束" class="headerlink" title="删除 PRIMARY KEY 约束"></a>删除 PRIMARY KEY 约束</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE student DROP PRIMARY KEY;</span><br></pre></td></tr></table></figure>
+
+<h5 id="PRIMARY-KEY-AUTO-INCREMENT-主键自增约束"><a href="#PRIMARY-KEY-AUTO-INCREMENT-主键自增约束" class="headerlink" title="PRIMARY KEY AUTO_INCREMENT 主键自增约束"></a>PRIMARY KEY AUTO_INCREMENT 主键自增约束</h5><p>将添加数据的主键对应的位置改为 Null ，会自动按照数据添加的顺序排序编号</p>
+<p>下面的 SQL 在 student 表创建时在 id 列上设为主键自增</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE student(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT,</span><br><span class="line">NAME VARCHAR(30),</span><br><span class="line">age INT</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>查询学生表的详细信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DESC student;</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO student VALUES (NULL,&#x27;张三&#x27;,23),(NULL,&#x27;李四&#x27;,24);</span><br></pre></td></tr></table></figure>
+
+<p>删除自增约束</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE student MODIFY id INT;</span><br><span class="line">INSERT INTO student VALUES (NULL,&#x27;张三&#x27;,23);</span><br></pre></td></tr></table></figure>
+
+<p>建表后单独添加自增约束</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE student MODIFY id INT AUTO_INCREMENT;</span><br></pre></td></tr></table></figure>
+
+<h4 id="CHECK-检查约束"><a href="#CHECK-检查约束" class="headerlink" title="CHECK 检查约束"></a>CHECK 检查约束</h4><p>检查约束用来限制列中的值必须符合指定的条件。检查约束可以应用在一个或多个列上，用来确保数据的合法性。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE products (</span><br><span class="line">    product_id INT PRIMARY KEY,</span><br><span class="line">    product_name VARCHAR(50),</span><br><span class="line">    price DECIMAL(10, 2),</span><br><span class="line">    CHECK (price &gt; 0)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="表级约束"><a href="#表级约束" class="headerlink" title="表级约束"></a>表级约束</h3><h4 id="PRIMARY-KEY"><a href="#PRIMARY-KEY" class="headerlink" title="PRIMARY KEY"></a>PRIMARY KEY</h4><h4 id="UNIQUE"><a href="#UNIQUE" class="headerlink" title="UNIQUE"></a>UNIQUE</h4><h4 id="CHECK"><a href="#CHECK" class="headerlink" title="CHECK"></a>CHECK</h4><h4 id="FOREIGN-KEY-外键约束"><a href="#FOREIGN-KEY-外键约束" class="headerlink" title="FOREIGN KEY 外键约束"></a>FOREIGN KEY 外键约束</h4><p>一个表中的 FOREIGN KEY 指向另一个表中的 UNIQUE KEY（唯一约束的键）。</p>
+<p>让我们通过一个实例来解释外键。请看下面两个表：</p>
+<p>Persons 表：</p>
+<table>
+<thead>
+<tr>
+<th align="center">P_Id</th>
+<th align="center">LastName</th>
+<th align="center">FirstName</th>
+<th align="center">Address</th>
+<th align="center">City</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">Hansen</td>
+<td align="center">Ola</td>
+<td align="center">Timoteivn 10</td>
+<td align="center">Sandnes</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">Svendson</td>
+<td align="center">Tove</td>
+<td align="center">Borgvn 23</td>
+<td align="center">Sandnes</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">Pettersen</td>
+<td align="center">Kari</td>
+<td align="center">Storgt 20</td>
+<td align="center">Stavanger</td>
+</tr>
+</tbody></table>
+<p>Orders 表：</p>
+<table>
+<thead>
+<tr>
+<th align="center">O_Id</th>
+<th align="center">OrderNo</th>
+<th align="center">P_Id</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">1</td>
+<td align="center">77895</td>
+<td align="center">3</td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center">44678</td>
+<td align="center">3</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center">22456</td>
+<td align="center">2</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="center">24562</td>
+<td align="center">1</td>
+</tr>
+</tbody></table>
+<p>请注意，”Orders” 表中的 “P_Id” 列指向 “Persons” 表中的 “P_Id” 列。</p>
+<p>“Persons” 表中的 “P_Id” 列是 “Persons” 表中的 PRIMARY KEY。</p>
+<p>“Orders” 表中的 “P_Id” 列是 “Orders” 表中的 FOREIGN KEY。</p>
+<p>FOREIGN KEY 约束用于预防破坏表之间连接的行为。</p>
+<p>FOREIGN KEY 约束也能防止非法数据插入外键列，因为它必须是它指向的那个表中的值之一。</p>
+<h5 id="CREATE-TABLE-时的-SQL-FOREIGN-KEY-约束"><a href="#CREATE-TABLE-时的-SQL-FOREIGN-KEY-约束" class="headerlink" title="CREATE TABLE 时的 SQL FOREIGN KEY 约束"></a>CREATE TABLE 时的 SQL FOREIGN KEY 约束</h5><p>下面的 SQL 在 “Orders” 表创建时在 “P_Id” 列上创建 FOREIGN KEY 约束</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE Orders(</span><br><span class="line">O_Id int NOT NULL,</span><br><span class="line">OrderNo int NOT NULL,</span><br><span class="line">P_Id int,</span><br><span class="line">PRIMARY KEY (O_Id),</span><br><span class="line">FOREIGN KEY (P_Id) REFERENCES Persons(P_Id)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>命名 FOREIGN KEY 约束，并定义多个列的 FOREIGN KEY 约束</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE Orders(</span><br><span class="line">O_Id int NOT NULL,</span><br><span class="line">OrderNo int NOT NULL,</span><br><span class="line">P_Id int,</span><br><span class="line">PRIMARY KEY (O_Id),</span><br><span class="line">CONSTRAINT fk_PerOrders FOREIGN KEY (P_Id) REFERENCES Persons(P_Id)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h5 id="ALTER-TABLE-时的-SQL-FOREIGN-KEY-约束"><a href="#ALTER-TABLE-时的-SQL-FOREIGN-KEY-约束" class="headerlink" title="ALTER TABLE 时的 SQL FOREIGN KEY 约束"></a>ALTER TABLE 时的 SQL FOREIGN KEY 约束</h5><p>当 “Orders” 表已被创建时，在 “P_Id” 列创建 FOREIGN KEY 约束</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE Orders ADD FOREIGN KEY (P_Id) REFERENCES Persons(P_Id);</span><br></pre></td></tr></table></figure>
+
+<p>命名 FOREIGN KEY 约束，并定义多个列的 FOREIGN KEY 约束</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE Orders</span><br><span class="line">ADD CONSTRAINT fk_PerOrders</span><br><span class="line">FOREIGN KEY (P_Id)</span><br><span class="line">REFERENCES Persons(P_Id)</span><br></pre></td></tr></table></figure>
+
+<h5 id="删除-FOREIGN-KEY-约束"><a href="#删除-FOREIGN-KEY-约束" class="headerlink" title="删除 FOREIGN KEY 约束"></a>删除 FOREIGN KEY 约束</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE Orders DROP FOREIGN KEY fk_PerOrders</span><br></pre></td></tr></table></figure>
+
+<h5 id="外键级联操作"><a href="#外键级联操作" class="headerlink" title="外键级联操作"></a>外键级联操作</h5><p>添加外键约束，同时添加级联更新</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE 表名 ADD CONSTRAINT 外键名 FOREIGN KEY (本表外键列名) REFERENCES 主表名(主键列名)</span><br><span class="line">ON UPDATE CASCADE;</span><br></pre></td></tr></table></figure>
+
+<p>添加外键约束，同时添加级联删除</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE 表名 ADD CONSTRAINT 外键名 FOREIGN KEY (本表外键列名) REFERENCES 主表名(主键列名)</span><br><span class="line">ON DELETE CASCADE;</span><br></pre></td></tr></table></figure>
+
+<p>添加外键约束，同时添加级联更新和级联删除</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE 表名 ADD CONSTRAINT 外键名 FOREIGN KEY (本表外键列名) REFERENCES 主表名(主键列名)</span><br><span class="line">ON UPDATE CASCADE ON DELETE CASCADE;</span><br></pre></td></tr></table></figure>
+
+<p><strong>check</strong></p>
+<p>删除外键约束</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE orderlist DROP FOREIGN KEY ou_fk1;</span><br></pre></td></tr></table></figure>
+
+<p>添加外键约束，同时添加级联更新和级联删除</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE orderlist ADD CONSTRAINT ou_fk1 FOREIGN KEY (uid) REFERENCES USER(id)</span><br><span class="line">ON UPDATE CASCADE ON DELETE CASCADE;</span><br></pre></td></tr></table></figure>
+
+<p>将李四这个用户的 id 修改为 3，订单表中的 uid 也自动修改</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">UPDATE USER SET id=3 WHERE id=2;</span><br></pre></td></tr></table></figure>
+
+<p>将李四这个用户删除，订单表中的该用户所属的订单也自动删除</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DELETE FROM USER WHERE id=3;</span><br></pre></td></tr></table></figure>
+
+<h2 id="连接（JOIN）"><a href="#连接（JOIN）" class="headerlink" title="连接（JOIN）"></a>连接（JOIN）</h2><h3 id="前置准备"><a href="#前置准备" class="headerlink" title="前置准备"></a>前置准备</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-- 创建 db4 数据库</span><br><span class="line">CREATE DATABASE db4;</span><br><span class="line">-- 使用 db4 数据库</span><br><span class="line">USE db4;</span><br><span class="line"></span><br><span class="line">-- 创建 user 表</span><br><span class="line">CREATE TABLE USER(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT, -- 用户id</span><br><span class="line">NAME VARCHAR(20), -- 用户姓名</span><br><span class="line">age INT -- 用户年龄</span><br><span class="line">);</span><br><span class="line">-- 添加数据</span><br><span class="line">INSERT INTO USER VALUES (1,&#x27;张三&#x27;,23);</span><br><span class="line">INSERT INTO USER VALUES (2,&#x27;李四&#x27;,24);</span><br><span class="line">INSERT INTO USER VALUES (3,&#x27;王五&#x27;,25);</span><br><span class="line">INSERT INTO USER VALUES (4,&#x27;赵六&#x27;,26);</span><br><span class="line"></span><br><span class="line">-- 创建订单表</span><br><span class="line">CREATE TABLE orderlist(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT, -- 订单id</span><br><span class="line">number VARCHAR(30), -- 订单编号</span><br><span class="line">uid INT, -- 外键字段</span><br><span class="line">CONSTRAINT ou_fk1 FOREIGN KEY (uid) REFERENCES USER(id)</span><br><span class="line">);</span><br><span class="line">-- 添加数据</span><br><span class="line">INSERT INTO orderlist VALUES (1,&#x27;hm001&#x27;,1);</span><br><span class="line">INSERT INTO orderlist VALUES (2,&#x27;hm002&#x27;,1);</span><br><span class="line">INSERT INTO orderlist VALUES (3,&#x27;hm003&#x27;,2);</span><br><span class="line">INSERT INTO orderlist VALUES (4,&#x27;hm004&#x27;,2);</span><br><span class="line">INSERT INTO orderlist VALUES (5,&#x27;hm005&#x27;,3);</span><br><span class="line">INSERT INTO orderlist VALUES (6,&#x27;hm006&#x27;,3);</span><br><span class="line">INSERT INTO orderlist VALUES (7,&#x27;hm007&#x27;,NULL);</span><br></pre></td></tr></table></figure>
+
+<p>orderlist：</p>
+<p><img src="https://s2.loli.net/2024/04/23/95P6cD3CWM8qEaw.png" alt="image-20240423201037977"></p>
+<p>uesr：</p>
+<p><img src="https://s2.loli.net/2024/04/23/hz4RoLlxO23ZJ8t.png" alt="image-20240423201102957"></p>
+<p>JOIN 用于把来自两个或多个表的行结合起来。</p>
+<p>下图展示了 LEFT JOIN、RIGHT JOIN、INNER JOIN、OUTER JOIN 相关的 7 种用法。</p>
+<p><img src="https://s2.loli.net/2024/04/23/Rombr5BsO9FT1pC.png" alt="image-20240423190127034"></p>
+<p>JOIN 子句用于把来自两个或多个表的行结合起来，基于这些表之间的共同字段。</p>
+<h3 id="INNER-JOIN-内连接"><a href="#INNER-JOIN-内连接" class="headerlink" title="INNER JOIN 内连接"></a>INNER JOIN 内连接</h3><p><img src="https://s2.loli.net/2024/04/23/BDcNKXpoih4qfbQ.gif" alt="img_innerjoin"></p>
+<p>最常见的 JOIN 类型：<strong>INNER JOIN（简单的 JOIN）</strong>。</p>
+<p>如果表中有至少一个匹配，则返回行。</p>
+<p>INNER JOIN 从多个表中返回满足 JOIN 条件的所有行。</p>
+<h4 id="语法："><a href="#语法：" class="headerlink" title="语法："></a>语法：</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column1, column2, ...</span><br><span class="line">FROM table1</span><br><span class="line">INNER JOIN table2</span><br><span class="line">ON condition;</span><br></pre></td></tr></table></figure>
+
+<p>或</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column1, column2, ...</span><br><span class="line">FROM table1</span><br><span class="line">JOIN table2</span><br><span class="line">ON condition;</span><br></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<ul>
+<li>column1, column2, …：要选择的字段名称，可以为多个字段。如果不指定字段名称，则会选择所有字段。</li>
+<li>table1：要连接的第一个表。</li>
+<li>table2：要连接的第二个表。</li>
+<li>condition：连接条件，用于指定连接方式。</li>
+</ul>
+<h4 id="实例-5"><a href="#实例-5" class="headerlink" title="实例"></a>实例</h4><p>查询用户信息和对应的订单信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * </span><br><span class="line">FROM USER </span><br><span class="line">INNER JOIN orderlist </span><br><span class="line">ON orderlist.uid = user.id;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/23/7p9Ns1XKu5PAUIj.png" alt="image-20240423195940895"></p>
+<p>查询用户信息和对应的订单信息，并起别名</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * </span><br><span class="line">FROM USER u </span><br><span class="line">INNER JOIN orderlist o </span><br><span class="line">ON o.uid=u.id;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/23/7p9Ns1XKu5PAUIj.png" alt="image-20240423195940895"></p>
+<p>查询用户姓名，年龄和订单编号</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT</span><br><span class="line">	u.name, -- 用户姓名</span><br><span class="line">	u.age, -- 用户年龄</span><br><span class="line">	o.number -- 订单编号</span><br><span class="line">FROM</span><br><span class="line">	USER u -- 用户表</span><br><span class="line">INNER JOIN</span><br><span class="line">	orderlist o -- 订单表</span><br><span class="line">ON</span><br><span class="line">	o.uid=u.id;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/23/H1KGFtQgUkiRepb.png" alt="image-20240423200108377"></p>
+<h4 id="隐式内连接"><a href="#隐式内连接" class="headerlink" title="隐式内连接"></a>隐式内连接</h4><h5 id="语法-9"><a href="#语法-9" class="headerlink" title="语法"></a>语法</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT 列名 </span><br><span class="line">FROM 表名1,表名2 </span><br><span class="line">WHERE 关联条件;</span><br></pre></td></tr></table></figure>
+
+<h5 id="实例-6"><a href="#实例-6" class="headerlink" title="实例"></a>实例</h5><p>查询用户姓名，年龄。和订单编号</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT</span><br><span class="line">	u.name, -- 用户姓名</span><br><span class="line">	u.age, -- 用户年龄</span><br><span class="line">	o.number -- 订单编号</span><br><span class="line">FROM</span><br><span class="line">	USER u, -- 用户表</span><br><span class="line">	orderlist o -- 订单表</span><br><span class="line">WHERE</span><br><span class="line">	o.uid=u.id;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/23/H1KGFtQgUkiRepb.png" alt="image-20240423200108377"></p>
+<h3 id="外连接"><a href="#外连接" class="headerlink" title="外连接"></a>外连接</h3><h4 id="LEFT-JOIN-左外连接"><a href="#LEFT-JOIN-左外连接" class="headerlink" title="LEFT JOIN 左外连接"></a>LEFT JOIN 左外连接</h4><p><img src="https://www.runoob.com/wp-content/uploads/2013/09/img_leftjoin.gif" alt="SQL LEFT JOIN"></p>
+<p>LEFT JOIN 关键字从左表（table1）返回所有的行，即使右表（table2）中没有匹配。如果右表中没有匹配，则结果为 NULL。</p>
+<h5 id="语法-10"><a href="#语法-10" class="headerlink" title="语法"></a>语法</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column_name(s)</span><br><span class="line">FROM table1</span><br><span class="line">LEFT JOIN table2</span><br><span class="line">ON table1.column_name=table2.column_name;</span><br></pre></td></tr></table></figure>
+
+<p>或</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column_name(s)</span><br><span class="line">FROM table1</span><br><span class="line">LEFT OUTER JOIN table2</span><br><span class="line">ON table1.column_name=table2.column_name;</span><br></pre></td></tr></table></figure>
+
+<h5 id="实例-7"><a href="#实例-7" class="headerlink" title="实例"></a>实例</h5><p>查询所有用户信息，以及用户对应的订单信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT</span><br><span class="line">	u.*,</span><br><span class="line">	o.number</span><br><span class="line">FROM</span><br><span class="line">	USER u</span><br><span class="line">LEFT OUTER JOIN</span><br><span class="line">	orderlist o</span><br><span class="line">ON</span><br><span class="line">	o.uid=u.id;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/23/ma8c2USdYjJtrAg.png" alt="image-20240423194319742"></p>
+<p>注意最后一行：没匹配记录也会显示，但是会显示 Null</p>
+<p>LEFT JOIN 关键字从左表（USER）返回所有的行，即使右表（orderlist）中没有匹配。</p>
+<h4 id="RIGHT-JOIN-右外连接"><a href="#RIGHT-JOIN-右外连接" class="headerlink" title="RIGHT JOIN 右外连接"></a>RIGHT JOIN 右外连接</h4><p><img src="https://www.runoob.com/wp-content/uploads/2013/09/img_rightjoin.gif" alt="SQL RIGHT JOIN"></p>
+<p>RIGHT JOIN 关键字从右表（table2）返回所有的行，即使左表（table1）中没有匹配。</p>
+<p>如果左表中没有匹配，则结果为 NULL。</p>
+<h5 id="语法-11"><a href="#语法-11" class="headerlink" title="语法"></a>语法</h5><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column_name(s)</span><br><span class="line">FROM table1</span><br><span class="line">RIGHT JOIN table2</span><br><span class="line">ON table1.column_name=table2.column_name;</span><br></pre></td></tr></table></figure>
+
+<p>或：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT column_name(s)</span><br><span class="line">FROM table1</span><br><span class="line">RIGHT OUTER JOIN table2</span><br><span class="line">ON table1.column_name=table2.column_name;</span><br></pre></td></tr></table></figure>
+
+<h5 id="实例-8"><a href="#实例-8" class="headerlink" title="实例"></a>实例</h5><p>查询所有订单信息，以及订单所属的用户信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT</span><br><span class="line">	o.*,</span><br><span class="line">	u.name</span><br><span class="line">FROM</span><br><span class="line">	USER u</span><br><span class="line">RIGHT OUTER JOIN</span><br><span class="line">	orderlist o</span><br><span class="line">ON</span><br><span class="line">	o.uid=u.id;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/23/OdSnNVM4CTJG3qg.png" alt="image-20240423194935317"></p>
+<p>注意最后一行：没匹配记录也会显示，但是会显示 Null</p>
+<p>LEFT JOIN 关键字从左表（USER）返回所有的行，即使右表（orderlist）中没有匹配。</p>
+<h3 id="FULL-OUTER-JOIN（MySQL-中不支持-FULL-OUTER-JOIN）"><a href="#FULL-OUTER-JOIN（MySQL-中不支持-FULL-OUTER-JOIN）" class="headerlink" title="FULL OUTER JOIN（MySQL 中不支持 FULL OUTER JOIN）"></a>FULL OUTER JOIN（MySQL 中不支持 FULL OUTER JOIN）</h3><p><img src="https://www.runoob.com/wp-content/uploads/2013/09/img_fulljoin.gif" alt="SQL FULL OUTER JOIN"></p>
+<h2 id="子查询"><a href="#子查询" class="headerlink" title="子查询"></a>子查询</h2><h4 id="结果是单行单列的"><a href="#结果是单行单列的" class="headerlink" title="结果是单行单列的"></a>结果是单行单列的</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT 列名 FROM 表名 WHERE 列名=(SELECT 列名 FROM 表名 [WHERE 条件]);</span><br></pre></td></tr></table></figure>
+
+<p>查询年龄最高的用户姓名</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT MAX(age) FROM USER;</span><br><span class="line">SELECT NAME,age FROM USER WHERE age=(SELECT MAX(age) FROM USER);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/23/pnVamqJGQykBMxl.png" alt="image-20240423202131550"></p>
+<h4 id="结果是多行单列的"><a href="#结果是多行单列的" class="headerlink" title="结果是多行单列的"></a>结果是多行单列的</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT 列名 FROM 表名 WHERE 列名 [NOT] IN (SELECT 列名 FROM 表名 [WHERE 条件]);</span><br></pre></td></tr></table></figure>
+
+<p>查询张三和李四的订单信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM orderlist WHERE uid IN (1,2);</span><br><span class="line">SELECT id FROM USER WHERE NAME IN (&#x27;张三&#x27;,&#x27;李四&#x27;);</span><br><span class="line">SELECT * FROM orderlist WHERE uid IN (SELECT id FROM USER WHERE NAME IN (&#x27;张三&#x27;,&#x27;李四&#x27;));</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/23/iLeazFQmps9BNP7.png" alt="image-20240423202154313"></p>
+<h4 id="结果是多行多列的"><a href="#结果是多行多列的" class="headerlink" title="结果是多行多列的"></a>结果是多行多列的</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT 列名 FROM 表名 [别名],(SELECT 列名 FROM 表名 [WHERE 条件]) [别名] [WHERE 条件];</span><br></pre></td></tr></table></figure>
+
+<p>查询订单表中 id 大于 4 的订单信息和所属用户信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM orderlist WHERE id &gt; 4;</span><br><span class="line">SELECT</span><br><span class="line">	u.name,</span><br><span class="line">	o.number</span><br><span class="line">FROM</span><br><span class="line">	USER u,</span><br><span class="line">	(SELECT * FROM orderlist WHERE id &gt; 4) o</span><br><span class="line">WHERE</span><br><span class="line">	o.uid=u.id;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://s2.loli.net/2024/04/23/WbrpXuMAZIFynD1.png" alt="image-20240423202249529"></p>
+<h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><h3 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h3><h4 id="查询所有数据库"><a href="#查询所有数据库" class="headerlink" title="查询所有数据库"></a>查询所有数据库</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SHOW DATABASES;</span><br></pre></td></tr></table></figure>
+
+<h4 id="查询某个数据库的创建语句"><a href="#查询某个数据库的创建语句" class="headerlink" title="查询某个数据库的创建语句"></a>查询某个数据库的创建语句</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER DATABASE db4 CHARACTER SET utf8;</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><h4 id="标准语法"><a href="#标准语法" class="headerlink" title="标准语法"></a>标准语法</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE DATABASE 数据库名称;</span><br><span class="line"># 创建 db1 数据库</span><br><span class="line">CREATE DATABASE db1;</span><br></pre></td></tr></table></figure>
+
+<h4 id="创建数据库，判断、如果不存在则创建"><a href="#创建数据库，判断、如果不存在则创建" class="headerlink" title="创建数据库，判断、如果不存在则创建"></a>创建数据库，判断、如果不存在则创建</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE DATABASE IF NOT EXISTS 数据库名称;</span><br><span class="line"># 创建数据库 db2 (判断，如果不存在则创建)</span><br><span class="line">CREATE DATABASE IF NOT EXISTS db2;</span><br></pre></td></tr></table></figure>
+
+<h4 id="创建数据库、并指定字符集"><a href="#创建数据库、并指定字符集" class="headerlink" title="创建数据库、并指定字符集"></a>创建数据库、并指定字符集</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE DATABASE 数据库名称 CHARACTER SET 字符集名称;</span><br><span class="line"># 创建数据库 db3，并指定字符集 utf8</span><br><span class="line">CREATE DATABASE db3 CHARACTER SET utf8;</span><br></pre></td></tr></table></figure>
+
+<p>查看 db3 数据库的字符集</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SHOW CREATE DATABASE db3;</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h3><h4 id="修改数据库的字符集"><a href="#修改数据库的字符集" class="headerlink" title="修改数据库的字符集"></a>修改数据库的字符集</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER DATABASE 数据库名称 CHARACTER SET 字符集名称;</span><br></pre></td></tr></table></figure>
+
+<p>修改数据库 db3 的字符集为 gbk</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER DATABASE db3 CHARACTER SET gbk;</span><br></pre></td></tr></table></figure>
+
+<h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><h4 id="删除数据库"><a href="#删除数据库" class="headerlink" title="删除数据库"></a>删除数据库</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DROP DATABASE 数据库名称;</span><br></pre></td></tr></table></figure>
+
+<p>删除db1数据库</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DROP DATABASE db1;</span><br></pre></td></tr></table></figure>
+
+<h4 id="删除数据库，判断、如果存在则删除"><a href="#删除数据库，判断、如果存在则删除" class="headerlink" title="删除数据库，判断、如果存在则删除"></a>删除数据库，判断、如果存在则删除</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DROP DATABASE IF EXISTS 数据库名称;</span><br></pre></td></tr></table></figure>
+
+<p>如果存在 db2 ，则删除</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DROP DATABASE IF EXISTS db2;</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><h4 id="标准语法-1"><a href="#标准语法-1" class="headerlink" title="标准语法"></a>标准语法</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">USE 数据库名称;</span><br></pre></td></tr></table></figure>
+
+<p>使用 db3 数据库</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">USE db3;</span><br></pre></td></tr></table></figure>
+
+<h4 id="查询当前使用的数据库"><a href="#查询当前使用的数据库" class="headerlink" title="查询当前使用的数据库"></a>查询当前使用的数据库</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT DATABASE();</span><br></pre></td></tr></table></figure>
+
+<h2 id="数据表"><a href="#数据表" class="headerlink" title="数据表"></a>数据表</h2><h3 id="查询-1"><a href="#查询-1" class="headerlink" title="查询"></a>查询</h3><h4 id="查询数据库中所有数据表"><a href="#查询数据库中所有数据表" class="headerlink" title="查询数据库中所有数据表"></a>查询数据库中所有数据表</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SHOW TABLES;</span><br></pre></td></tr></table></figure>
+
+<h4 id="查询表结构"><a href="#查询表结构" class="headerlink" title="查询表结构"></a>查询表结构</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DESC 表名;</span><br></pre></td></tr></table></figure>
+
+<p>查询 user 表结构</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DESC USER;</span><br></pre></td></tr></table></figure>
+
+<h4 id="查询数据表的字符集"><a href="#查询数据表的字符集" class="headerlink" title="查询数据表的字符集"></a>查询数据表的字符集</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SHOW TABLE STATUS FROM 数据库名称 LIKE &#x27;表名&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>查看 mysql 数据库中 user 表字符集</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SHOW TABLE STATUS FROM mysql LIKE &#x27;user&#x27;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建-1"><a href="#创建-1" class="headerlink" title="创建"></a>创建</h3><h4 id="创建数据表"><a href="#创建数据表" class="headerlink" title="创建数据表"></a>创建数据表</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE 表名(</span><br><span class="line"></span><br><span class="line">列名 数据类型 约束,</span><br><span class="line"></span><br><span class="line">列名 数据类型 约束,</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">列名 数据类型 约束</span><br><span class="line"></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>创建一个 product 商品表（商品编号、商品名称、商品价格、商品库存、上架时间）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE product(</span><br><span class="line"></span><br><span class="line">id INT,</span><br><span class="line"></span><br><span class="line">NAME VARCHAR(20),</span><br><span class="line"></span><br><span class="line">price DOUBLE,</span><br><span class="line"></span><br><span class="line">stock INT,</span><br><span class="line"></span><br><span class="line">insert_time DATE</span><br><span class="line"></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>查看 product 表详细结构</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DESC product;</span><br></pre></td></tr></table></figure>
+
+<h3 id="添加"><a href="#添加" class="headerlink" title="添加"></a>添加</h3><h4 id="给表添加列"><a href="#给表添加列" class="headerlink" title="给表添加列"></a>给表添加列</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE 表名 ADD 列名 数据类型;</span><br></pre></td></tr></table></figure>
+
+<p>给 product 表添加一列 color</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE product ADD color VARCHAR(10);</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改-1"><a href="#修改-1" class="headerlink" title="修改"></a>修改</h3><h4 id="修改表名-1"><a href="#修改表名-1" class="headerlink" title="修改表名"></a>修改表名</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE 旧表名 RENAME TO 新表名;</span><br></pre></td></tr></table></figure>
+
+<p>修改 product 表名为 product2</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE product RENAME TO product2;</span><br></pre></td></tr></table></figure>
+
+<h4 id="修改表的字符集"><a href="#修改表的字符集" class="headerlink" title="修改表的字符集"></a>修改表的字符集</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE 表名 CHARACTER SET 字符集名称;</span><br></pre></td></tr></table></figure>
+
+<p>查看 db3 数据库中 product2 数据表字符集</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SHOW TABLE STATUS FROM db3 LIKE &#x27;product2&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>修改 product2 数据表字符集为 gbk</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE product2 CHARACTER SET gbk;</span><br></pre></td></tr></table></figure>
+
+<h4 id="修改表中列的数据类型"><a href="#修改表中列的数据类型" class="headerlink" title="修改表中列的数据类型"></a>修改表中列的数据类型</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE 表名 MODIFY 列名 数据类型;</span><br></pre></td></tr></table></figure>
+
+<p>将 color 数据类型修改为 int</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE product2 MODIFY color INT;</span><br></pre></td></tr></table></figure>
+
+<p>查看 product2 表详细信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DESC product2;</span><br></pre></td></tr></table></figure>
+
+<h4 id="修改表中列的名称和数据类型"><a href="#修改表中列的名称和数据类型" class="headerlink" title="修改表中列的名称和数据类型"></a>修改表中列的名称和数据类型</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE 表名 CHANGE 旧列名 新列名 数据类型;</span><br></pre></td></tr></table></figure>
+
+<p>将 color 修改为 address</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE product2 CHANGE color address VARCHAR(200);</span><br></pre></td></tr></table></figure>
+
+<h3 id="删除-1"><a href="#删除-1" class="headerlink" title="删除"></a>删除</h3><h4 id="删除表中的列"><a href="#删除表中的列" class="headerlink" title="删除表中的列"></a>删除表中的列</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE 表名 DROP 列名;</span><br></pre></td></tr></table></figure>
+
+<p>删除 address 列</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ALTER TABLE product2 DROP address;</span><br></pre></td></tr></table></figure>
+
+<h4 id="删除表"><a href="#删除表" class="headerlink" title="删除表"></a>删除表</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DROP TABLE 表名;</span><br></pre></td></tr></table></figure>
+
+<p>删除 product2 表</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DROP TABLE product2;</span><br></pre></td></tr></table></figure>
+
+<h4 id="删除表，判断、如果存在则删除"><a href="#删除表，判断、如果存在则删除" class="headerlink" title="删除表，判断、如果存在则删除"></a>删除表，判断、如果存在则删除</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DROP TABLE IF EXISTS 表名;</span><br></pre></td></tr></table></figure>
+
+<h2 id="列"><a href="#列" class="headerlink" title="列"></a>列</h2><h3 id="添加-1"><a href="#添加-1" class="headerlink" title="添加"></a>添加</h3><h4 id="给指定列添加数据"><a href="#给指定列添加数据" class="headerlink" title="给指定列添加数据"></a>给指定列添加数据</h4><p>标准语法：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO 表名(列名1,列名2,...) VALUES (值1,值2,...);</span><br></pre></td></tr></table></figure>
+
+<p>向 product 表添加一条数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO product(id,NAME,price,stock,insert_time) VALUES (1,&#x27;手机&#x27;,1999.99,25,&#x27;2020-02-02&#x27;);</span><br></pre></td></tr></table></figure>
+
+<p>向 product 表添加指定列数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO product(id,NAME,price) VALUES (2,&#x27;电脑&#x27;,3999.99);</span><br></pre></td></tr></table></figure>
+
+<p>注：要保证插入的数据和已插入的没有重复，不然会报错</p>
+<h4 id="给全部列添加数据"><a href="#给全部列添加数据" class="headerlink" title="给全部列添加数据"></a>给全部列添加数据</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO 表名 VALUES (值1,值2,值3,...);</span><br></pre></td></tr></table></figure>
+
+<p>默认给全部列添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO product VALUES (3,&#x27;冰箱&#x27;,1500,35,&#x27;2030-03-03&#x27;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="批量添加所有列数据"><a href="#批量添加所有列数据" class="headerlink" title="批量添加所有列数据"></a>批量添加所有列数据</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO 表名 VALUES (值1,值2,值3,...),(值1,值2,值3,...),(值1,值2,值3,...);</span><br></pre></td></tr></table></figure>
+
+<p>批量添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO product VALUES (4,&#x27;洗衣机&#x27;,800,15,&#x27;2030-05-05&#x27;),(5,&#x27;微波炉&#x27;,300,45,&#x27;2030-06-06&#x27;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改-2"><a href="#修改-2" class="headerlink" title="修改"></a>修改</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">UPDATE 表名 SET 列名1 = 值1,列名2 = 值2,... [where 条件];</span><br></pre></td></tr></table></figure>
+
+<p>修改手机的价格为 3500</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">UPDATE product SET price=3500 WHERE NAME=&#x27;手机&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>修改电脑的价格为 1800，库存为 36</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">UPDATE product SET price=1800,stock=36 WHERE NAME=&#x27;电脑&#x27;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="删除-2"><a href="#删除-2" class="headerlink" title="删除"></a>删除</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DELETE FROM 表名 [WHERE 条件];</span><br></pre></td></tr></table></figure>
+
+<p>删除 product 表中的微波炉那一行</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DELETE FROM product WHERE NAME=&#x27;微波炉&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>删除 product 表中库存为 10 的商品信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DELETE FROM product WHERE stock=10;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查询数据准备"><a href="#查询数据准备" class="headerlink" title="查询数据准备"></a>查询数据准备</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-- 创建db1数据库</span><br><span class="line">CREATE DATABASE db1;</span><br><span class="line"></span><br><span class="line">-- 使用db1数据库</span><br><span class="line">USE db1;</span><br><span class="line"></span><br><span class="line">-- 创建数据表</span><br><span class="line">CREATE TABLE product(</span><br><span class="line">id INT, -- 商品编号</span><br><span class="line">NAME VARCHAR(20), -- 商品名称</span><br><span class="line">price DOUBLE, -- 商品价格</span><br><span class="line">brand VARCHAR(10), -- 商品品牌</span><br><span class="line">stock INT, -- 商品库存</span><br><span class="line">insert_time DATE -- 添加时间</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">-- 添加数据</span><br><span class="line">INSERT INTO product VALUES</span><br><span class="line">(1,&#x27;华为手机&#x27;,3999,&#x27;华为&#x27;,23,&#x27;2088-03-10&#x27;),</span><br><span class="line">(2,&#x27;小米手机&#x27;,2999,&#x27;小米&#x27;,30,&#x27;2088-05-15&#x27;),</span><br><span class="line">(3,&#x27;苹果手机&#x27;,5999,&#x27;苹果&#x27;,18,&#x27;2088-08-20&#x27;),</span><br><span class="line">(4,&#x27;华为电脑&#x27;,6999,&#x27;华为&#x27;,14,&#x27;2088-06-16&#x27;),</span><br><span class="line">(5,&#x27;小米电脑&#x27;,4999,&#x27;小米&#x27;,26,&#x27;2088-07-08&#x27;),</span><br><span class="line">(6,&#x27;苹果电脑&#x27;,8999,&#x27;苹果&#x27;,15,&#x27;2088-10-25&#x27;),</span><br><span class="line">(7,&#x27;联想电脑&#x27;,7999,&#x27;联想&#x27;,NULL,&#x27;2088-11-11&#x27;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="查询-查询全部"><a href="#查询-查询全部" class="headerlink" title="查询_查询全部"></a>查询_查询全部</h3><h4 id="查询全部数据"><a href="#查询全部数据" class="headerlink" title="查询全部数据"></a>查询全部数据</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM 表名;</span><br></pre></td></tr></table></figure>
+
+<p>注：星号( * )为通配符，表示所有</p>
+<p>查询 product 表所有数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product;</span><br></pre></td></tr></table></figure>
+
+<h4 id="查询指定列"><a href="#查询指定列" class="headerlink" title="查询指定列"></a>查询指定列</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT 列名1,列名2,... FROM 表名;</span><br></pre></td></tr></table></figure>
+
+<p>查询名称、价格、品牌</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT NAME,price,brand FROM product;</span><br></pre></td></tr></table></figure>
+
+<h4 id="去除重复查询"><a href="#去除重复查询" class="headerlink" title="去除重复查询"></a>去除重复查询</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT DISTINCT 列名1,列名2,... FROM 表名;</span><br></pre></td></tr></table></figure>
+
+<p>查询品牌</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT brand FROM product;</span><br></pre></td></tr></table></figure>
+
+<p>查询品牌，去除重复</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT DISTINCT brand FROM product;</span><br></pre></td></tr></table></figure>
+
+<h3 id="计算列的值"><a href="#计算列的值" class="headerlink" title="计算列的值"></a>计算列的值</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT 列名1 运算符(+ - * /) 列名2 FROM 表名;</span><br></pre></td></tr></table></figure>
+
+<p>如果某一列为 null，可以进行替换</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">IFNULL(表达式1,表达式2)</span><br><span class="line"></span><br><span class="line">表达式1：想替换的列</span><br><span class="line"></span><br><span class="line">表达式2：想替换的值</span><br></pre></td></tr></table></figure>
+
+<p>查询商品名称和库存，库存数量在原有基础上加 10</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT NAME,stock+10 FROM product;</span><br></pre></td></tr></table></figure>
+
+<p>查询商品名称和库存，库存数量在原有基础上加 10。进行 null 值判断</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT NAME,IFNULL(stock,0)+10 FROM product;</span><br></pre></td></tr></table></figure>
+
+<h3 id="起别名"><a href="#起别名" class="headerlink" title="起别名"></a>起别名</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT 列名1,列名2,... AS 别名 FROM 表名;</span><br></pre></td></tr></table></figure>
+
+<p>查询商品名称和库存，库存数量在原有基础上加 10。进行 null 值判断。起别名为 getSum。</p>
+<p>输出名称将从 IFNULL(stock,0)+10 变为 getSum</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT NAME,IFNULL(stock,0)+10 AS getSum FROM product;</span><br><span class="line">SELECT NAME,IFNULL(stock,0)+10 getSum FROM product;</span><br></pre></td></tr></table></figure>
+
+<h3 id="查询-2"><a href="#查询-2" class="headerlink" title="查询"></a>查询</h3><h4 id="查询-条件查询"><a href="#查询-条件查询" class="headerlink" title="查询_条件查询"></a>查询_条件查询</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT 列名列表 FROM 表名 WHERE 条件;</span><br></pre></td></tr></table></figure>
+
+<p>查询库存大于 20 的商品信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product WHERE stock &gt; 20;</span><br></pre></td></tr></table></figure>
+
+<p>查询品牌为华为的商品信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product WHERE brand=&#x27;华为&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>查询金额在 4000 ~ 6000 之间的商品信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product WHERE price &gt;= 4000 AND price &lt;= 6000;</span><br><span class="line">SELECT * FROM product WHERE price BETWEEN 4000 AND 6000;</span><br></pre></td></tr></table></figure>
+
+<p>查询库存为 14、30、23 的商品信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product WHERE stock=14 OR stock=30 OR stock=23;</span><br><span class="line">SELECT * FROM product WHERE stock IN(14,30,23);</span><br></pre></td></tr></table></figure>
+
+<p>查询库存为 null 的商品信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product WHERE stock IS NULL;</span><br></pre></td></tr></table></figure>
+
+<p>查询库存不为 null 的商品信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product WHERE stock IS NOT NULL;</span><br></pre></td></tr></table></figure>
+
+<p>查询名称以小米为开头的商品信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product WHERE NAME LIKE &#x27;小米%&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>查询名称第二个字是为的商品信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product WHERE NAME LIKE &#x27;_为%&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>查询名称为四个字符的商品信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product WHERE NAME LIKE &#x27;____&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>查询名称中包含电脑的商品信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product WHERE NAME LIKE &#x27;%电脑%&#x27;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="查询-聚合函数"><a href="#查询-聚合函数" class="headerlink" title="查询_聚合函数"></a>查询_聚合函数</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT 函数名(列名) FROM 表名 [WHERE 条件];</span><br></pre></td></tr></table></figure>
+
+<p>计算 product 表中总记录条数</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT COUNT(*) FROM product;</span><br></pre></td></tr></table></figure>
+
+<p>获取最高价格</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT MAX(price) FROM product;</span><br></pre></td></tr></table></figure>
+
+<p>获取最低库存</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT MIN(stock) FROM product;</span><br></pre></td></tr></table></figure>
+
+<p>获取总库存数量</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT SUM(stock) FROM product;</span><br></pre></td></tr></table></figure>
+
+<p>获取品牌为苹果的总库存数量</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT SUM(stock) FROM product WHERE brand=&#x27;苹果&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>获取品牌为小米的平均商品价格</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT AVG(price) FROM product WHERE brand=&#x27;小米&#x27;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="查询-排序查询"><a href="#查询-排序查询" class="headerlink" title="查询_排序查询"></a>查询_排序查询</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT 列名 FROM 表名 </span><br><span class="line">[WHERE 条件]</span><br><span class="line">ORDER BY 列名1 排序方式1,列名2 排序方式2;</span><br></pre></td></tr></table></figure>
+
+<p>按照库存升序排序</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product ORDER BY stock ASC;</span><br></pre></td></tr></table></figure>
+
+<p>查询名称中包含手机的商品信息。按照金额降序排序</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product WHERE NAME LIKE &#x27;%手机%&#x27; ORDER BY price DESC;</span><br></pre></td></tr></table></figure>
+
+<p>按照金额升序排序，如果金额相同，按照库存降序排列</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product ORDER BY price ASC,stock DESC;</span><br></pre></td></tr></table></figure>
+
+<h4 id="查询-分组查询"><a href="#查询-分组查询" class="headerlink" title="查询_分组查询"></a>查询_分组查询</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT 列名 FROM 表名</span><br><span class="line">[WHERE 条件]</span><br><span class="line">GROUP BY 分组列名</span><br><span class="line">[HAVING 分组后条件过滤] </span><br><span class="line">[ORDER BY 排序列名 排序方式];</span><br></pre></td></tr></table></figure>
+
+<p>按照品牌分组，获取每组商品的总金额</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT brand,SUM(price) FROM product GROUP BY brand;</span><br></pre></td></tr></table></figure>
+
+<p>对金额大于 4000 元的商品，按照品牌分组，获取每组商品的总金额</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT brand,SUM(price) FROM product WHERE price &gt; 4000 GROUP BY brand;</span><br></pre></td></tr></table></figure>
+
+<p>对金额大于 4000 元的商品，按照品牌分组，获取每组商品的总金额，只显示总金额大于 7000 元的</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT brand,SUM(price) getSum FROM product WHERE price &gt; 4000 GROUP BY brand HAVING getSum &gt; 7000;</span><br></pre></td></tr></table></figure>
+
+<p>对金额大于 4000 元的商品，按照品牌分组，获取每组商品的总金额，只显示总金额大于 7000 元的、并按照总金额的降序排列</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT brand,SUM(price) getSum FROM product</span><br><span class="line">WHERE price &gt; 4000</span><br><span class="line">GROUP BY brand</span><br><span class="line">HAVING getSum &gt; 7000</span><br><span class="line">ORDER BY getSum DESC;</span><br></pre></td></tr></table></figure>
+
+<h4 id="查询-分页查询"><a href="#查询-分页查询" class="headerlink" title="查询_分页查询"></a>查询_分页查询</h4><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT 列名 FROM 表名 </span><br><span class="line">[WHERE 条件] </span><br><span class="line">[GROUP BY 分组列名] </span><br><span class="line">[HAVING 分组后条件过滤] </span><br><span class="line">[ORDER BY 排序列名 排序方式] </span><br><span class="line">LIMIT 当前页数,每页显示的条数;</span><br></pre></td></tr></table></figure>
+
+<p>公式：当前页数 &#x3D; (当前页数-1) * 每页显示的条数</p>
+<p>假设每页显示 3 条数据</p>
+<ul>
+<li><p>第1页：当前页数 &#x3D; (1-1) * 3</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product LIMIT 0,3;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第2页：当前页数 &#x3D; (2-1) * 3</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product LIMIT 3,3;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第3页 当前页数&#x3D;(3-1) * 3</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT * FROM product LIMIT 6,3;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="表关系"><a href="#表关系" class="headerlink" title="表关系"></a>表关系</h2><h3 id="一对一"><a href="#一对一" class="headerlink" title="一对一"></a>一对一</h3><p>创建 db3 数据库并使用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE DATABASE db3;</span><br><span class="line">USE db3;</span><br></pre></td></tr></table></figure>
+
+<p>创建 person 表</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE person(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT, -- 主键id</span><br><span class="line">NAME VARCHAR(20) -- 姓名</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO person VALUES (NULL,&#x27;张三&#x27;),(NULL,&#x27;李四&#x27;);</span><br></pre></td></tr></table></figure>
+
+<p>创建 card 表</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE card(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT, -- 主键id</span><br><span class="line">number VARCHAR(20) UNIQUE NOT NULL, -- 身份证号</span><br><span class="line">pid INT UNIQUE, -- 外键列</span><br><span class="line">CONSTRAINT cp_fk1 FOREIGN KEY (pid) REFERENCES person(id)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO card VALUES (NULL,&#x27;12345&#x27;,1),(NULL,&#x27;56789&#x27;,2);</span><br></pre></td></tr></table></figure>
+
+<h3 id="一对多"><a href="#一对多" class="headerlink" title="一对多"></a>一对多</h3><p>创建 user 表</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE USER(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT, -- 主键id</span><br><span class="line">NAME VARCHAR(20) -- 姓名</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO USER VALUES (NULL,&#x27;张三&#x27;),(NULL,&#x27;李四&#x27;);</span><br></pre></td></tr></table></figure>
+
+<p>创建 orderlist 表</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE orderlist(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT, -- 主键id</span><br><span class="line">number VARCHAR(20), -- 订单编号</span><br><span class="line">uid INT, -- 外键列</span><br><span class="line">CONSTRAINT ou_fk1 FOREIGN KEY (uid) REFERENCES USER(id)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO orderlist VALUES (NULL,&#x27;hm001&#x27;,1),(NULL,&#x27;hm002&#x27;,1),(NULL,&#x27;hm003&#x27;,2),(NULL,&#x27;hm004&#x27;,2);</span><br></pre></td></tr></table></figure>
+
+<p>创建 category 表</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE category(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT, -- 主键id</span><br><span class="line">NAME VARCHAR(10) -- 分类名称</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO category VALUES (NULL,&#x27;手机数码&#x27;),(NULL,&#x27;电脑办公&#x27;);</span><br></pre></td></tr></table></figure>
+
+<p>创建 product 表</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE product(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT, -- 主键id</span><br><span class="line">NAME VARCHAR(30), -- 商品名称</span><br><span class="line">cid INT, -- 外键列</span><br><span class="line">CONSTRAINT pc_fk1 FOREIGN KEY (cid) REFERENCES category(id)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO product VALUES (NULL,&#x27;华为P30&#x27;,1),(NULL,&#x27;小米note3&#x27;,1),(NULL,&#x27;联想电脑&#x27;,2),(NULL,&#x27;苹果电脑&#x27;,2);</span><br></pre></td></tr></table></figure>
+
+<h3 id="多对多"><a href="#多对多" class="headerlink" title="多对多"></a>多对多</h3><p>创建 student 表</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE student(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT, -- 主键id</span><br><span class="line">NAME VARCHAR(20) -- 学生姓名</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO student VALUES (NULL,&#x27;张三&#x27;),(NULL,&#x27;李四&#x27;);</span><br></pre></td></tr></table></figure>
+
+<p>创建 course 表</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE course(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT, -- 主键id</span><br><span class="line">NAME VARCHAR(10) -- 课程名称</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO course VALUES (NULL,&#x27;语文&#x27;),(NULL,&#x27;数学&#x27;);</span><br></pre></td></tr></table></figure>
+
+<p>创建中间表</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">CREATE TABLE stu_course(</span><br><span class="line">id INT PRIMARY KEY AUTO_INCREMENT, -- 主键id</span><br><span class="line">sid INT, -- 用于和 student 表中的 id 进行外键关联</span><br><span class="line">cid INT, -- 用于和 course 表中的 id 进行外键关联</span><br><span class="line">CONSTRAINT sc_fk1 FOREIGN KEY (sid) REFERENCES student(id), -- 添加外键约束</span><br><span class="line">CONSTRAINT sc_fk2 FOREIGN KEY (cid) REFERENCES course(id) -- 添加外键约束</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>添加数据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">INSERT INTO stu_course VALUES (NULL,1,1),(NULL,1,2),(NULL,2,1),(NULL,2,2);</span><br></pre></td></tr></table></figure>
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">Ed3n</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2024/04/23/Mysql%20%E8%AF%AD%E6%B3%95/">http://example.com/2024/04/23/Mysql%20%E8%AF%AD%E6%B3%95/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">Ed3n's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL</a></div><div class="post_share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/04/15/JavaScript%20%E6%BC%8F%E6%B4%9E/" title="JavaScript 漏洞学习记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">JavaScript 漏洞学习记录</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Ed3n</div><div class="author-info__description">欢迎光临，我的朋友</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">17</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">18</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">10</div></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E5%87%86%E5%A4%87%EF%BC%9A"><span class="toc-number">1.</span> <span class="toc-text">前置准备：</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95"><span class="toc-number"></span> <span class="toc-text">基础语法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%80%9A%E9%85%8D%E7%AC%A6"><span class="toc-number">1.</span> <span class="toc-text">通配符</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SELECT-%E8%AF%AD%E5%8F%A5"><span class="toc-number">2.</span> <span class="toc-text">SELECT 语句</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95"><span class="toc-number">2.1.</span> <span class="toc-text">语法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SELECT-DISTINCT-%E8%AF%AD%E5%8F%A5"><span class="toc-number">3.</span> <span class="toc-text">SELECT DISTINCT 语句</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95-1"><span class="toc-number">3.1.</span> <span class="toc-text">语法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#WHERE-%E5%AD%90%E5%8F%A5"><span class="toc-number">4.</span> <span class="toc-text">WHERE 子句</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95-2"><span class="toc-number">4.1.</span> <span class="toc-text">语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E5%AE%9E%E4%BE%8B"><span class="toc-number">4.2.</span> <span class="toc-text">简单实例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AD%89%E4%BA%8E%E6%9D%A1%E4%BB%B6%EF%BC%9A"><span class="toc-number">4.2.1.</span> <span class="toc-text">等于条件：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%8D%E7%AD%89%E4%BA%8E%E6%9D%A1%E4%BB%B6%EF%BC%9A"><span class="toc-number">4.2.2.</span> <span class="toc-text">不等于条件：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%A7%E4%BA%8E%E6%9D%A1%E4%BB%B6"><span class="toc-number">4.2.3.</span> <span class="toc-text">大于条件:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B0%8F%E4%BA%8E%E6%9D%A1%E4%BB%B6"><span class="toc-number">4.2.4.</span> <span class="toc-text">小于条件:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%A7%E4%BA%8E%E7%AD%89%E4%BA%8E%E6%9D%A1%E4%BB%B6"><span class="toc-number">4.2.5.</span> <span class="toc-text">大于等于条件:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B0%8F%E4%BA%8E%E7%AD%89%E4%BA%8E%E6%9D%A1%E4%BB%B6"><span class="toc-number">4.2.6.</span> <span class="toc-text">小于等于条件:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E6%9D%A1%E4%BB%B6%EF%BC%88AND%E3%80%81OR%EF%BC%89"><span class="toc-number">4.2.7.</span> <span class="toc-text">组合条件（AND、OR）:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E7%B3%8A%E5%8C%B9%E9%85%8D%E6%9D%A1%E4%BB%B6%EF%BC%88LIKE%EF%BC%89"><span class="toc-number">4.2.8.</span> <span class="toc-text">模糊匹配条件（LIKE）:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#IN-%E6%9D%A1%E4%BB%B6"><span class="toc-number">4.2.9.</span> <span class="toc-text">IN 条件:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#NOT-%E6%9D%A1%E4%BB%B6"><span class="toc-number">4.2.10.</span> <span class="toc-text">NOT 条件:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#BETWEEN-%E6%9D%A1%E4%BB%B6"><span class="toc-number">4.2.11.</span> <span class="toc-text">BETWEEN 条件:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#IS-NULL-%E6%9D%A1%E4%BB%B6"><span class="toc-number">4.2.12.</span> <span class="toc-text">IS NULL 条件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#IS-NOT-NULL-%E6%9D%A1%E4%BB%B6"><span class="toc-number">4.2.13.</span> <span class="toc-text">IS NOT NULL 条件:</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#LIKE-%E5%AD%90%E5%8F%A5"><span class="toc-number">5.</span> <span class="toc-text">LIKE 子句</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95-3"><span class="toc-number">5.1.</span> <span class="toc-text">语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B"><span class="toc-number">5.2.</span> <span class="toc-text">实例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%99%BE%E5%88%86%E5%8F%B7%E9%80%9A%E9%85%8D%E7%AC%A6-%EF%BC%9A"><span class="toc-number">5.2.1.</span> <span class="toc-text">百分号通配符 % ：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%8B%E5%88%92%E7%BA%BF%E9%80%9A%E9%85%8D%E7%AC%A6-%EF%BC%9A"><span class="toc-number">5.2.2.</span> <span class="toc-text">下划线通配符 _ ：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%84%E5%90%88%E4%BD%BF%E7%94%A8-%E5%92%8C-%EF%BC%9A"><span class="toc-number">5.2.3.</span> <span class="toc-text">组合使用 % 和 _ ：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%8D%E5%8C%BA%E5%88%86%E5%A4%A7%E5%B0%8F%E5%86%99%E7%9A%84%E5%8C%B9%E9%85%8D%EF%BC%9A"><span class="toc-number">5.2.4.</span> <span class="toc-text">不区分大小写的匹配：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ORDER-BY-%E8%AF%AD%E5%8F%A5"><span class="toc-number">6.</span> <span class="toc-text">ORDER BY 语句</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95-4"><span class="toc-number">6.1.</span> <span class="toc-text">语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B-1"><span class="toc-number">6.2.</span> <span class="toc-text">实例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%95%E5%88%97%E6%8E%92%E5%BA%8F%EF%BC%9A"><span class="toc-number">6.2.1.</span> <span class="toc-text">单列排序：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%9A%E5%88%97%E6%8E%92%E5%BA%8F%EF%BC%9A"><span class="toc-number">6.2.2.</span> <span class="toc-text">多列排序：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%95%B0%E5%AD%97%E8%A1%A8%E7%A4%BA%E5%88%97%E7%9A%84%E4%BD%8D%E7%BD%AE%EF%BC%9A"><span class="toc-number">6.2.3.</span> <span class="toc-text">使用数字表示列的位置：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%8E%92%E5%BA%8F%EF%BC%9A"><span class="toc-number">6.2.4.</span> <span class="toc-text">使用表达式排序：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-NULLS-FIRST-%E6%88%96-NULLS-LAST-%E5%A4%84%E7%90%86-NULL-%E5%80%BC%EF%BC%9A"><span class="toc-number">6.2.5.</span> <span class="toc-text">使用 NULLS FIRST 或 NULLS LAST 处理 NULL 值：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#UPDATE-%E8%AF%AD%E5%8F%A5"><span class="toc-number">7.</span> <span class="toc-text">UPDATE 语句</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95-5"><span class="toc-number">7.1.</span> <span class="toc-text">语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B-2"><span class="toc-number">7.2.</span> <span class="toc-text">实例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E5%8D%95%E4%B8%AA%E5%88%97%E7%9A%84%E5%80%BC%EF%BC%9A"><span class="toc-number">7.2.1.</span> <span class="toc-text">更新单个列的值：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E5%A4%9A%E4%B8%AA%E5%88%97%E7%9A%84%E5%80%BC%EF%BC%9A"><span class="toc-number">7.2.2.</span> <span class="toc-text">更新多个列的值：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%9B%B4%E6%96%B0%E5%80%BC%EF%BC%9A"><span class="toc-number">7.2.3.</span> <span class="toc-text">使用表达式更新值：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E7%AC%A6%E5%90%88%E6%9D%A1%E4%BB%B6%E7%9A%84%E6%89%80%E6%9C%89%E8%A1%8C%EF%BC%9A"><span class="toc-number">7.2.4.</span> <span class="toc-text">更新符合条件的所有行：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E4%BD%BF%E7%94%A8%E5%AD%90%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%80%BC%EF%BC%9A"><span class="toc-number">7.2.5.</span> <span class="toc-text">更新使用子查询的值：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DELETE-%E8%AF%AD%E5%8F%A5"><span class="toc-number">8.</span> <span class="toc-text">DELETE 语句</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95-6"><span class="toc-number">8.1.</span> <span class="toc-text">语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B-3"><span class="toc-number">8.2.</span> <span class="toc-text">实例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E7%AC%A6%E5%90%88%E6%9D%A1%E4%BB%B6%E7%9A%84%E8%A1%8C%EF%BC%9A"><span class="toc-number">8.2.1.</span> <span class="toc-text">删除符合条件的行：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E6%89%80%E6%9C%89%E8%A1%8C%EF%BC%9A"><span class="toc-number">8.2.2.</span> <span class="toc-text">删除所有行：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E5%AD%90%E6%9F%A5%E8%AF%A2%E5%88%A0%E9%99%A4%E7%AC%A6%E5%90%88%E6%9D%A1%E4%BB%B6%E7%9A%84%E8%A1%8C%EF%BC%9A"><span class="toc-number">8.2.3.</span> <span class="toc-text">使用子查询删除符合条件的行：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#UNION-%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="toc-number">9.</span> <span class="toc-text">UNION 操作符</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%8F%E8%BF%B0"><span class="toc-number">9.1.</span> <span class="toc-text">描述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95-7"><span class="toc-number">9.2.</span> <span class="toc-text">语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B-4"><span class="toc-number">9.3.</span> <span class="toc-text">实例</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E7%9A%84-UNION-%E6%93%8D%E4%BD%9C%EF%BC%9A"><span class="toc-number">9.3.1.</span> <span class="toc-text">基本的 UNION 操作：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E8%BF%87%E6%BB%A4%E6%9D%A1%E4%BB%B6%E7%9A%84-UNION%EF%BC%9A"><span class="toc-number">9.3.2.</span> <span class="toc-text">使用过滤条件的 UNION：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#UNION-%E6%93%8D%E4%BD%9C%E4%B8%AD%E7%9A%84%E5%88%97%E6%95%B0%E5%92%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%BF%85%E9%A1%BB%E7%9B%B8%E5%90%8C%EF%BC%9A"><span class="toc-number">9.3.3.</span> <span class="toc-text">UNION 操作中的列数和数据类型必须相同：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8-UNION-ALL-%E4%B8%8D%E5%8E%BB%E9%99%A4%E9%87%8D%E5%A4%8D%E8%A1%8C%EF%BC%9A"><span class="toc-number">9.3.4.</span> <span class="toc-text">使用 UNION ALL 不去除重复行：</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ALTER-TABLE-%E5%91%BD%E4%BB%A4"><span class="toc-number">10.</span> <span class="toc-text">ALTER TABLE 命令</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95-8"><span class="toc-number">10.1.</span> <span class="toc-text">语法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0%E5%88%97"><span class="toc-number">10.1.1.</span> <span class="toc-text">添加列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E5%88%97%E7%9A%84%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">10.1.2.</span> <span class="toc-text">修改列的数据类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E5%88%97%E5%90%8D"><span class="toc-number">10.1.3.</span> <span class="toc-text">修改列名</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E5%88%97"><span class="toc-number">10.1.4.</span> <span class="toc-text">删除列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0-PRIMARY-KEY"><span class="toc-number">10.1.5.</span> <span class="toc-text">添加 PRIMARY KEY</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0-FOREIGN-KEY"><span class="toc-number">10.1.6.</span> <span class="toc-text">添加 FOREIGN KEY</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E8%A1%A8%E5%90%8D"><span class="toc-number">10.1.7.</span> <span class="toc-text">修改表名</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%AB%E5%90%8D"><span class="toc-number">11.</span> <span class="toc-text">别名</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SQL-%E5%88%AB%E5%90%8D"><span class="toc-number">12.</span> <span class="toc-text">SQL 别名</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%97%E7%9A%84-SQL-%E5%88%AB%E5%90%8D%E8%AF%AD%E6%B3%95"><span class="toc-number">12.1.</span> <span class="toc-text">列的 SQL 别名语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A1%A8%E7%9A%84-SQL-%E5%88%AB%E5%90%8D%E8%AF%AD%E6%B3%95"><span class="toc-number">12.2.</span> <span class="toc-text">表的 SQL 别名语法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.</span> <span class="toc-text">约束</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%97%E7%BA%A7%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.</span> <span class="toc-text">列级约束</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#NOT-NULL-%E9%9D%9E%E7%A9%BA%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.1.</span> <span class="toc-text">NOT NULL 非空约束</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#CREATE-TABLE-%E6%97%B6%E6%B7%BB%E5%8A%A0-NOT-NULL-%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.1.1.</span> <span class="toc-text">CREATE TABLE 时添加 NOT NULL 约束</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#ALTER-TABLE-%E6%97%B6%E6%B7%BB%E5%8A%A0-NOT-NULL-%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.1.2.</span> <span class="toc-text">ALTER TABLE 时添加 NOT NULL 约束</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%92%A4%E9%94%80-NOT-NULL-%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.1.3.</span> <span class="toc-text">撤销 NOT NULL 约束</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DEFAULT-%E9%BB%98%E8%AE%A4%E5%80%BC%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.2.</span> <span class="toc-text">DEFAULT 默认值约束</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#UNIQUE-%E5%94%AF%E4%B8%80%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.3.</span> <span class="toc-text">UNIQUE 唯一约束</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#CREATE-TABLE-%E6%97%B6%E7%9A%84-UNIQUE-%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.3.1.</span> <span class="toc-text">CREATE TABLE 时的 UNIQUE 约束</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#ALTER-TABLE-%E6%97%B6%E7%9A%84-UNIQUE-%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.3.2.</span> <span class="toc-text">ALTER TABLE 时的 UNIQUE 约束</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%A0%E9%99%A4-UNIQUE-%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.3.3.</span> <span class="toc-text">删除 UNIQUE 约束</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#PRIMARY-KEY-%E4%B8%BB%E9%94%AE%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.4.</span> <span class="toc-text">PRIMARY KEY 主键约束</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#CREATE-TABLE-%E6%97%B6%E7%9A%84-PRIMARY-KEY-%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.4.1.</span> <span class="toc-text">CREATE TABLE 时的 PRIMARY KEY 约束</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#ALTER-TABLE-%E6%97%B6%E7%9A%84-PRIMARY-KEY-%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.4.2.</span> <span class="toc-text">ALTER TABLE 时的 PRIMARY KEY 约束</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%A0%E9%99%A4-PRIMARY-KEY-%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.4.3.</span> <span class="toc-text">删除 PRIMARY KEY 约束</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#PRIMARY-KEY-AUTO-INCREMENT-%E4%B8%BB%E9%94%AE%E8%87%AA%E5%A2%9E%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.4.4.</span> <span class="toc-text">PRIMARY KEY AUTO_INCREMENT 主键自增约束</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CHECK-%E6%A3%80%E6%9F%A5%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.1.5.</span> <span class="toc-text">CHECK 检查约束</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A1%A8%E7%BA%A7%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.2.</span> <span class="toc-text">表级约束</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#PRIMARY-KEY"><span class="toc-number">13.2.1.</span> <span class="toc-text">PRIMARY KEY</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#UNIQUE"><span class="toc-number">13.2.2.</span> <span class="toc-text">UNIQUE</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CHECK"><span class="toc-number">13.2.3.</span> <span class="toc-text">CHECK</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#FOREIGN-KEY-%E5%A4%96%E9%94%AE%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.2.4.</span> <span class="toc-text">FOREIGN KEY 外键约束</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#CREATE-TABLE-%E6%97%B6%E7%9A%84-SQL-FOREIGN-KEY-%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.2.4.1.</span> <span class="toc-text">CREATE TABLE 时的 SQL FOREIGN KEY 约束</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#ALTER-TABLE-%E6%97%B6%E7%9A%84-SQL-FOREIGN-KEY-%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.2.4.2.</span> <span class="toc-text">ALTER TABLE 时的 SQL FOREIGN KEY 约束</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%88%A0%E9%99%A4-FOREIGN-KEY-%E7%BA%A6%E6%9D%9F"><span class="toc-number">13.2.4.3.</span> <span class="toc-text">删除 FOREIGN KEY 约束</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%A4%96%E9%94%AE%E7%BA%A7%E8%81%94%E6%93%8D%E4%BD%9C"><span class="toc-number">13.2.4.4.</span> <span class="toc-text">外键级联操作</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%9E%E6%8E%A5%EF%BC%88JOIN%EF%BC%89"><span class="toc-number">14.</span> <span class="toc-text">连接（JOIN）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E5%87%86%E5%A4%87"><span class="toc-number">14.1.</span> <span class="toc-text">前置准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#INNER-JOIN-%E5%86%85%E8%BF%9E%E6%8E%A5"><span class="toc-number">14.2.</span> <span class="toc-text">INNER JOIN 内连接</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95%EF%BC%9A"><span class="toc-number">14.2.1.</span> <span class="toc-text">语法：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B-5"><span class="toc-number">14.2.2.</span> <span class="toc-text">实例</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9A%90%E5%BC%8F%E5%86%85%E8%BF%9E%E6%8E%A5"><span class="toc-number">14.2.3.</span> <span class="toc-text">隐式内连接</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95-9"><span class="toc-number">14.2.3.1.</span> <span class="toc-text">语法</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B-6"><span class="toc-number">14.2.3.2.</span> <span class="toc-text">实例</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%96%E8%BF%9E%E6%8E%A5"><span class="toc-number">14.3.</span> <span class="toc-text">外连接</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#LEFT-JOIN-%E5%B7%A6%E5%A4%96%E8%BF%9E%E6%8E%A5"><span class="toc-number">14.3.1.</span> <span class="toc-text">LEFT JOIN 左外连接</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95-10"><span class="toc-number">14.3.1.1.</span> <span class="toc-text">语法</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B-7"><span class="toc-number">14.3.1.2.</span> <span class="toc-text">实例</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#RIGHT-JOIN-%E5%8F%B3%E5%A4%96%E8%BF%9E%E6%8E%A5"><span class="toc-number">14.3.2.</span> <span class="toc-text">RIGHT JOIN 右外连接</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E8%AF%AD%E6%B3%95-11"><span class="toc-number">14.3.2.1.</span> <span class="toc-text">语法</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B-8"><span class="toc-number">14.3.2.2.</span> <span class="toc-text">实例</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FULL-OUTER-JOIN%EF%BC%88MySQL-%E4%B8%AD%E4%B8%8D%E6%94%AF%E6%8C%81-FULL-OUTER-JOIN%EF%BC%89"><span class="toc-number">14.4.</span> <span class="toc-text">FULL OUTER JOIN（MySQL 中不支持 FULL OUTER JOIN）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%90%E6%9F%A5%E8%AF%A2"><span class="toc-number">15.</span> <span class="toc-text">子查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C%E6%98%AF%E5%8D%95%E8%A1%8C%E5%8D%95%E5%88%97%E7%9A%84"><span class="toc-number">15.0.1.</span> <span class="toc-text">结果是单行单列的</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C%E6%98%AF%E5%A4%9A%E8%A1%8C%E5%8D%95%E5%88%97%E7%9A%84"><span class="toc-number">15.0.2.</span> <span class="toc-text">结果是多行单列的</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%93%E6%9E%9C%E6%98%AF%E5%A4%9A%E8%A1%8C%E5%A4%9A%E5%88%97%E7%9A%84"><span class="toc-number">15.0.3.</span> <span class="toc-text">结果是多行多列的</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">16.</span> <span class="toc-text">数据库</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2"><span class="toc-number">16.1.</span> <span class="toc-text">查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E6%89%80%E6%9C%89%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">16.1.1.</span> <span class="toc-text">查询所有数据库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E6%9F%90%E4%B8%AA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%88%9B%E5%BB%BA%E8%AF%AD%E5%8F%A5"><span class="toc-number">16.1.2.</span> <span class="toc-text">查询某个数据库的创建语句</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA"><span class="toc-number">16.2.</span> <span class="toc-text">创建</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%87%E5%87%86%E8%AF%AD%E6%B3%95"><span class="toc-number">16.2.1.</span> <span class="toc-text">标准语法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%8C%E5%88%A4%E6%96%AD%E3%80%81%E5%A6%82%E6%9E%9C%E4%B8%8D%E5%AD%98%E5%9C%A8%E5%88%99%E5%88%9B%E5%BB%BA"><span class="toc-number">16.2.2.</span> <span class="toc-text">创建数据库，判断、如果不存在则创建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E3%80%81%E5%B9%B6%E6%8C%87%E5%AE%9A%E5%AD%97%E7%AC%A6%E9%9B%86"><span class="toc-number">16.2.3.</span> <span class="toc-text">创建数据库、并指定字符集</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9"><span class="toc-number">16.3.</span> <span class="toc-text">修改</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%97%E7%AC%A6%E9%9B%86"><span class="toc-number">16.3.1.</span> <span class="toc-text">修改数据库的字符集</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A0%E9%99%A4"><span class="toc-number">16.4.</span> <span class="toc-text">删除</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">16.4.1.</span> <span class="toc-text">删除数据库</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E6%95%B0%E6%8D%AE%E5%BA%93%EF%BC%8C%E5%88%A4%E6%96%AD%E3%80%81%E5%A6%82%E6%9E%9C%E5%AD%98%E5%9C%A8%E5%88%99%E5%88%A0%E9%99%A4"><span class="toc-number">16.4.2.</span> <span class="toc-text">删除数据库，判断、如果存在则删除</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8"><span class="toc-number">16.5.</span> <span class="toc-text">使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%87%E5%87%86%E8%AF%AD%E6%B3%95-1"><span class="toc-number">16.5.1.</span> <span class="toc-text">标准语法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E5%BD%93%E5%89%8D%E4%BD%BF%E7%94%A8%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">16.5.2.</span> <span class="toc-text">查询当前使用的数据库</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E8%A1%A8"><span class="toc-number">17.</span> <span class="toc-text">数据表</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2-1"><span class="toc-number">17.1.</span> <span class="toc-text">查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E6%89%80%E6%9C%89%E6%95%B0%E6%8D%AE%E8%A1%A8"><span class="toc-number">17.1.1.</span> <span class="toc-text">查询数据库中所有数据表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E8%A1%A8%E7%BB%93%E6%9E%84"><span class="toc-number">17.1.2.</span> <span class="toc-text">查询表结构</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E6%95%B0%E6%8D%AE%E8%A1%A8%E7%9A%84%E5%AD%97%E7%AC%A6%E9%9B%86"><span class="toc-number">17.1.3.</span> <span class="toc-text">查询数据表的字符集</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA-1"><span class="toc-number">17.2.</span> <span class="toc-text">创建</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E8%A1%A8"><span class="toc-number">17.2.1.</span> <span class="toc-text">创建数据表</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0"><span class="toc-number">17.3.</span> <span class="toc-text">添加</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%99%E8%A1%A8%E6%B7%BB%E5%8A%A0%E5%88%97"><span class="toc-number">17.3.1.</span> <span class="toc-text">给表添加列</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9-1"><span class="toc-number">17.4.</span> <span class="toc-text">修改</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E8%A1%A8%E5%90%8D-1"><span class="toc-number">17.4.1.</span> <span class="toc-text">修改表名</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E8%A1%A8%E7%9A%84%E5%AD%97%E7%AC%A6%E9%9B%86"><span class="toc-number">17.4.2.</span> <span class="toc-text">修改表的字符集</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E8%A1%A8%E4%B8%AD%E5%88%97%E7%9A%84%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">17.4.3.</span> <span class="toc-text">修改表中列的数据类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E8%A1%A8%E4%B8%AD%E5%88%97%E7%9A%84%E5%90%8D%E7%A7%B0%E5%92%8C%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">17.4.4.</span> <span class="toc-text">修改表中列的名称和数据类型</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A0%E9%99%A4-1"><span class="toc-number">17.5.</span> <span class="toc-text">删除</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E8%A1%A8%E4%B8%AD%E7%9A%84%E5%88%97"><span class="toc-number">17.5.1.</span> <span class="toc-text">删除表中的列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E8%A1%A8"><span class="toc-number">17.5.2.</span> <span class="toc-text">删除表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A0%E9%99%A4%E8%A1%A8%EF%BC%8C%E5%88%A4%E6%96%AD%E3%80%81%E5%A6%82%E6%9E%9C%E5%AD%98%E5%9C%A8%E5%88%99%E5%88%A0%E9%99%A4"><span class="toc-number">17.5.3.</span> <span class="toc-text">删除表，判断、如果存在则删除</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%97"><span class="toc-number">18.</span> <span class="toc-text">列</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B7%BB%E5%8A%A0-1"><span class="toc-number">18.1.</span> <span class="toc-text">添加</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%99%E6%8C%87%E5%AE%9A%E5%88%97%E6%B7%BB%E5%8A%A0%E6%95%B0%E6%8D%AE"><span class="toc-number">18.1.1.</span> <span class="toc-text">给指定列添加数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%BB%99%E5%85%A8%E9%83%A8%E5%88%97%E6%B7%BB%E5%8A%A0%E6%95%B0%E6%8D%AE"><span class="toc-number">18.1.2.</span> <span class="toc-text">给全部列添加数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%B9%E9%87%8F%E6%B7%BB%E5%8A%A0%E6%89%80%E6%9C%89%E5%88%97%E6%95%B0%E6%8D%AE"><span class="toc-number">18.1.3.</span> <span class="toc-text">批量添加所有列数据</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9-2"><span class="toc-number">18.2.</span> <span class="toc-text">修改</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A0%E9%99%A4-2"><span class="toc-number">18.3.</span> <span class="toc-text">删除</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87"><span class="toc-number">18.4.</span> <span class="toc-text">查询数据准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2-%E6%9F%A5%E8%AF%A2%E5%85%A8%E9%83%A8"><span class="toc-number">18.5.</span> <span class="toc-text">查询_查询全部</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E5%85%A8%E9%83%A8%E6%95%B0%E6%8D%AE"><span class="toc-number">18.5.1.</span> <span class="toc-text">查询全部数据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2%E6%8C%87%E5%AE%9A%E5%88%97"><span class="toc-number">18.5.2.</span> <span class="toc-text">查询指定列</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8E%BB%E9%99%A4%E9%87%8D%E5%A4%8D%E6%9F%A5%E8%AF%A2"><span class="toc-number">18.5.3.</span> <span class="toc-text">去除重复查询</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A1%E7%AE%97%E5%88%97%E7%9A%84%E5%80%BC"><span class="toc-number">18.6.</span> <span class="toc-text">计算列的值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B5%B7%E5%88%AB%E5%90%8D"><span class="toc-number">18.7.</span> <span class="toc-text">起别名</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2-2"><span class="toc-number">18.8.</span> <span class="toc-text">查询</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2-%E6%9D%A1%E4%BB%B6%E6%9F%A5%E8%AF%A2"><span class="toc-number">18.8.1.</span> <span class="toc-text">查询_条件查询</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2-%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0"><span class="toc-number">18.8.2.</span> <span class="toc-text">查询_聚合函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2-%E6%8E%92%E5%BA%8F%E6%9F%A5%E8%AF%A2"><span class="toc-number">18.8.3.</span> <span class="toc-text">查询_排序查询</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2-%E5%88%86%E7%BB%84%E6%9F%A5%E8%AF%A2"><span class="toc-number">18.8.4.</span> <span class="toc-text">查询_分组查询</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9F%A5%E8%AF%A2-%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2"><span class="toc-number">18.8.5.</span> <span class="toc-text">查询_分页查询</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%A8%E5%85%B3%E7%B3%BB"><span class="toc-number">19.</span> <span class="toc-text">表关系</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E5%AF%B9%E4%B8%80"><span class="toc-number">19.1.</span> <span class="toc-text">一对一</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E5%AF%B9%E5%A4%9A"><span class="toc-number">19.2.</span> <span class="toc-text">一对多</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E5%AF%B9%E5%A4%9A"><span class="toc-number">19.3.</span> <span class="toc-text">多对多</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/04/23/Mysql%20%E8%AF%AD%E6%B3%95/" title="MySQL 语法学习记录">MySQL 语法学习记录</a><time datetime="2024-04-22T16:00:00.000Z" title="发表于 2024-04-23 00:00:00">2024-04-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/04/15/JavaScript%20%E6%BC%8F%E6%B4%9E/" title="JavaScript 漏洞学习记录">JavaScript 漏洞学习记录</a><time datetime="2024-04-14T16:00:00.000Z" title="发表于 2024-04-15 00:00:00">2024-04-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/04/11/Javascript%20%E8%AF%AD%E6%B3%95/" title="JavaScript 学习记录">JavaScript 学习记录</a><time datetime="2024-04-10T16:00:00.000Z" title="发表于 2024-04-11 00:00:00">2024-04-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/04/05/Java%20%E4%BD%9C%E4%B8%9A%202/" title="Java 作业 02">Java 作业 02</a><time datetime="2024-04-04T16:00:00.000Z" title="发表于 2024-04-05 00:00:00">2024-04-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/04/04/HTML%20CSS%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/" title="HTML CSS 学习记录">HTML CSS 学习记录</a><time datetime="2024-04-03T16:00:00.000Z" title="发表于 2024-04-04 00:00:00">2024-04-04</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://s2.loli.net/2024/03/16/lDdKRUXWtLcZJP8.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By Ed3n</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/fireworks.min.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
