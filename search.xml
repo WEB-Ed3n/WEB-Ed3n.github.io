@@ -703,7 +703,7 @@
   <entry>
     <title>My CMSMS Walkthrough</title>
     <url>/2025/03/19/MyCMSMS/</url>
-    <content><![CDATA[<h1 id="My-CMSMS-Walkthrough"><a href="#My-CMSMS-Walkthrough" class="headerlink" title="My CMSMS Walkthrough"></a>My CMSMS Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：[My CMSMS: 1](<a href="https://www.vulnhub.com/entry/my-cmsms-1,498/">My CMSMS: 1 ~ VulnHub</a>)</p>
+    <content><![CDATA[<h1 id="My-CMSMS-Walkthrough"><a href="#My-CMSMS-Walkthrough" class="headerlink" title="My CMSMS Walkthrough"></a>My CMSMS Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/my-cmsms-1,498/">My CMSMS: 1</a></p>
 <p><img src="/picture/image-20250325194806444.png" alt="image-20250325194806444"></p>
 <h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>先做全端口扫描</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 172.16.33.103</span><br></pre></td></tr></table></figure>
