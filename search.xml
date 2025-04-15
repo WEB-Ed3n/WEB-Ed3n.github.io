@@ -1914,4 +1914,90 @@
         <tag>vulnhub</tag>
       </tags>
   </entry>
+  <entry>
+    <title>SickOs 1.1 Walkthrough</title>
+    <url>/2025/04/15/SickOs%201/</url>
+    <content><![CDATA[<h1 id="SickOs-1-1-Walkthrough"><a href="#SickOs-1-1-Walkthrough" class="headerlink" title="SickOs 1.1 Walkthrough"></a>SickOs 1.1 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/sickos-11,132/">SickOs: 1.1</a></p>
+<p><img src="/picture/image-20250415184842698.png" alt="image-20250415184842698"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>确定存活的主机</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sP 192.168.186.0/24</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250415155934060.png" alt="image-20250415155934060"></p>
+<p>对目标 IP 进行端口发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p- 192.168.186.153</span><br></pre></td></tr></table></figure>
+
+<p>发现开放 22，3128 端口</p>
+<p><img src="/picture/image-20250415160011982.png" alt="image-20250415160011982"></p>
+<p>对开放的端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p 22,3128 -A 192.168.186.153 </span><br></pre></td></tr></table></figure>
+
+<p>22 和 3128 端口都没有什么可以直接利用的漏洞，</p>
+<p><img src="/picture/image-20250415160104311.png" alt="image-20250415160104311"></p>
+<p>3128 端口是作为代理使用的，所以想访问 80 端口必须走 3128 端口代理，使用代理对 80 端口进行目录扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://192.168.186.153/ --proxy=http://192.168.186.153:3128/</span><br></pre></td></tr></table></figure>
+
+<p>发现 &#x2F;connect 和 &#x2F;robots.txt 目录</p>
+<p><img src="/picture/image-20250415160618029.png" alt="image-20250415160618029"></p>
+<p>开启 Firefox 全局代理，所有请求都要通过 3128 代理转发</p>
+<p><img src="/picture/image-20250415160839856.png" alt="image-20250415160839856"></p>
+<p>访问 80 端口主页面，没有泄露任何信息</p>
+<p><img src="/picture/image-20250415161045216.png" alt="image-20250415161045216"></p>
+<p>访问 connect 发现是谜语</p>
+<p><img src="/picture/image-20250415165355072.png" alt="image-20250415165355072"></p>
+<p>访问 robots.txt ，会发现除了 80 端口根目录外，还有 &#x2F;wolfcms 也是 Disallow 的</p>
+<p><img src="/picture/image-20250415161159986.png" alt="image-20250415161159986"></p>
+<p>访问，是 Wolf 的主目录</p>
+<p><img src="/picture/image-20250415165521729.png" alt="image-20250415165521729"></p>
+<p>对 WolfCMS 进行进一步扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://192.168.186.153/wolfcms --proxy=http://192.168.186.153:3128/</span><br></pre></td></tr></table></figure>
+
+<p>其中 20B 大小的内容是空的</p>
+<p><img src="/picture/image-20250415165848811.png" alt="image-20250415165848811"></p>
+<p>在 &#x2F;wolfcms&#x2F;docs&#x2F;updating.txt 文件中可以发现 Wolf CMS 版本更新至 0.8.2 </p>
+<p><img src="/picture/image-20250415170001718.png" alt="image-20250415170001718"></p>
+<p>0.8.2 后台存在文件上传漏洞，但需要登陆后台，幸运的是，弱口令直接试出来了，是 admin&#x2F;admin</p>
+<p><img src="/picture/image-20250415170207828.png" alt="image-20250415170207828"></p>
+<p>可以直接在 Files 处没有限制的上传文件，这里上传的是 kali 自带的更改 ip 和 port 后的 php-reverse-shell.php </p>
+<p>从标题中不难发现，上传至 public 目录</p>
+<p><img src="/picture/image-20250415170809740.png" alt="image-20250415170809740"></p>
+<p>成功上传</p>
+<p><img src="/picture/image-20250415170900207.png" alt="image-20250415170900207"></p>
+<p>kali 开启 nc 监听，点击访问 php 文件，即可接收到反弹回来的 shell ，并将其升级为 TTY shell</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python -c &quot;import pty;pty.spawn(&#x27;/bin/bash&#x27;)&quot;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250415171146164.png" alt="image-20250415171146164"></p>
+<p>接下来是提权，通过 <code>netstat -tln</code> 发现目标主机运行了 3306 端口</p>
+<p><img src="/picture/image-20250415171908364.png" alt="image-20250415171908364"></p>
+<p>在 WolfCMS 的 config.php 中可以发现 MySQL 的账号和密码</p>
+<p><img src="/picture/image-20250415172057575.png" alt="image-20250415172057575"></p>
+<p>登陆目标主机 mysql 服务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mysql -h localhost -u root -p</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250415172200514.png" alt="image-20250415172200514"></p>
+<p>可惜查看一圈并没有泄露信息，由于开放 SSH 服务，我们可以考虑尝试密码喷洒，那就要知道用户名，在 &#x2F;etc&#x2F;passwd 中找到已登录的用户名</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">www-data@SickOs:/var/www$ cat /etc/passwd | grep bash</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">sickos:x:1000:1000:sickos,,,:/home/sickos:/bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>用户名是 sickos ，尝试 SSH 远程登陆账户</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh sickos@192.168.186.153</span><br></pre></td></tr></table></figure>
+
+<p>成功登陆</p>
+<p><img src="/picture/image-20250415183135168.png" alt="image-20250415183135168"></p>
+<p>发现 sickos 可以使用 sudo 执行所有命令</p>
+<p><img src="/picture/image-20250415183317566.png" alt="image-20250415183317566"></p>
+<p>使用如下命令提权</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo sudo /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>提权成功</p>
+<p><img src="/picture/image-20250415183426600.png" alt="image-20250415183426600"></p>
+<p>获得 flag</p>
+<p><img src="/picture/image-20250415183518567.png" alt="image-20250415183518567"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
+      </tags>
+  </entry>
 </search>
