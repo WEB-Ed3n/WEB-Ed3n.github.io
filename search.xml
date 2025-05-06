@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Resolute Record</title>
+    <title>Active Walkthrough</title>
     <url>/2025/05/05/Active/</url>
     <content><![CDATA[<h1 id="Active-Walkthrough"><a href="#Active-Walkthrough" class="headerlink" title="Active Walkthrough"></a>Active Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://app.hackthebox.com/machines/148/information">Active</a></p>
 <p>Active is an easy to medium difficulty machine, which features two very prevalent techniques to gain privileges within an Active Directory environment.</p>
@@ -1516,7 +1516,7 @@
       </tags>
   </entry>
   <entry>
-    <title>Resolute Record</title>
+    <title>Sauna Walkthrough</title>
     <url>/2025/04/28/Sauna/</url>
     <content><![CDATA[<h1 id="Sauna-Walkthrough"><a href="#Sauna-Walkthrough" class="headerlink" title="Sauna Walkthrough"></a>Sauna Walkthrough</h1><h2 id="Box-Info"><a href="#Box-Info" class="headerlink" title="Box Info"></a>Box Info</h2><p>官网在这里：<a href="https://app.hackthebox.com/machines/Sauna">Sauna</a></p>
 <p>Sauna is an easy difficulty Windows machine that features Active Directory enumeration and exploitation. Possible usernames can be derived from employee full names listed on the website. With these usernames, an ASREPRoasting attack can be performed, which results in hash for an account that doesn&amp;amp;#039;t require Kerberos pre-authentication. This hash can be subjected to an offline brute force attack, in order to recover the plaintext password for a user that is able to WinRM to the box. Running WinPEAS reveals that another system user has been configured to automatically login and it identifies their password. This second user also has Windows remote management permissions. BloodHound reveals that this user has the <em>DS-Replication-Get-Changes-All</em> extended right, which allows them to dump password hashes from the Domain Controller in a DCSync attack. Executing this attack returns the hash of the primary domain administrator, which can be used with Impacket&amp;amp;#039;s psexec.py in order to gain a shell on the box as <code>NT_AUTHORITY\SYSTEM</code>.</p>
@@ -1905,7 +1905,7 @@
       </tags>
   </entry>
   <entry>
-    <title>Resolute Record</title>
+    <title>Secura01 Walkthrough</title>
     <url>/2025/05/06/Secura01/</url>
     <content><![CDATA[<h1 id="Secura01"><a href="#Secura01" class="headerlink" title="Secura01"></a>Secura01</h1><p>使用 enum4linux 对目标主机进行默认用户名密码检测</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">enum4linux -a 192.168.152.95</span><br></pre></td></tr></table></figure>
